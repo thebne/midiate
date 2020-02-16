@@ -2,3 +2,5 @@ pygame
 mido
 pychord
 music21
+numpy
+python-rtmidi
