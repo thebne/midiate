@@ -7,9 +7,6 @@ from .base import OutputBase
 from .types import OutputType
 
 
-REFRESH_GUI_EVENT = '<<RefreshGUI>>'
-
-
 class SimpleVisualOutput(OutputBase):
     output_type = OutputType.Visual
 
