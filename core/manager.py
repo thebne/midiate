@@ -15,26 +15,34 @@ class Manager:
         self._apps.add(app)
 
     async def run(self):
+        await asyncio.gather(self._input.prepare(), self._output.prepare())
         event_task = asyncio.create_task(self._propagate_events())
+
         while True:
+            # make input process events explicitly to avoid gui locks
+            await self._input.process_events()
+
             if self._foreground_app is None:
                 # FIXME currently randomly select the first app
                 await self.set_foreground_app(list(self._apps)[0])
 
+            # only onUpdate foreground app
             await self._foreground_app.on_update()
 
             await asyncio.gather(self._output.render(), self._wait_for_next_frame())
-            if event_task.done():
-                raise RuntimeError('Event task is inactive')
+            #if event_task.done():
+            #    raise RuntimeError('Event task is inactive')
 
     async def _wait_for_next_frame(self):
         # TODO use time passed to determine
-        return await asyncio.sleep(.01)
+        return await asyncio.sleep(1 / 60)
 
     async def _propagate_events(self):
-        async for event in self._input.get_next_event():
+        while True:
+            event = await self._input.event_queue.get()
             # relook at self._apps each iteration, in case of new apps
             await asyncio.gather(*[self._propagate_event_to_app(app, event) for app in self._apps]) 
+            self._input.event_queue.task_done()
 
     async def set_foreground_app(self, app):
         if self._foreground_app: 

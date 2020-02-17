@@ -1,22 +1,41 @@
-from PyQt5.QtWidgets import QLabel, QMainWindow, QApplication, QWidget, QVBoxLayout
-from PyQt5.QtGui import QPixmap
-from threading import Thread
+import tkinter as tk
+import asyncio
+import numpy as np
+from PIL import Image, ImageTk
 
 from .base import OutputBase
 from .types import OutputType
 
 
+REFRESH_GUI_EVENT = '<<RefreshGUI>>'
+
+
 class SimpleVisualOutput(OutputBase):
     output_type = OutputType.Visual
 
-    def __init__(self):
-        super().__init__()
-        self._app = QApplication([])
-        self._window = SimpleQtWindow()
-        Thread(target=self._app.exec_).start()
+    async def prepare(self):
+        app = tk.Tk()
+        app.geometry('800x600')
+
+        canvas = tk.Canvas(app, height=600, width=800)
+        canvas.pack()
+        # TODO remove coupling between sizes (maybe just output decides and tells UI, or UI decides and output resizes
+        img = canvas.create_image(800 /2, 600 /2, image=self._np_to_tk(self._ui.get_default_frame()))
+
+        self._app = app
+        self._canvas = canvas
+        self._image = img
 
     async def _render(self):
-        self._window.draw(self._ui.get_frame())
+        frame = self._np_to_tk(self._ui.get_frame())
+        self._canvas.itemconfig(self._image, image=frame)
+        self._canvas.image = frame
+        self._app.update()
+
+    @staticmethod
+    def _np_to_tk(np_img):
+        return ImageTk.PhotoImage(image=Image.fromarray(np_img, mode='RGB'))
+
 
 
 class SimpleTextualOutput(OutputBase):
@@ -33,24 +52,3 @@ class SimpleTextualOutput(OutputBase):
             print(text)
             self._last_text = text
 
-
-class SimpleQtWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('MIDIate')
-
-        self.central_widget = QWidget()               
-        self.setCentralWidget(self.central_widget)    
-        lay = QVBoxLayout(self.central_widget)
-
-        label = QLabel(self)
-        pixmap = QPixmap('/home/operry/Downloads/Artboard 19.png')
-        label.setPixmap(pixmap)
-        self.resize(pixmap.width(), pixmap.height())
-
-        lay.addWidget(label)
-        self.show()
-
-    def draw(self, frame):
-        print('hi')
-        pass

@@ -5,30 +5,18 @@ from .base import InputBase
 
 class MidiInput(InputBase):
     def __init__(self, name):
+        super().__init__()
         self._device_name = self._get_full_name(name)
+        self._port = None
 
-        # create a callback/stream pair and pass callback to mido
-        cb, self._stream = self._make_stream()
-        mido.open_input(self._device_name, callback=cb)
-
-    # from https://stackoverflow.com/questions/56277440/how-can-i-integrate-python-mido-and-asyncio
-    @staticmethod
-    def _make_stream():
-        loop = asyncio.get_event_loop()
-        queue = asyncio.Queue()
-        def callback(message):
-            loop.call_soon_threadsafe(queue.put_nowait, message)
-        async def stream():
-            while True:
-                yield queue.get()
-        return callback, stream()
+    async def prepare(self):
+        await super().prepare()
+        self._port = mido.open_input(self._device_name)
 
     @staticmethod
     def _get_full_name(name):
         return [n for n in mido.get_input_names() if name in n][0]
 
-    async def get_next_event(self):
-        # send messages as they come just by reading from stream
-        async for message in self._stream:
-            yield await message
-
+    async def process_events(self):
+        for e in self._port.iter_pending():
+            await self._queue.put(e)
