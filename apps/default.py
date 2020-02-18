@@ -12,10 +12,9 @@ class DefaultApp(AppBase):
         self._manager = manager
 
     async def on_event(self, event):
-        if event.note == 99:
+        if event.note == 99 and event.type == 'note_on':
             await self._manager.open_app(ChordApp)
 
-        print(event)
     async def on_update(self):
         self._ui.set_text("Default")
 

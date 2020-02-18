@@ -29,7 +29,7 @@ class UI:
         text = self.get_text()
         if self._prev_text != text:
             self.clean()
-        if len(text):
+        if text and len(text):
             font                   = cv2.FONT_HERSHEY_SIMPLEX
             fontScale              = 3
             fontColor              = (0,0,0)
@@ -74,4 +74,5 @@ class UI:
 
     def __get__(args):
         # TODO check if app is running on background, if so, dont allow to call set() functions
+        # also don't allow apps to access functions they're not allowed to access (OutputType)
         pass

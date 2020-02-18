@@ -12,6 +12,7 @@ class Manager:
         self._default_app = None
 
     def register_app(self, app, default=False):
+        print('registering', app)
         app.set_ui(self._output.get_ui())
         self._apps[type(app)] = app
 

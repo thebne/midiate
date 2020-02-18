@@ -10,7 +10,7 @@ class AppBase:
         self._ui = ui
 
     async def on_event(self, event):
-        raise NotImplementedError()
+        pass
 
     async def on_update(self):
         pass
