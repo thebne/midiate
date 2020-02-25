@@ -7,9 +7,11 @@ from apps import DefaultApp
 from apps.recorder import RecorderApp
 
 def main():
-    mgr = Manager(MidiInput("Roland Digital Piano"), SimpleVisualOutput())
-    mgr.register_app(DefaultApp(mgr), default=True)
-    mgr.register_app(RecorderApp())
+    mgr = Manager()
+    mgr.set_input(MidiInput("Roland Digital Piano"))
+    mgr.set_output(SimpleVisualOutput())
+
+    mgr.register_app(DefaultApp(), default=True)
 
     asyncio.run(mgr.run())
 

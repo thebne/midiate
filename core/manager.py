@@ -1,15 +1,23 @@
 import asyncio 
 
 from .ui import UI
+from .utils import Singleton
+from .events import AppEvent, EventType
 
-class Manager:
-    def __init__(self, input, output):
-        self._input = input
-        self._output = output
+class Manager(metaclass=Singleton):
+    def __init__(self):
+        self._input = None
+        self._output = None
 
         self._apps = {} 
         self._foreground_app = None
         self._default_app = None
+        self._event_queue = None
+
+    def set_input(self, input):
+        self._input = input
+    def set_output(self, output):
+        self._output = output
 
     def register_app(self, app, default=False):
         print('registering', app)
@@ -24,15 +32,21 @@ class Manager:
             self.register_app(app_class())
 
         await self.set_foreground_app(self._apps[app_class])
-            
+
+    def is_running(self, app):
+        return self._foreground_app is app
 
     async def run(self):
+        self._event_queue = asyncio.Queue()
+
         await asyncio.gather(self._input.prepare(), self._output.prepare(),
                 *[app.prepare() for app in self._apps.values()])
+
+        input_event_task = asyncio.create_task(self._handle_input_events())
         event_task = asyncio.create_task(self._propagate_events())
 
         while True:
-            if self._foreground_app is None or self._input.signal_set():
+            if self._foreground_app is None:
                 if self._default_app is None:
                     raise RuntimeError('no default app set')
                 print('Giving control to default app')
@@ -53,12 +67,33 @@ class Manager:
         # TODO use time passed to determine
         return await asyncio.sleep(1 / 60)
 
-    async def _propagate_events(self):
+    async def _handle_input_events(self):
         while True:
             event = await self._input.event_queue.get()
-            # relook at self._apps each iteration, in case of new apps
-            await asyncio.gather(*[self._propagate_event_to_app(app, event) for app in self._apps.values()]) 
+            await self._event_queue.put(event)
             self._input.event_queue.task_done()
+
+    async def _propagate_events(self):
+        while True:
+            event = await self._event_queue.get()
+            # try to handle event youtself first
+            if not await self._handle_event(event):
+                # relook at self._apps each iteration, in case of new apps
+                await asyncio.gather(*[self._propagate_event_to_app(app, event) for app in self._apps.values()]) 
+            self._event_queue.task_done()
+
+    async def _handle_event(self, event):
+        if not isinstance(event, AppEvent):
+            return False
+
+        if event.value == EventType.SWITCH_TO_DEFAULT_APP:
+            await self.set_foreground_app(self._default_app)
+            return True
+
+        return False
+
+    async def fire_event(self, event):
+        await self._event_queue.put(event)
 
     async def set_foreground_app(self, app):
         if self._foreground_app == app:

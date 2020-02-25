@@ -22,7 +22,7 @@ class UseFeature:
         orig_init = getattr(cls, '__init__')
         @wraps(orig_init)
         def init_hook(s, *args, **kwargs):
-            s._proxy_instances = [c(*args, **kwargs) for c in self._proxy_classes]
+            s._proxy_instances = [c(s, *args, **kwargs) for c in self._proxy_classes]
             return orig_init(s, *args, **kwargs)
         setattr(cls, '__init__', init_hook)
 
