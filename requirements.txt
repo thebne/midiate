@@ -4,3 +4,4 @@ pychord
 music21
 numpy
 python-rtmidi
+aiofile

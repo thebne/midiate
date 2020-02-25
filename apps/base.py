@@ -20,3 +20,6 @@ class AppBase:
 
     async def on_move_to_foreground(self):
         pass
+
+    async def prepare(self):
+        pass

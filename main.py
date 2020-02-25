@@ -4,10 +4,12 @@ from core import Manager
 from core.input import MidiInput
 from core.output.simple import SimpleVisualOutput, SimpleTextualOutput
 from apps import DefaultApp
+from apps.recorder import RecorderApp
 
 def main():
     mgr = Manager(MidiInput("Roland Digital Piano"), SimpleVisualOutput())
     mgr.register_app(DefaultApp(mgr), default=True)
+    mgr.register_app(RecorderApp())
 
     asyncio.run(mgr.run())
 

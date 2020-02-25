@@ -72,7 +72,8 @@ class UI:
         self._dirty = True
 
 
-    def __get__(args):
+    def __get__(self, instance, owner):
         # TODO check if app is running on background, if so, dont allow to call set() functions
         # also don't allow apps to access functions they're not allowed to access (OutputType)
-        pass
+        print(self, instance, owner)
+        return self

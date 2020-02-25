@@ -4,7 +4,7 @@ from core.output.types import OutputType
 
 
 class CurrentNotes(AppBase):
-    output_type = OutputType.Proxy
+    output_type = OutputType.Background
 
     def __init__(self):
         super().__init__()

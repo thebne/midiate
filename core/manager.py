@@ -27,7 +27,8 @@ class Manager:
             
 
     async def run(self):
-        await asyncio.gather(self._input.prepare(), self._output.prepare())
+        await asyncio.gather(self._input.prepare(), self._output.prepare(),
+                *[app.prepare() for app in self._apps.values()])
         event_task = asyncio.create_task(self._propagate_events())
 
         while True:
@@ -45,8 +46,8 @@ class Manager:
             await self._foreground_app.on_update()
 
             await asyncio.gather(self._output.render(), self._wait_for_next_frame())
-            #if event_task.done():
-            #    raise RuntimeError('Event task is inactive')
+            if event_task.done():
+                raise RuntimeError('Event task is inactive')
 
     async def _wait_for_next_frame(self):
         # TODO use time passed to determine

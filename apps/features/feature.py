@@ -6,7 +6,7 @@ class UseFeature:
 
     def __call__(self, cls):
         # hook all important functions
-        async_hooks = ('on_event', 'on_update')
+        async_hooks = ('on_event', 'on_update', 'prepare')
         def create_wrapper(f):
             @wraps(f)
             async def wrapper(s, *args, **kwargs):
