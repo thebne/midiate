@@ -16,10 +16,10 @@ class SineWaveApp(AppBase):
         ax = fig.gca()
 
         # add waves
-        t = np.linspace(0, 1/6, 300)
+        t = np.linspace(0, 1/80, 300)
         amp = np.zeros(t.shape)
         for midi_note in self.current_notes_midi:
-            amp += np.sin(t * self.note_to_freq(midi_note))
+            amp += np.sin(t * 2 * np.pi * self.note_to_freq(midi_note))
 
         ax.plot(t, amp)
         #ax.set_ylim(-1.1, 1.1)

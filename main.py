@@ -8,8 +8,8 @@ from apps.recorder import RecorderApp
 
 def main():
     mgr = Manager()
-    #mgr.set_input(MidiLiveInput("Roland Digital Piano"))
-    mgr.set_input(MidiFileInput('samples/MIDI_sample.mid'))
+    #mgr.set_input(MidiFileInput('samples/MIDI_sample.mid'))
+    mgr.set_input(MidiLiveInput("Roland Digital Piano"))
     mgr.set_output(SimpleVisualOutput())
 
     mgr.register_app(DefaultApp(), default=True)
