@@ -1,18 +1,16 @@
-from .types import OutputType
-
+import asyncio
 
 class OutputBase:
-    output_type = None
+    def __init__(self, ui_class=None):
+        self._queue = None
 
-    def __init__(self):
-        if self.output_type is None:
-            raise ValueError("Output must declare an output type")
-
-        from ..ui import UI
-        self._ui = UI(self.output_type)
+        if ui_class is None:
+            from ..ui import UI
+            ui_class = UI
+        self._ui = ui_class()
 
     async def prepare(self, event_callbacks=None):
-        pass
+        self._queue = asyncio.Queue()
 
     def get_ui(self):
         return self._ui
@@ -25,3 +23,7 @@ class OutputBase:
 
     async def _render(self):
         raise NotImplementedError()
+
+    @property
+    def event_queue(self):
+        return self._queue

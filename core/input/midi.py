@@ -1,13 +1,11 @@
-from collections import deque
 import time
 import asyncio
 import mido
-import time
 
 from .base import InputBase
 from ..events import MidiEvent
 
-class MidiInput(InputBase):
+class MidiLiveInput(InputBase):
     def __init__(self, name):
         super().__init__()
         self._device_name = self._get_full_name(name)

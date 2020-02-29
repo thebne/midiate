@@ -2,16 +2,10 @@ import tempfile
 
 
 class AppBase:
-    output_type = None
-
     def __init__(self):
-        if self.output_type is None:
-            raise ValueError("App must declare an output type")
-
         self._data_path = None
 
     def set_ui(self, ui):
-        ui.assert_compatible(self.output_type)
         self._ui = ui
 
     async def on_event(self, event):

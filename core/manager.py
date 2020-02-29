@@ -1,3 +1,4 @@
+import time
 import asyncio 
 
 from .ui import UI
@@ -13,6 +14,8 @@ class Manager(metaclass=Singleton):
         self._foreground_app = None
         self._default_app = None
         self._event_queue = None
+
+        self._last_frame_time = None
 
     def set_input(self, input):
         self._input = input
@@ -42,7 +45,8 @@ class Manager(metaclass=Singleton):
         await asyncio.gather(self._input.prepare(), self._output.prepare(),
                 *[app.prepare() for app in self._apps.values()])
 
-        input_event_task = asyncio.create_task(self._handle_input_events())
+        asyncio.create_task(self._handle_events(self._input.event_queue))
+        asyncio.create_task(self._handle_events(self._output.event_queue))
         event_task = asyncio.create_task(self._propagate_events())
 
         while True:
@@ -64,14 +68,19 @@ class Manager(metaclass=Singleton):
                 raise RuntimeError('Event task is inactive')
 
     async def _wait_for_next_frame(self):
-        # TODO use time passed to determine
-        return await asyncio.sleep(1 / 60)
+        sleep_interval = 1 / 120
+        current = time.time()
+        if self._last_frame_time is not None:
+            sleep_interval = min(sleep_interval, current - self._last_frame_time)
 
-    async def _handle_input_events(self):
+        self._last_frame_time = current
+        return await asyncio.sleep(sleep_interval)
+
+    async def _handle_events(self, queue):
         while True:
-            event = await self._input.event_queue.get()
+            event = await queue.get()
             await self._event_queue.put(event)
-            self._input.event_queue.task_done()
+            queue.task_done()
 
     async def _propagate_events(self):
         while True:

@@ -1,14 +1,15 @@
 import asyncio 
 
 from core import Manager
-from core.input import MidiInput
-from core.output.simple import SimpleVisualOutput, SimpleTextualOutput
+from core.input import MidiLiveInput, MidiFileInput
+from core.output.simple import SimpleVisualOutput
 from apps import DefaultApp
 from apps.recorder import RecorderApp
 
 def main():
     mgr = Manager()
-    mgr.set_input(MidiInput("Roland Digital Piano"))
+    #mgr.set_input(MidiLiveInput("Roland Digital Piano"))
+    mgr.set_input(MidiFileInput('samples/MIDI_sample.mid'))
     mgr.set_output(SimpleVisualOutput())
 
     mgr.register_app(DefaultApp(), default=True)

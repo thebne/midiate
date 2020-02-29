@@ -1,15 +1,18 @@
 import time
 from collections import deque
 
-from .base import AppBase
-from .chord import ChordApp
 from .recorder import RecorderApp
 from .features import UseFeature
 from .features.buttons import Buttons
 
-from core.output.types import OutputType
 from core.events import AppEvent, MidiEvent, EventType
 from core import Manager
+
+
+from .base import AppBase
+from .chord import ChordApp
+from .sine import SineWaveApp
+APPS = (ChordApp, RecorderApp, SineWaveApp)
 
 
 """
@@ -17,8 +20,6 @@ Default app takes care of MIDI keyboard management
 """
 @UseFeature(Buttons)
 class DefaultApp(AppBase):
-    output_type = OutputType.Visual
-
     def __init__(self):
         super().__init__()
         # TODO use CurrentNotes feature instead, keep track of last state
@@ -29,21 +30,16 @@ class DefaultApp(AppBase):
         self._locked = False
 
     async def on_event(self, event):
-        if isinstance(event, MidiEvent):
+        if isinstance(event, MidiEvent) and event.type in ('note_on', 'note_off'):
             self._signal_queue.append(event.value)
             await self._process_signals()
 
-        elif isinstance(event, AppEvent):
-            if event.value == EventType.LOCK:
-                print("Changing lock state")
-                self._locked = not self._locked
-                if self._locked:
-                    # FIXME for now if the interface is locked go back to this app, in the future it's desireable to have another way to go back to home screen
-                    await Manager().set_foreground_app(self)
+        elif isinstance(event, AppEvent) and event.value == EventType.LOCK:
+            raise RuntimeError("Lock feature not supported yet")
 
     def get_buttons(self):
         buttons = {}
-        for app in (ChordApp, RecorderApp):
+        for app in APPS:
             def make_fn(app):
                 async def start():
                     await Manager().open_app(app)

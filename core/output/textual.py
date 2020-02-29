@@ -1,10 +1,7 @@
 from .base import OutputBase
-from .types import OutputType
 
 
 class TextualOutput(OutputBase):
-    output_type = OutputType.Textual
-
     def __init__(self):
         super().__init__()
 

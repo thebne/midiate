@@ -1,6 +1,5 @@
 from .base import AppBase
 from .features import UseFeature, CurrentNotes
-from core.output.types import OutputType
 
 import mido
 import pychord 
@@ -8,10 +7,6 @@ import cv2
 
 @UseFeature(CurrentNotes)
 class ChordApp(AppBase):
-    def __init__(self, output_type=OutputType.Visual):
-        self.output_type = output_type
-        super().__init__()
-
     @staticmethod
     def _find_chord(notes):
         guesses = [x.chord for x in pychord.note_to_chord(notes)]
@@ -21,10 +16,7 @@ class ChordApp(AppBase):
         return None
 
     async def on_update(self):
-        if self.output_type == OutputType.Visual:
-            return await self.update_visual()
-        elif self.output_type == OutputType.Textual:
-            return await self.update_textual()
+        return await self.update_visual()
 
     async def update_visual(self):
         frame = self._ui.get_default_frame()

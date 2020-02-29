@@ -3,14 +3,11 @@ import asyncio
 
 from ..base import AppFeature
 from ..utils import midi_to_note
-from core.output.types import OutputType
 from core.events import AppEvent, EventType
 from core import Manager
 
 
 class Buttons(AppFeature):
-    output_type = OutputType.Background
-
     def __init__(self, instance):
         super().__init__(instance)
         self._button_index = 0
@@ -24,6 +21,7 @@ class Buttons(AppFeature):
             return
 
         buttons = self.instance.get_buttons()
+        print(event)
         if event.value == EventType.LEFT:
             self._button_index = max(0, self._button_index - 1)
         elif event.value == EventType.RIGHT:

@@ -6,14 +6,11 @@ import mido
 from .base import AppBase
 from .features import UseFeature
 from .features.buttons import Buttons
-from core.output.types import OutputType
 from core.events import MidiEvent
 
 
 @UseFeature(Buttons)
 class RecorderApp(AppBase):
-    output_type = OutputType.Visual
-
     def __init__(self):
         super().__init__()
         self._mid = None

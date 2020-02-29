@@ -1,12 +1,9 @@
 from ..base import AppFeature
 from ..utils import midi_to_note
-from core.output.types import OutputType
 from core.events import MidiEvent
 
 
 class CurrentNotes(AppFeature):
-    output_type = OutputType.Background
-
     def __init__(self, instance):
         super().__init__(instance)
         self._currently_playing = set()

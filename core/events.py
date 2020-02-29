@@ -11,8 +11,13 @@ class Event:
     def value(self):
         return self._value
 
+    def __repr__(self):
+        return f'<Event {self.__class__.__name__} value={self.value}>'
+
+
 class MidiEvent(Event):
     pass
+
 
 class AppEvent(Event):
     pass

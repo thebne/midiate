@@ -3,8 +3,6 @@ from typing import List
 import numpy as np
 import cv2
 
-from .output.types import OutputType
-
 
 @dataclass
 class FrameContext:
@@ -13,15 +11,10 @@ class FrameContext:
 
 
 class UI:
-    def __init__(self, output_type):
-        self._output_type = output_type
+    def __init__(self):
         self.clean()
 
         self._prev_text = None
-
-    def assert_compatible(self, output_type):
-       if self._output_type == OutputType.Textual and output_type == OutputType.Visual:
-            raise RuntimeError(f"output type {output_type} is not compatible with UI")
 
     def get_frame(self):
         # TODO write logic to blend drawn frames / text together
@@ -74,6 +67,5 @@ class UI:
 
     def __get__(self, instance, owner):
         # TODO check if app is running on background, if so, dont allow to call set() functions
-        # also don't allow apps to access functions they're not allowed to access (OutputType)
         print(self, instance, owner)
         return self
