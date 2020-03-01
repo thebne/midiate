@@ -5,3 +5,4 @@ music21
 numpy
 python-rtmidi
 aiofile
+opencv-python
