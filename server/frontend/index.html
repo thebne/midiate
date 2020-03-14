@@ -1,0 +1,15 @@
+<html>
+  <script>
+    let socket = new WebSocket('ws://127.0.0.1:5000/ws/input')
+
+    socket.onmessage = (event) => {
+      event.data.arrayBuffer().then(b => {
+        console.log(b)
+      })
+    }
+  </script>
+  <body>
+    hi
+    <div id='messages'></div>
+  </body>
+</html>
