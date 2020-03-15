@@ -1290,10 +1290,27 @@
     "@tonaljs/core" "^3.5.0"
     "@tonaljs/pcset" "^3.5.0"
 
+"@tonaljs/chord-detect@^3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/chord-detect/-/chord-detect-3.5.1.tgz#560fc08f7dbf306a08ecb201a926d07a3338aedd"
+  integrity sha512-nHf6yrEE17nbKegste36OzI5qvhdwEXlXVmupTl3fXn37pe5Uv1aYwqeiG5thixGcN5Qs3eAX0+543Tlz9o5aQ==
+  dependencies:
+    "@tonaljs/chord-type" "^3.5.1"
+    "@tonaljs/core" "^3.5.0"
+    "@tonaljs/pcset" "^3.5.0"
+
 "@tonaljs/chord-type@^3.5.0":
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/@tonaljs/chord-type/-/chord-type-3.5.0.tgz#5a58303c37fef47815e837721adaeda2c59c5b21"
   integrity sha512-LjerZ7aN+4Mn3OpUjD/DljuAl/xBOQKdg/l56zlj0xCyhh7h5p5js0v6hruwpgPqr/Yxs2YXmQGPvUfw6vWEJw==
+  dependencies:
+    "@tonaljs/core" "^3.5.0"
+    "@tonaljs/pcset" "^3.5.0"
+
+"@tonaljs/chord-type@^3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/chord-type/-/chord-type-3.5.1.tgz#e571e45e1249880cde5043bdd6d5a97fd8272006"
+  integrity sha512-tngP0wpBYBbH2Sge8jRMALTodQKYHcIlAPdBP6E320SlhdsQGrnaU6k3ngewSC6Jtv4w159vc40QiKZ6usLNtA==
   dependencies:
     "@tonaljs/core" "^3.5.0"
     "@tonaljs/pcset" "^3.5.0"
