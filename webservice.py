@@ -10,7 +10,7 @@ INPUT_ZMQ_URL = f"tcp://{HOST}:20300"
 OUTPUT_ZMQ_URL = f"tcp://{HOST}:20301"
 
 
-app = Quart(__name__, static_url_path='', static_folder='frontend')
+app = Quart(__name__, static_url_path='', static_folder='os')
 ctx = zmq.asyncio.Context()
 
 out_sock = ctx.socket(zmq.ROUTER)
