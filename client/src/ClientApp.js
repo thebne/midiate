@@ -9,9 +9,6 @@ import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
-import IconButton from '@material-ui/core/IconButton'
-import Badge from '@material-ui/core/Badge'
-
 
 import { PROGRAM_NAME } from './constants'
 import Default from './Apps/Default'
@@ -20,6 +17,8 @@ import ServerHandler from './ServerHandler'
 // apps
 import * as ChordRecognizer from './Apps/ChordRecognizer'
 import * as LastNote from './Apps/LastNote'
+import * as storeSelectors from './redux/selectors'
+import * as storeActions from './redux/actions'
 
 class ClientApp extends React.Component {
   constructor(props) {
@@ -38,7 +37,12 @@ class ClientApp extends React.Component {
       LastNote
     ].forEach((app, i) => {
       this.props.addApp(i, app.config())
-      this.appCache.push(React.createElement(app.default, {appId: i}))
+
+			const appSelectors = app.createSelectors ? ((state, ownProps) => app.createSelectors(storeSelectors, state, ownProps)) : null
+			const appDispatchers = app.createDispatchers? ((dispatch, ownProps) => app.createDispatchers(storeActions, dispatch, ownProps)) : null
+			let connectFn = connect(appSelectors, appDispatchers)
+
+      this.appCache.push(React.createElement(connectFn(app.default), {appId: i}))
     })
   }
 

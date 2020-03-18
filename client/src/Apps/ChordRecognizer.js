@@ -1,10 +1,8 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { getCurrentlyPlayed } from '../redux/selectors'
 import { Midi } from "@tonaljs/tonal"
 import { detect } from "@tonaljs/chord-detect"
 
-class ChordRecognizer extends React.Component {
+export default class ChordRecognizer extends React.Component {
   render() {
     let notes = this.props.currentlyPlayed
     const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
@@ -23,6 +21,4 @@ export function config() {
   return {name: "Chord Recognizer"}
 }
 
-export default connect(
-  (state) => ({ currentlyPlayed: getCurrentlyPlayed(state) })
-)(ChordRecognizer)
+export let createSelectors = (selectors, state) => ({ currentlyPlayed: selectors.getCurrentlyPlayed(state) })
