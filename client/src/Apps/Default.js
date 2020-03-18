@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { switchForegroundApp } from '../redux/actions'
 import { getRunningApps } from '../redux/selectors'
 
+import Button from '@material-ui/core/Button'
+
 
 class Default extends React.Component {
   handleSwitchForegroundApp = (pos) => {
@@ -11,7 +13,7 @@ class Default extends React.Component {
 
   render() {
     let apps = this.props.currentApps.map(app => 
-      <button key={app.appId} onClick={() => this.handleSwitchForegroundApp(app.appId)}>{app.config.name}</button>)
+      <Button key={app.appId} onClick={() => this.handleSwitchForegroundApp(app.appId)}>{app.config.name}</Button>)
     return <div>{apps}</div>
   }
 }

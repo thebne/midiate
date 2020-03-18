@@ -1,1 +1,1 @@
-export const DEFAULT_APP_PID = -1
+export const PROGRAM_NAME = 'MIDIate'
