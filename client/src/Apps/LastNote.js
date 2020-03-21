@@ -7,9 +7,9 @@ const zip = rows=>rows[0].map((_,c)=>rows.map(row=>row[c]))
 
 export default class LastNote extends React.Component {
   render() {
-		const pianoColors = Object.fromEntries(zip([this.props.currentlyPlayed, Array(this.props.currentlyPlayed.length).fill("#ff4444")]))
+		const pianoClasses = Object.fromEntries(zip([this.props.currentlyPlayed, Array(this.props.currentlyPlayed.length).fill("active")]))
     return <div>
-			<Piano colors={pianoColors} />
+			<Piano classes={pianoClasses} startNote="C1" endNote="C7" />
       <h1>{this.props.lastEvent ? this.props.lastEvent.note : null}</h1>
       <pre>{JSON.stringify(this.props.lastEvent)}</pre>
       </div>
