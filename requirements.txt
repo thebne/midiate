@@ -1,3 +1,4 @@
 zmq
 quart
 mido
+python-rtmidi

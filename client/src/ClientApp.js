@@ -82,7 +82,7 @@ function AppContainer(props) {
 				</AppBar>
 				<main className={classes.content}>
 					<div className={classes.appBarSpacer} />
-					<Container maxWidth="lg" className={classes.container}>
+					<Container maxWidth="xl" className={classes.container}>
 					{props.app}
 					</Container>
 				</main>
@@ -107,9 +107,6 @@ const useStyles = makeStyles(theme => ({
 		paddingLeft: theme.spacing(4),
 	},
 
-  toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
-  },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
