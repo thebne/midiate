@@ -14,14 +14,12 @@ context = zmq.Context()
 socket = context.socket(zmq.PUB)
 socket.bind(INPUT_ZMQ_URL)
 
-
 def stream_live(device_name):
     print("Streaming from", device_name, "(live)")
     with mido.open_input(device_name) as port:
         t1 = None
         for msg in port:
             t2 = time.perf_counter_ns()
-            print(msg)
             socket.send(msg.bin() + struct.pack("<Q", t2 - t1 if t1 is not None else 0))
             t1 = t2
 
@@ -30,13 +28,6 @@ def stream_file(file_path, loop):
     print("Streaming from", file_path, "(file)")
     while True:
         mid = mido.MidiFile(file_path)
-
-        for i, track in enumerate(mid.tracks):
-            print('Track {}: {}'.format(i, track.name))
-            for msg in track:
-                print(msg)
-
-
         t1 = None
         for msg in mid.play():
             t2 = time.perf_counter_ns()
