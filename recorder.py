@@ -39,8 +39,6 @@ def main():
     
     args = parser.parse_args()
 
-    print('args', args)
-
     try:
         recorder()
     except KeyboardInterrupt:
