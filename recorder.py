@@ -9,8 +9,8 @@ from mido import Message, MidiFile, MidiTrack, MetaMessage, second2tick
 HOST = "127.0.0.1"
 INPUT_ZMQ_URL = f"tcp://{HOST}:20300"
 NANOSECONDS_IN_SECONDS = 10**9
-TICKS_PER_BEAT = 480
-TEMPO = 500000  # microseconds per beat; 120bpm
+TICKS_PER_BEAT = 480  # standard in most midi software
+TEMPO = 500000  # microseconds per beat; standard is 120bpm
 
 mid = MidiFile()
 
