@@ -1,6 +1,7 @@
 import zmq
 import sys
 import struct
+import argparse
 from datetime import datetime 
 from time import perf_counter
 from mido import Message, MidiFile, MidiTrack, MetaMessage, second2tick
@@ -13,7 +14,7 @@ TEMPO = 500000  # microseconds per beat; 120bpm
 
 mid = MidiFile()
 
-def main():
+def recorder():
     ctx = zmq.Context()
     sock = ctx.socket(zmq.SUB)
     sock.connect(INPUT_ZMQ_URL)
@@ -32,10 +33,20 @@ def main():
         msg.time = int(second2tick(current_ts / NANOSECONDS_IN_SECONDS, TICKS_PER_BEAT, TEMPO))
         track.append(msg)
 
-try:
-    main()
-except KeyboardInterrupt:
-    print('Recorder stopped')
-    mid.save('samples/special_song2.mid')
-    sys.exit()    
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('output_path', help='path of output file')
+    
+    args = parser.parse_args()
 
+    print('args', args)
+
+    try:
+        recorder()
+    except KeyboardInterrupt:
+        print('Recorder stopped.')
+        mid.save(args.output_path)
+        sys.exit()    
+
+if __name__ == '__main__':
+    main()
