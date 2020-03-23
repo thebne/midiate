@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { CSSTransition } from 'react-transition-group'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 
 import './Piano.css'
@@ -28,15 +29,58 @@ export default function Piano(props) {
 
     notes = [...Array(endMidi - startMidi + 1).keys()].map(m => Note.fromMidi(startMidi + m))
   }
-
-  const notesList = notes.map(note => {
-      const type = Note.accidentals(Note.simplify(note)).length ? "black" : "white"
-      const class_ = classes[note]
-
-      return <li key={note} className={[type, class_, note].join(' ')}><div/></li>
-  })
 	
-	return <div className="piano"><div className="pianoBody"><ul>
-		{notesList}
-  </ul></div></div>
+	return <div className="piano"><div className="pianoContainer">
+          <div className="pianoBody"><ul>
+            {notes.map(n => 
+              <PianoKey key={n} note={n} className={classes[n]} />
+            )}
+          </ul></div>
+        </div></div>
+}
+
+function PianoKey(props) {
+    const type = Note.accidentals(Note.simplify(props.note)).length ? "black" : "white"
+    const [animations, setAnimations] = useState([])
+
+    useEffect(() => {
+      let newAnimations = [...animations]
+      const now = new Date().getTime()
+      switch (props.className) {
+        case 'active':
+          // the class is added, start a new animation (if there isn't one any)
+          if (newAnimations.filter(a => a.active).length === 0)
+            newAnimations.push({active: true, startTime: now })
+          break
+        default:
+          // the class is removed, stop current animation
+          newAnimations = (newAnimations
+            .map(a => ({ ...a, active: false, endTime: a.active ? now : a.endTime }))
+          )
+          break
+      }
+
+      // remove animations that are too old
+      newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= 5 * 1000)
+
+      // update all
+      setAnimations(newAnimations)
+    }, [props.className])
+
+    return <li className={[type, props.className, props.note].join(' ')}>
+        <div className='body'>
+          <div className='draw' />
+          {animations.map(a => 
+            <NoteAnimation key={a.startTime} in={a.active} />
+          )}
+        </div>
+      </li>
+}
+
+function NoteAnimation(props) {
+	return <div className="animationContainer">
+        <CSSTransition in={props.in} timeout={5000} classNames="pianoPress" unmountOnExit>
+          <div className="animationDraw" />
+        </CSSTransition>
+    	</div>
 }

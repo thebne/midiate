@@ -10,9 +10,13 @@ export default class LastNote extends React.Component {
 		const pianoClasses = Object.fromEntries(zip([this.props.currentlyPlayed, Array(this.props.currentlyPlayed.length).fill("active")]))
     return <div>
 			<Piano classes={pianoClasses} startNote="C1" endNote="C7" />
+      </div>
+
+    /*
+
       <h1>{this.props.lastEvent ? this.props.lastEvent.note : null}</h1>
       <pre>{JSON.stringify(this.props.lastEvent)}</pre>
-      </div>
+      */
   }
 }
 
