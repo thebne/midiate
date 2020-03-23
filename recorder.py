@@ -1,3 +1,4 @@
+import os
 import zmq
 import sys
 import struct
@@ -39,12 +40,15 @@ def main():
     
     args = parser.parse_args()
 
+    if not os.path.isdir(os.path.dirname(args.output_path)):
+        raise RuntimeError('Bad output path')
+
     try:
         recorder()
     except KeyboardInterrupt:
         print('Recorder stopped.')
         mid.save(args.output_path)
-        sys.exit()    
+        sys.exit()
 
 if __name__ == '__main__':
     main()
