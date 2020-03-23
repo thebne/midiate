@@ -28,7 +28,7 @@ def recorder():
     print('Recording...')
     while True:
         data = sock.recv()
-        msg, current_ts = data[0:3], data[3:]
+        msg, current_ts = data[:3], data[3:]
         current_ts, = struct.unpack("<Q", current_ts)
         msg = Message.from_bytes(msg) 
         msg.time = int(second2tick(current_ts / NANOSECONDS_IN_SECONDS, TICKS_PER_BEAT, TEMPO))
