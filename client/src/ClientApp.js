@@ -24,7 +24,7 @@ class ClientApp extends React.Component {
   constructor(props) {
     super(props)
     // TODO change to window.location.host || envVar if exists (compile time)
-    this.serverHandler = new ServerHandler('127.0.0.1:5000')
+    this.serverHandler = new ServerHandler(`${window.location.hostname}:5000`)
 
     this.appCache = []
     this.defaultApp = <Default />

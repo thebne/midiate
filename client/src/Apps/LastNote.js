@@ -9,7 +9,7 @@ export default class LastNote extends React.Component {
   render() {
 		const pianoClasses = Object.fromEntries(zip([this.props.currentlyPlayed, Array(this.props.currentlyPlayed.length).fill("active")]))
     return <div>
-			<Piano classes={pianoClasses} startNote="C1" endNote="C7" />
+			<Piano classes={pianoClasses} startNote="A0" endNote="C8" />
       </div>
 
     /*

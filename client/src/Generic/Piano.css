@@ -3,7 +3,7 @@
 }
 
 .piano {
-  height: 50vh;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -26,7 +26,7 @@
 
 ul {
   display: flex;
-  height:12vw;
+  height:11vw;
   max-width:98vw;
   padding:1vw;
 }
@@ -40,8 +40,8 @@ li {
 }
 
 ul .white .draw {
-  height:11vw;
-  width:2vw;
+  height:10vw;
+  width:1.5vw;
   z-index:1;
   border-left:1px solid #bbb;
   border-bottom:1px solid #bbb;
@@ -60,13 +60,13 @@ ul .white:active .draw, ul .white.active .draw {
 
 .black .body {
   position: absolute;
-  left:-.5vw;
+  left:-.4vw;
 }
 
 .black .draw {
   position: relative;
-  height:7vw;
-  width:1vw;
+  height:6vw;
+  width:.8vw;
   z-index:2;
   border:1px solid #000;
   border-radius:0 0 3px 3px;
@@ -94,15 +94,15 @@ h1 {
 
 .animationContainer  {
 	position: absolute;
-	top: -4vh;
+	top: -.5vh;
 	left: 0;
 }
 
 .black .animationDraw {
-	width: 1vw;
+	width: .6vw;
 }
 .white .animationDraw {
-	width: 2vw;
+	width: 1.5vw;
 }
 
 .animationDraw {
@@ -112,8 +112,9 @@ h1 {
   height: .6vh;
   background-color: #d10;
   border: 1px solid #222;
-  border-radius: .5em;
-  animation: grow 5s linear;
+  border-radius: .3vw;
+  animation-name: grow;
+  animation-timing-function: linear;
   animation-fill-mode: forwards; 
 }
 
@@ -125,7 +126,7 @@ h1 {
   }
   to {
     background-color: #3f2;
-    height: 40vh; 
-    top: -40vh;
+    height: 100vh; 
+    top: -100vh;
   }
 }

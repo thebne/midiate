@@ -40,4 +40,4 @@ async def route_output_event():
         await websocket.send(event)
 
 
-app.run()
+app.run(host="0.0.0.0")

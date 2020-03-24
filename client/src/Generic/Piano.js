@@ -3,6 +3,9 @@ import { Note, Scale, Midi } from "@tonaljs/tonal"
 
 import './Piano.css'
 
+// TODO props...
+const ANIMATION_DURATION_S = 8
+
 // if singleOctave is a note name, create only a single octave starting from this name
 export default function Piano(props) {
   let notes
@@ -60,7 +63,7 @@ function PianoKey(props) {
       }
 
       // remove animations that are too old
-      newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= 5 * 1000)
+      newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= ANIMATION_DURATION_S * 1000)
 
       // update all
       setAnimations(newAnimations)
@@ -77,8 +80,17 @@ function PianoKey(props) {
 }
 
 function NoteAnimation({active, startTime, endTime}) {
+  const [shouldRender, setShouldRender] = useState(true)
+  if (!shouldRender)
+    return null;
+
+  const timePassedSec = !active ? (endTime - startTime) / 1000 : null
+  if (timePassedSec > ANIMATION_DURATION_S) {
+    setShouldRender(false)
+  }
   const style = {
-    maxHeight: active ? "inherit" : (endTime - startTime) / 1000 * 5 * 2 + "vh",
+    animationDuration: `${ANIMATION_DURATION_S}s`,
+    maxHeight: active ? "inherit" : timePassedSec * ANIMATION_DURATION_S * 2 + "vh",
   }
 	return <div className="animationContainer">
           <div className="animationDraw" style={style} />
