@@ -109,23 +109,23 @@ h1 {
   position: absolute;
   top: 0;
   left: 0;
-  height: 2vh;
-  background-color: red;
-  /* animation: example 1s;*/
-}
-.animationDraw.pianoPress-exit {
-  opacity: 1;
-  display: block;
-}
-
-.animationDraw.pianoPress-exit-active {
-  top: -30vh;
-  opacity: 0;
-  transition: all 5s linear;
+  height: .6vh;
+  background-color: #d10;
+  border: 1px solid #222;
+  border-radius: .5em;
+  animation: grow 5s linear;
+  animation-fill-mode: forwards; 
 }
 
-
-@keyframes example {
-  from {top: 0; opacity: 1; display: block; }
-  to {top: -20vh; opacity: 0; display: none; }
-} 
+@keyframes grow {
+  from {
+    background-color: #d10;
+    height: .6vh; 
+    top: 0;
+  }
+  to {
+    background-color: #3f2;
+    height: 40vh; 
+    top: -40vh;
+  }
+}
