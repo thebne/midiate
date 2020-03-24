@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { CSSTransition } from 'react-transition-group'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 
 import './Piano.css'
@@ -71,16 +70,17 @@ function PianoKey(props) {
         <div className='body'>
           <div className='draw' />
           {animations.map(a => 
-            <NoteAnimation key={a.startTime} in={a.active} />
+            <NoteAnimation key={a.startTime} {...a} />
           )}
         </div>
       </li>
 }
 
-function NoteAnimation(props) {
+function NoteAnimation({active, startTime, endTime}) {
+  const style = {
+    maxHeight: active ? "inherit" : (endTime - startTime) / 1000 * 5 * 2 + "vh",
+  }
 	return <div className="animationContainer">
-        <CSSTransition in={props.in} timeout={5000} classNames="pianoPress" unmountOnExit>
-          <div className="animationDraw" />
-        </CSSTransition>
+          <div className="animationDraw" style={style} />
     	</div>
 }
