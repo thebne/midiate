@@ -15,7 +15,7 @@ import Default from './Apps/Default'
 import ServerHandler from './ServerHandler'
 
 // apps
-import * as ChordRecognizer from './Apps/ChordRecognizer'
+import * as ChordRecognizer from './Apps/chord-recognizer/ChordRecognizer.js'
 import * as LastNote from './Apps/LastNote'
 import * as storeSelectors from './redux/selectors'
 import * as storeActions from './redux/actions'

@@ -1,0 +1,24 @@
+.animationContainer2  {
+    background: pink;
+    height: 40vh;
+    width: 40vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.slide-up {
+    position: absolute;
+    margin: 0;
+    bottom: 0;
+	animation: slide-top 5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+  @keyframes slide-top {
+    from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(-30vh);
+        opacity: 0;
+      }
+  }
