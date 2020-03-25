@@ -41,7 +41,7 @@ export default function Piano(props) {
         </div></div>
 }
 
-function PianoKey(props) {
+function PianoKey(props) { 
     const type = Note.accidentals(Note.simplify(props.note)).length ? "black" : "white"
     const [animations, setAnimations] = useState([])
 
