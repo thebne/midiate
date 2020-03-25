@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 
-import './Piano.css'
+import styles from './Piano.module.css'
+
+// TODO props...
+const ANIMATION_DURATION_S = 8
 
 // if singleOctave is a note name, create only a single octave starting from this name
 export default function Piano(props) {
@@ -28,15 +31,61 @@ export default function Piano(props) {
 
     notes = [...Array(endMidi - startMidi + 1).keys()].map(m => Note.fromMidi(startMidi + m))
   }
-
-  const notesList = notes.map(note => {
-      const type = Note.accidentals(Note.simplify(note)).length ? "black" : "white"
-      const class_ = classes[note]
-
-      return <li key={note} className={[type, class_, note].join(' ')}><div/></li>
-  })
 	
-	return <div className="piano"><div className="pianoBody"><ul>
-		{notesList}
-  </ul></div></div>
+	return <div className={styles.root}><div className={styles.pianoContainer}>
+          <div className={styles.pianoBody}><ul className={styles.notesList}>
+            {notes.map(n => 
+              <PianoKey key={n} note={n} className={classes[n]} />
+            )}
+          </ul></div>
+        </div></div>
+}
+
+function PianoKey(props) {
+    const type = Note.accidentals(Note.simplify(props.note)).length ? "black" : "white"
+    const [animations, setAnimations] = useState([])
+
+    useEffect(() => {
+      let newAnimations = [...animations]
+      const now = new Date().getTime()
+      switch (props.className) {
+        case 'active':
+          // the class is added, start a new animation (if there isn't one any)
+          if (newAnimations.filter(a => a.active).length === 0)
+            newAnimations.push({active: true, startTime: now })
+          break
+        default:
+          // the class is removed, stop current animation
+          newAnimations = (newAnimations
+            .map(a => ({ ...a, active: false, endTime: a.active ? now : a.endTime }))
+          )
+          break
+      }
+
+      // remove animations that are too old
+      newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= ANIMATION_DURATION_S * 1000)
+
+      // update all
+      setAnimations(newAnimations)
+    }, [props.className])
+
+    return <li className={[styles.noteItem, styles[type], styles[props.className], props.note].join(' ')}>
+        <div className={styles.noteBody}>
+          <div className={styles.noteRender} />
+          {animations.map(a => 
+            <NoteAnimation key={a.startTime} {...a} />
+          )}
+        </div>
+      </li>
+}
+
+function NoteAnimation({active, startTime, endTime}) {
+  const timePassedSec = !active ? (endTime - startTime) / 1000 : null
+  const style = {
+    animationDuration: `${ANIMATION_DURATION_S}s`,
+    maxHeight: active ? "inherit" : timePassedSec * ANIMATION_DURATION_S * 2 + "vh",
+  }
+	return <div className={styles.animationContainer}>
+          <div className={styles.animationRender} style={style} />
+    	</div>
 }

@@ -1,8 +1,12 @@
-* {
-  box-sizing:border-box
+.root {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-.piano {
+
+.pianoContainer {
   display: flex;
   justify-content: center;
 }
@@ -16,14 +20,15 @@
   position:relative;
 }
 
-ul {
+.notesList {
   display: flex;
-  height:12vw;
+  height:9.5vw;
   max-width:98vw;
-  padding:1vw;
+  padding:0 1vw 1vw 1vw;
+  margin-block-start: 0;
 }
 
-li {
+.noteItem {
   margin:0;
   padding:0;
   list-style:none;
@@ -31,9 +36,9 @@ li {
   float:left
 }
 
-ul .white {
-  height:11vw;
-  width:2vw;
+.noteRender {
+  height:10vw;
+  width:1.5vw;
   z-index:1;
   border-left:1px solid #bbb;
   border-bottom:1px solid #bbb;
@@ -42,7 +47,7 @@ ul .white {
   background:linear-gradient(to bottom,#eee 0%,#fff 100%);
 }
 
-ul .white:active, ul .white.active {
+.white:active .noteRender, .white.active .noteRender {
   border-top:1px solid #777;
   border-left:1px solid #999;
   border-bottom:1px solid #999;
@@ -50,11 +55,15 @@ ul .white:active, ul .white.active {
   background:linear-gradient(to bottom,#fff 0%,#e9e9e9 100%)
 }
 
-.black div {
+.black .noteBody {
   position: absolute;
-  height:7vw;
-  width:1vw;
-  left:-.5vw;
+  left:-.4vw;
+}
+
+.black .noteRender {
+  position: relative;
+  height:6vw;
+  width:.8vw;
   z-index:2;
   border:1px solid #000;
   border-radius:0 0 3px 3px;
@@ -62,15 +71,57 @@ ul .white:active, ul .white.active {
   background:linear-gradient(45deg,#222 0%,#555 100%)
 }
 
-.black:active div, .black.active div {
+.black:active .noteRender, .black.active .noteRender {
   box-shadow:-1px -1px 2px rgba(255,255,255,0.2) inset,0 -2px 2px 3px rgba(0,0,0,0.6) inset,0 1px 2px rgba(0,0,0,0.5);
   background:linear-gradient(to right,#444 0%,#222 100%)
 }
 
-ul li:first-child {
+.noteItem:first-child {
   border-radius:5px 0 5px 5px
 }
 
-ul li:last-child {
+.noteItem:last-child {
   border-radius:0 5px 5px 5px
+}
+
+.animationContainer  {
+	position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+	top: -.5vh;
+	left: 0;
+}
+
+.black .animationRender {
+	width: .6vw;
+}
+.white .animationRender {
+	width: 1.5vw;
+}
+
+.animationRender {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: .6vh;
+  background-color: #d10;
+  border: 1px solid #222;
+  border-radius: .3vw;
+  animation-name: grow;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards; 
+}
+
+@keyframes grow {
+  from {
+    background-color: #d10;
+    height: .6vh; 
+    top: 0;
+  }
+  to {
+    background-color: #3f2;
+    height: 100vh; 
+    top: -100vh;
+  }
 }
