@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 
 import styles from './Piano.module.css'
-console.log(styles)
 
 // TODO props...
 const ANIMATION_DURATION_S = 8

@@ -20,6 +20,14 @@ export default class LastNote extends React.Component {
   }
 }
 
+export function StatusBar({lastEvent}) {
+  return <Fragment>
+          {lastEvent && lastEvent.note
+            ? lastEvent.note 
+            : <i style={{color: '#ccc'}}>note</i>}
+    </Fragment>
+}
+
 export function config() {
   return {name: "Last Note"}
 }
