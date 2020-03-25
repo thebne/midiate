@@ -10,6 +10,7 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
 
+import './Style.css'
 import { PROGRAM_NAME } from './constants'
 import Default from './Apps/Default'
 import ServerHandler from './ServerHandler'
@@ -17,6 +18,8 @@ import ServerHandler from './ServerHandler'
 // apps
 import * as ChordRecognizer from './Apps/ChordRecognizer'
 import * as LastNote from './Apps/LastNote'
+
+
 import * as storeSelectors from './redux/selectors'
 import * as storeActions from './redux/actions'
 

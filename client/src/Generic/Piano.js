@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 
-import './Piano.css'
+import styles from './Piano.module.css'
+console.log(styles)
 
 // TODO props...
 const ANIMATION_DURATION_S = 8
@@ -32,8 +33,8 @@ export default function Piano(props) {
     notes = [...Array(endMidi - startMidi + 1).keys()].map(m => Note.fromMidi(startMidi + m))
   }
 	
-	return <div className="piano"><div className="pianoContainer">
-          <div className="pianoBody"><ul>
+	return <div className={styles.root}><div className={styles.pianoContainer}>
+          <div className={styles.pianoBody}><ul className={styles.notesList}>
             {notes.map(n => 
               <PianoKey key={n} note={n} className={classes[n]} />
             )}
@@ -69,9 +70,9 @@ function PianoKey(props) {
       setAnimations(newAnimations)
     }, [props.className])
 
-    return <li className={[type, props.className, props.note].join(' ')}>
-        <div className='body'>
-          <div className='draw' />
+    return <li className={[styles.noteItem, styles[type], styles[props.className], props.note].join(' ')}>
+        <div className={styles.noteBody}>
+          <div className={styles.noteRender} />
           {animations.map(a => 
             <NoteAnimation key={a.startTime} {...a} />
           )}
@@ -80,19 +81,12 @@ function PianoKey(props) {
 }
 
 function NoteAnimation({active, startTime, endTime}) {
-  const [shouldRender, setShouldRender] = useState(true)
-  if (!shouldRender)
-    return null;
-
   const timePassedSec = !active ? (endTime - startTime) / 1000 : null
-  if (timePassedSec > ANIMATION_DURATION_S) {
-    setShouldRender(false)
-  }
   const style = {
     animationDuration: `${ANIMATION_DURATION_S}s`,
     maxHeight: active ? "inherit" : timePassedSec * ANIMATION_DURATION_S * 2 + "vh",
   }
-	return <div className="animationContainer">
-          <div className="animationDraw" style={style} />
+	return <div className={styles.animationContainer}>
+          <div className={styles.animationRender} style={style} />
     	</div>
 }
