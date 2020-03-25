@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 
-import './Piano.css'
+import styles from './Piano.module.css'
+
+// TODO props...
+const ANIMATION_DURATION_S = 8
 
 // if singleOctave is a note name, create only a single octave starting from this name
 export default function Piano(props) {
@@ -29,8 +32,8 @@ export default function Piano(props) {
     notes = [...Array(endMidi - startMidi + 1).keys()].map(m => Note.fromMidi(startMidi + m))
   }
 	
-	return <div className="piano"><div className="pianoContainer">
-          <div className="pianoBody"><ul>
+	return <div className={styles.root}><div className={styles.pianoContainer}>
+          <div className={styles.pianoBody}><ul className={styles.notesList}>
             {notes.map(n => 
               <PianoKey key={n} note={n} className={classes[n]} />
             )}
@@ -60,15 +63,15 @@ function PianoKey(props) {
       }
 
       // remove animations that are too old
-      newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= 5 * 1000)
+      newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= ANIMATION_DURATION_S * 1000)
 
       // update all
       setAnimations(newAnimations)
     }, [props.className])
 
-    return <li className={[type, props.className, props.note].join(' ')}>
-        <div className='body'>
-          <div className='draw' />
+    return <li className={[styles.noteItem, styles[type], styles[props.className], props.note].join(' ')}>
+        <div className={styles.noteBody}>
+          <div className={styles.noteRender} />
           {animations.map(a => 
             <NoteAnimation key={a.startTime} {...a} />
           )}
@@ -77,10 +80,12 @@ function PianoKey(props) {
 }
 
 function NoteAnimation({active, startTime, endTime}) {
+  const timePassedSec = !active ? (endTime - startTime) / 1000 : null
   const style = {
-    maxHeight: active ? "inherit" : (endTime - startTime) / 1000 * 5 * 2 + "vh",
+    animationDuration: `${ANIMATION_DURATION_S}s`,
+    maxHeight: active ? "inherit" : timePassedSec * ANIMATION_DURATION_S * 2 + "vh",
   }
-	return <div className="animationContainer">
-          <div className="animationDraw" style={style} />
+	return <div className={styles.animationContainer}>
+          <div className={styles.animationRender} style={style} />
     	</div>
 }

@@ -9,7 +9,9 @@ import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
+import IconButton from '@material-ui/core/IconButton'
 
+import './Style.css'
 import { PROGRAM_NAME } from './constants'
 import Default from './Apps/Default'
 import ServerHandler from './ServerHandler'
@@ -17,6 +19,8 @@ import ServerHandler from './ServerHandler'
 // apps
 import * as ChordRecognizer from './Apps/chord-recognizer/ChordRecognizer.js'
 import * as LastNote from './Apps/LastNote'
+
+
 import * as storeSelectors from './redux/selectors'
 import * as storeActions from './redux/actions'
 
@@ -24,47 +28,52 @@ class ClientApp extends React.Component {
   constructor(props) {
     super(props)
     // TODO change to window.location.host || envVar if exists (compile time)
-    this.serverHandler = new ServerHandler('127.0.0.1:5000')
+    this.serverHandler = new ServerHandler(`${window.location.hostname}:5000`)
 
     this.appCache = []
     this.defaultApp = <Default />
+
+    this.state = {statusBar: []}
   }
 
   componentDidMount() {
     // load apps
-    [ 
+    let statusBar = []
+
+    const apps = [ 
       ChordRecognizer,
       LastNote
-    ].forEach((app, i) => {
+    ]
+
+    apps.forEach((app, i) => {
       this.props.addApp(i, app.config())
 
 			const appSelectors = app.createSelectors ? ((state, ownProps) => app.createSelectors(storeSelectors, state, ownProps)) : null
 			const appDispatchers = app.createDispatchers? ((dispatch, ownProps) => app.createDispatchers(storeActions, dispatch, ownProps)) : null
 			let connectFn = connect(appSelectors, appDispatchers)
 
-      this.appCache.push(React.createElement(connectFn(app.default), {appId: i}))
+      this.appCache.push(app.default 
+        ? React.createElement(connectFn(app.default), {appId: i}) : null)
+      statusBar.push(app.StatusBar ? 
+        React.createElement(connectFn(app.StatusBar), {appId: i}) : null)
     })
+
+    this.setState({statusBar})
   }
 
   render() {
 		let app = this.appCache[this.props.foregroundAppId] || this.defaultApp
 
-		return <AppContainer {...this.props} app={app} />
+		return <AppContainer {...this.props} statusBar={this.state.statusBar}>
+             {app}
+           </AppContainer>
   }
 }
 
 function AppContainer(props) {
 	const classes = useStyles()
 
-  let handleBackToDefaultApp = () => {
-    props.switchForegroundApp(null)
-  }
-
-		let button
-    if (props.foregroundAppId != null) {
-			button = <Button onClick={handleBackToDefaultApp} color="inherit"
-									className={classes.backButton}>Back</Button>
-		}
+  let handleBackToDefaultApp = () => props.switchForegroundApp(null)
 
 	return <div className={classes.root}>
 				<AppBar position="absolute" className={classes.appBar}>
@@ -77,13 +86,21 @@ function AppContainer(props) {
 								{props.foregroundAppName}
 							</Typography>
 						</div>
-						{button}
+            {props.statusBar.map(st => st != null ? 
+              <IconButton color="inherit" style={{width: "5vw", minWidth: "3em"}}
+                  key={st.props.appId} onClick={() => props.switchForegroundApp(st.props.appId)}>
+                {st}
+              </IconButton> 
+              : null)}
+            {props.foregroundAppId != null && 
+			        <Button onClick={handleBackToDefaultApp} color="inherit"
+									className={classes.backButton}>Back</Button>}
 					</Toolbar>
 				</AppBar>
 				<main className={classes.content}>
 					<div className={classes.appBarSpacer} />
 					<Container maxWidth="xl" className={classes.container}>
-					{props.app}
+					{props.children}
 					</Container>
 				</main>
 			</div>
