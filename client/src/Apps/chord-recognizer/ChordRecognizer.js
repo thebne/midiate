@@ -6,6 +6,9 @@ import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import './styles.css'
 
+
+const EPSILON_MS = 300
+
 /* 
 Logic:
 
@@ -27,42 +30,54 @@ export default class ChordRecognizer extends React.Component {
     const detection = detect(current)
     console.log('Detection ', detection)
     const notesList = current.map((s) => <li key={s}>{s}</li>)
-  
+
     return (
-      <ChordAnimator detection={detection[0]} />  
+      <AnimationList detection={detection[0]} />
     )
   }
 }
 
-function ChordAnimator(props) {
-  console.log(props)
+function AnimationList({detection}) {
   const [animations, setAnimations] = useState([])
-  const {detection} = props
 
   // triggered after every render if detection has changed
   // if new detection, add a new animation to list
   useEffect(() => {
     let newAnimations = [...animations]
     const now = new Date().getTime()
-    if (detection) {
-      newAnimations.push({startTime: now})
-      setAnimations(newAnimations)
+
+    let handled = false
+    if (newAnimations.length) {
+      let prevAnimation = newAnimations[newAnimations.length - 1]
+      const deltaTime = now - prevAnimation.time
+      if (detection && deltaTime < EPSILON_MS) {
+        prevAnimation.active = true
+        prevAnimation.time = now
+        prevAnimation.chord = detection
+
+        handled = true
+      } else {
+        prevAnimation.active = false
+      }
     }
-    console.log('new animations', newAnimations)
-  }, [detection]) // detection AND lastEvent are different?
+    if (detection && !handled) {
+      newAnimations.push({time: now, chord: detection, active: true})
+      handled = true
+    }
+    setAnimations(newAnimations)
+  }, [detection]) // detection AND lastDetecton are different
 
   // for every animation in the list, create the animation element
   return <div className='animationContainer2'>
     {animations.map(a =>
-        <ChordAnimation detection={detection} key={a.startTime} {...a} />
+        <ChordAnimation key={a.time} {...a} />
       )}
   </div>
 }
 
-function ChordAnimation(props) {
-  console.log('creating chord animation')
+function ChordAnimation({chord, active}) {
   return (
-    <h2 className='slide-up text'>{props.detection}</h2>
+    <h2 className={['slide-up', 'text', active ? 'active' : ''].join(' ')}>{chord}</h2> //class name based on active; active becomes true when 
   )
 }
   

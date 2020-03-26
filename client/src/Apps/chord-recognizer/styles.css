@@ -15,6 +15,11 @@
 	animation: slide-top 3s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
 }
 
+.active {
+  background: red;
+  border: 1px solid blue;
+}
+
   @keyframes slide-top {
     from {
         transform: translateY(0);
