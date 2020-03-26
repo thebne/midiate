@@ -2,3 +2,5 @@ zmq
 quart
 mido
 python-rtmidi
+async_timeout
+uvloop
