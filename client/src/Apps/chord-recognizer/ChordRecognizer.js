@@ -9,17 +9,10 @@ import './styles.css'
 
 const EPSILON_MS = 300
 
-/* 
-Logic:
-
-detection  null, lastEvent null --> right before starting; show placeholders
-detection, lastEvent null ---> first chord played
-
-detection == lastEvent ON
-
-last event note on: keep chord there; note off OR detection changed to something DIFF- fire animation 
-
-*/
+function detectChord(notes) {
+  const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
+  return detect(current)
+}
 
 export default class ChordRecognizer extends React.Component {
   
@@ -27,7 +20,7 @@ export default class ChordRecognizer extends React.Component {
     const {lastEvent} = this.props
     let notes = this.props.currentlyPlayed
     const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
-    const detection = detect(current)
+    const detection = detectChord(current)
     console.log('Detection ', detection)
     const notesList = current.map((s) => <li key={s}>{s}</li>)
 
@@ -84,6 +77,12 @@ function ChordAnimation({chord, active}) {
 // TODO move to config.json
 export function config() {
   return {name: "Chord Recognizer"}
+}
+
+export function StatusBar({currentlyPlayed}) {
+  const chord = detectChord(currentlyPlayed)
+  const detection = chord.length ? chord[0] : <i style={{color: '#ccc'}}>chord</i>
+  return <Fragment>{detection}</Fragment>
 }
 
 export let createSelectors = (selectors, state) => ({
