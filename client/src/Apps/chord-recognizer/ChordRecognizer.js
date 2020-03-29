@@ -23,21 +23,29 @@ export default function ChordRecognizer({currentlyPlayed}) {
   // triggered after every render if detection has changed
   // if new detection, add a new animation to list
   useEffect(() => {
+    // create a copy of animations
     let newAnimations = [...animations]
     const now = new Date().getTime()
 
+    // handled = did we take care of updating the state with the new detection?
     let handled = false
+
+    // is there at least one animation presented on the screen?
     if (newAnimations.length) {
       let prevAnimation = newAnimations[newAnimations.length - 1]
+      // handle alteration of current animation
       if (chord) {
         prevAnimation.chord = chord
-
         handled = true
       } else if (currentlyPlayed.length == 0) {
+        // remove animation from list (will still animate the exit)
         newAnimations.splice(newAnimations.indexOf(prevAnimation), 1)
       }
     }
+
+    // is there still a new detection to handle? 
     if (chord && !handled) {
+      // this is a new detection
       newAnimations.push({time: now, chord})
       handled = true
     }
@@ -46,8 +54,7 @@ export default function ChordRecognizer({currentlyPlayed}) {
 
   // for every animation in the list, create the animation element
 	//<svg viewBox="0 0 1000 350" style={{position: 'absolute', width: '100%', height: '100%', left: '0px', top: '0px'}}>
-  return <div style={{position: 'relative'}}>
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{
+  return <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{
       width: '100%',
       height: '100%',
     }}><g transform="translate(50, 50)">
@@ -106,7 +113,7 @@ export default function ChordRecognizer({currentlyPlayed}) {
   			</g>))}
     </Fragment>}
   </NodeGroup>
-  </g></svg></div>
+  </g></svg>
 }
   
 // TODO move to config.json
