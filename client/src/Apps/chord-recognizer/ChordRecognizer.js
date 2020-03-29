@@ -1,37 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Fragment } from 'react'
 import { Midi } from "@tonaljs/tonal"
 import { detect } from "@tonaljs/chord-detect"
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import Typography from '@material-ui/core/Typography';
+import { NodeGroup } from 'react-move'
+import { interpolate, interpolateTransformSvg } from 'd3-interpolate'
+import { easeSinOut } from 'd3-ease'
 import './styles.css'
 
-
-const EPSILON_MS = 300
 
 function detectChord(notes) {
   const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
   return detect(current)
 }
 
-export default class ChordRecognizer extends React.Component {
-  
-  render() {
-    const {lastEvent} = this.props
-    let notes = this.props.currentlyPlayed
-    const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
-    const detection = detectChord(current)
-    console.log('Detection ', detection)
-    const notesList = current.map((s) => <li key={s}>{s}</li>)
-
-    return (
-      <AnimationList detection={detection[0]} />
-    )
-  }
-}
-
-function AnimationList({detection}) {
+export default function ChordRecognizer({currentlyPlayed}) {
   const [animations, setAnimations] = useState([])
+
+  let notes = currentlyPlayed
+  const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
+  const detection = detectChord(current)
+  const chord = detection[0]
 
   // triggered after every render if detection has changed
   // if new detection, add a new animation to list
@@ -42,36 +29,84 @@ function AnimationList({detection}) {
     let handled = false
     if (newAnimations.length) {
       let prevAnimation = newAnimations[newAnimations.length - 1]
-      const deltaTime = now - prevAnimation.time
-      if (detection && deltaTime < EPSILON_MS) {
-        prevAnimation.active = true
-        prevAnimation.time = now
-        prevAnimation.chord = detection
+      if (chord) {
+        prevAnimation.chord = chord
 
         handled = true
-      } else {
-        prevAnimation.active = false
+      } else if (currentlyPlayed.length == 0) {
+        newAnimations.splice(newAnimations.indexOf(prevAnimation), 1)
       }
     }
-    if (detection && !handled) {
-      newAnimations.push({time: now, chord: detection, active: true})
+    if (chord && !handled) {
+      newAnimations.push({time: now, chord})
       handled = true
     }
     setAnimations(newAnimations)
-  }, [detection]) // detection AND lastDetecton are different
+  }, [chord, currentlyPlayed])
 
   // for every animation in the list, create the animation element
-  return <div className='animationContainer2'>
-    {animations.map(a =>
-        <ChordAnimation key={a.time} {...a} />
-      )}
-  </div>
-}
+	//<svg viewBox="0 0 1000 350" style={{position: 'absolute', width: '100%', height: '100%', left: '0px', top: '0px'}}>
+  return <div style={{position: 'relative'}}>
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{
+      width: '100%',
+      height: '100%',
+    }}><g transform="translate(50, 50)">
+    <NodeGroup
+      data={animations}
+      keyAccessor={a => a.time}
+      start={() => ({
+        circle: {
+          fill: 'white',
+        },
+        g: {
+  				transform: 'translate(0, 120)',
+          opacity: 0,
+        },
+      })}
+      enter={() => ({
+        circle: {
+          fill: ['red'],
+        },
+        g: {
+          transform: 'translate(0,-25)',
+          opacity: [1],
+        },
+        timing: { duration: 100, ease: easeSinOut },
+      })}
+      leave={() => [{
+        circle: {
+          fill: ['blue'],
+        },
+        g: {
+          opacity: [.1],
+          transform: ['translate(0, -75)'],
+        },
+        timing: { duration: 4000, ease: easeSinOut },
+      }, {
+      }]}
+			update={() => ({
+        g: {
+          opacity: 1,
+          transform: 'translate(0,-25)',
+        },
+        timing: { duration: 50, ease: easeSinOut },
+			})}
+			interpolation={(begValue, endValue, attr) => {
+				if (attr === 'transform') {
+					return interpolateTransformSvg(begValue, endValue)
+				}
 
-function ChordAnimation({chord, active}) {
-  return (
-    <h2 className={['slide-up', 'text', active ? 'active' : ''].join(' ')}>{chord}</h2> //class name based on active; active becomes true when 
-  )
+				return interpolate(begValue, endValue)
+			}}
+    >
+      {(nodes) => <Fragment>{nodes.map(({key, data: {chord}, state: {circle, g}}) => (
+        <g key={key} {...g}>
+				  <circle stroke="grey" r="5" {...circle} />
+				  <text fill="black" fontSize="3">{chord}</text>
+  			</g>))}
+    </Fragment>}
+  </NodeGroup>
+  </g></svg></div>
 }
   
 // TODO move to config.json

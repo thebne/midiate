@@ -9,9 +9,12 @@
     "@testing-library/user-event": "^7.1.2",
     "@tonaljs/chord-detect": "^3.5.1",
     "@tonaljs/tonal": "^3.5.1",
+    "d3-ease": "^1.0.6",
+    "d3-interpolate": "^1.4.0",
     "midimessage": "^1.0.5",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
+    "react-move": "^6.1.0",
     "react-redux": "^7.2.0",
     "react-scripts": "3.4.0",
     "redux": "^4.0.5"
