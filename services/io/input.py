@@ -2,8 +2,10 @@
 
 import argparse
 import mido
+import time
 import zmq
 
+DEVICE_POLLING_INTERVAL_SEC = 3
 
 # TODO use env vars
 HOST = "127.0.0.1"
@@ -16,10 +18,24 @@ socket.bind(INPUT_ZMQ_URL)
 
 
 def stream_live(device_name):
-    print("Streaming from", device_name, "(live)")
-    with mido.open_input(device_name) as port:
-        for msg in port:
-            socket.send(msg.bin())
+    while True:
+        print('Searching for device', device_name)
+        while True:
+            time.sleep(DEVICE_POLLING_INTERVAL_SEC)
+            if device_name in mido.get_input_names():
+                break
+        try:
+            print("Streaming from", device_name, "(live)")
+            with mido.open_input(device_name, callback=lambda msg:
+                    socket.send(msg.bin())) as port:
+                while True:
+                    time.sleep(DEVICE_POLLING_INTERVAL_SEC)
+                    if device_name not in mido.get_input_names():
+                        print('port is closed')
+                        break
+        except OSError:
+            import traceback
+            traceback.print_exc()
 
 
 def stream_file(file_path, loop):
