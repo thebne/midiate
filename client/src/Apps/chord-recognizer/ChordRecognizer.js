@@ -1,20 +1,32 @@
-import React, { useEffect, useState, Fragment } from 'react'
+import React, { useEffect, useState, useRef, Fragment } from 'react'
 import { Midi } from "@tonaljs/tonal"
 import { detect } from "@tonaljs/chord-detect"
 import { NodeGroup } from 'react-move'
 import { interpolate, interpolateTransformSvg } from 'd3-interpolate'
 import { easeSinOut } from 'd3-ease'
-import './styles.css'
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
 
 
 function detectChord(notes) {
-  const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
+  const current = notes.sort((  n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
   return detect(current)
 }
 
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
+// is a subset of b
+const isSubset = (a, b) => a.every(val => b.includes(val))
+
 export default function ChordRecognizer({currentlyPlayed}) {
   const [animations, setAnimations] = useState([])
-
+  const previousCurrentlyPlayed = usePrevious(currentlyPlayed)
   let notes = currentlyPlayed
   const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
   const detection = detectChord(current)
@@ -35,9 +47,14 @@ export default function ChordRecognizer({currentlyPlayed}) {
       let prevAnimation = newAnimations[newAnimations.length - 1]
       // handle alteration of current animation
       if (chord) {
-        prevAnimation.chord = chord
+        // handle the case of leaving the chord notes in parts and it creates a new detection
+        if (!isSubset(currentlyPlayed, previousCurrentlyPlayed)) {
+          prevAnimation.chord = chord
+        }
         handled = true
+      // handle the case of leaving the chord notes in parts and it nullifies the detection
       } else if (currentlyPlayed.length == 0) {
+        console.log('splicing')
         // remove animation from list (will still animate the exit)
         newAnimations.splice(newAnimations.indexOf(prevAnimation), 1)
       }
@@ -52,68 +69,89 @@ export default function ChordRecognizer({currentlyPlayed}) {
     setAnimations(newAnimations)
   }, [chord, currentlyPlayed])
 
-  // for every animation in the list, create the animation element
-	//<svg viewBox="0 0 1000 350" style={{position: 'absolute', width: '100%', height: '100%', left: '0px', top: '0px'}}>
-  return <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{
-      width: '100%',
-      height: '100%',
-    }}><g transform="translate(50, 50)">
-    <NodeGroup
-      data={animations}
-      keyAccessor={a => a.time}
-      start={() => ({
-        circle: {
-          fill: 'white',
-        },
-        g: {
-  				transform: 'translate(0, 120)',
-          opacity: 0,
-        },
-      })}
-      enter={() => ({
-        circle: {
-          fill: ['red'],
-        },
-        g: {
-          transform: 'translate(0,-25)',
-          opacity: [1],
-        },
-        timing: { duration: 100, ease: easeSinOut },
-      })}
-      leave={() => [{
-        circle: {
-          fill: ['blue'],
-        },
-        g: {
-          opacity: [.1],
-          transform: ['translate(0, -75)'],
-        },
-        timing: { duration: 4000, ease: easeSinOut },
-      }, {
-      }]}
-			update={() => ({
-        g: {
-          opacity: 1,
-          transform: 'translate(0,-25)',
-        },
-        timing: { duration: 50, ease: easeSinOut },
-			})}
-			interpolation={(begValue, endValue, attr) => {
-				if (attr === 'transform') {
-					return interpolateTransformSvg(begValue, endValue)
-				}
-
-				return interpolate(begValue, endValue)
-			}}
-    >
-      {(nodes) => <Fragment>{nodes.map(({key, data: {chord}, state: {circle, g}}) => (
-        <g key={key} {...g}>
-				  <circle stroke="grey" r="5" {...circle} />
-				  <text fill="black" fontSize="3">{chord}</text>
-  			</g>))}
-    </Fragment>}
-  </NodeGroup>
+  return (
+    <svg 
+      viewBox="0 0 100 100" 
+      xmlns="http://www.w3.org/2000/svg" 
+      style={{
+        width: '400px',
+        height: '700px',
+        display: 'block',
+        margin: 'auto'
+        }} >
+      <g transform="translate(50, 100)">
+      <NodeGroup
+        data={animations}
+        keyAccessor={a => a.time}
+        start={() => ({
+          circle: {
+            fill: '#2E86C1',
+          },
+          g: {
+            transform: 'translate(0, 60)',
+            opacity: 0,
+          },
+        })}
+        enter={() => ({
+          circle: {
+            fill: ['#2E86C1'],
+          },
+          g: {
+            transform: 'translate(0,-25)',
+            opacity: [1],
+          },
+          timing: { duration: 200, ease: easeSinOut },
+        })}
+        leave={() => [{
+          circle: {
+            fill: ['#A9CCE3'],
+          },
+          g: {
+            opacity: [.1],
+            transform: ['translate(0, -200)'],
+          },
+          events: {
+            end: () => {
+              console.log('hi')
+            }
+          },
+          timing: { duration: 4000, ease: easeSinOut },
+        }, {
+        }]}
+        update={() => ({
+          g: {
+            opacity: 1,
+            transform: 'translate(0,-25)',
+          },
+          timing: { duration: 50, ease: easeSinOut },
+        })}
+        interpolation={(begValue, endValue, attr) => {
+          if (attr === 'transform') {
+            return interpolateTransformSvg(begValue, endValue)
+          }
+          return interpolate(begValue, endValue)
+        }}
+      >
+        {(nodes) => (
+          <Fragment>{nodes.map(({key, data: {chord}, state: {circle, g}}) => (
+            <g key={key} {...g}>
+              <circle style={{x:0, y:0}} r="25" {...circle} />
+              <text 
+              fill="black" 
+              fontSize="15"
+              style = {{
+                x: "50%", 
+                y: "50%", 
+                dominantBaseline: "middle",
+                textAnchor: "middle",
+              }} >
+                {chord}
+              </text>
+            </g>))}
+        </Fragment>)}
+    </NodeGroup>
   </g></svg>
+  )
 }
   
 // TODO move to config.json
