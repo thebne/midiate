@@ -14,31 +14,40 @@ context = zmq.Context()
 socket = context.socket(zmq.PUB)
 socket.bind(INPUT_ZMQ_URL)
 
-def delta_time(t1, t2):
-    return t2 - t1 if t1 is not None else 0
 
-def send_msg_data(msg, t1, t2):
-    socket.send(msg.bin() + struct.pack("<Q", delta_time(t1, t2)))
+def timed_sender():
+    yield
+    t1 = time.perf_counter_ns()
+    t2 = t1
+    while True:
+        msg = yield t2 - t1
+
+        arr = bytearray()
+        arr += struct.pack("<Q", t2 - t1)
+        arr += msg.bin()
+        socket.send(arr)
+
+        t1 = t2
+        t2 = time.perf_counter_ns()
+
 
 def stream_live(device_name):
     print("Streaming from", device_name, "(live)")
     with mido.open_input(device_name) as port:
-        t1 = None
+        sender = timed_sender()
+        next(sender)
         for msg in port:
-            t2 = time.perf_counter_ns()
-            send_msg_data(msg, t1, t2)
-            t1 = t2
+            sender.send(msg)
 
 
 def stream_file(file_path, loop):
     print("Streaming from", file_path, "(file)")
     while True:
         mid = mido.MidiFile(file_path)
-        t1 = None
+        sender = timed_sender()
+        next(sender)
         for msg in mid.play():
-            t2 = time.perf_counter_ns()
-            send_msg_data(msg, t1, t2)
-            t1 = t2
+            sender.send(msg)
 
         if not loop:
             return

@@ -29,7 +29,7 @@ async def broadcast_input_events():
 
     while True:
         data = await sock.recv()
-        msg, current_ts = data[:3], data[3:]
+        current_ts, msg = data[:8], data[8:]
         # TODO send current_ts to client
         await websocket.send(msg)
 
