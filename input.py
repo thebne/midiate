@@ -1,6 +1,8 @@
 import argparse
 import mido
 import zmq
+import struct
+import time
 
 
 # TODO use env vars
@@ -13,19 +15,39 @@ socket = context.socket(zmq.PUB)
 socket.bind(INPUT_ZMQ_URL)
 
 
+def timed_sender():
+    yield
+    t1 = time.perf_counter_ns()
+    t2 = t1
+    while True:
+        msg = yield t2 - t1
+
+        arr = bytearray()
+        arr += struct.pack("<Q", t2 - t1)
+        arr += msg.bin()
+        socket.send(arr)
+
+        t1 = t2
+        t2 = time.perf_counter_ns()
+
+
 def stream_live(device_name):
     print("Streaming from", device_name, "(live)")
     with mido.open_input(device_name) as port:
+        sender = timed_sender()
+        next(sender)
         for msg in port:
-            socket.send(msg.bin())
+            sender.send(msg)
 
 
 def stream_file(file_path, loop):
     print("Streaming from", file_path, "(file)")
     while True:
         mid = mido.MidiFile(file_path)
+        sender = timed_sender()
+        next(sender)
         for msg in mid.play():
-            socket.send(msg.bin())
+            sender.send(msg)
 
         if not loop:
             return
