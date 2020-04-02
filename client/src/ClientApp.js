@@ -17,7 +17,7 @@ import Default from './Apps/Default'
 import ServerHandler from './ServerHandler'
 
 // apps
-import * as ChordRecognizer from './Apps/ChordRecognizer'
+import * as ChordRecognizer from './Apps/chord-recognizer/ChordRecognizer'
 import * as LastNote from './Apps/LastNote'
 
 
