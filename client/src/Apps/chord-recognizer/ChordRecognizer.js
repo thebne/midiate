@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, Fragment } from 'react'
 import { Midi } from "@tonaljs/tonal"
 import { detect } from "@tonaljs/chord-detect"
-import { NodeGroup } from 'react-move'
+import { NodeGroup, Animate } from 'react-move'
 import { interpolate, interpolateTransformSvg } from 'd3-interpolate'
 import { easeSinOut } from 'd3-ease'
 import Card from '@material-ui/core/Card';
@@ -43,7 +43,7 @@ export default function ChordRecognizer({currentlyPlayed}) {
     let handled = false
 
     // is there at least one animation presented on the screen?
-    if (newAnimations.length) {
+    if (newAnimations.some(a => a.active)) {
       let prevAnimation = newAnimations[newAnimations.length - 1]
       // handle alteration of current animation
       if (chord) {
@@ -54,16 +54,19 @@ export default function ChordRecognizer({currentlyPlayed}) {
         handled = true
       // handle the case of leaving the chord notes in parts and it nullifies the detection
       } else if (currentlyPlayed.length == 0) {
-        console.log('splicing')
-        // remove animation from list (will still animate the exit)
-        newAnimations.splice(newAnimations.indexOf(prevAnimation), 1)
+        // set current animation to be inactive animate the exit)
+        prevAnimation.active = false
+        setTimeout(() => setAnimations((animations) => {
+          animations.splice(animations.indexOf(prevAnimation), 1)
+          return animations
+        }), 4000)
       }
     }
 
     // is there still a new detection to handle? 
     if (chord && !handled) {
       // this is a new detection
-      newAnimations.push({time: now, chord})
+      newAnimations.push({time: now, chord, active: true})
       handled = true
     }
     setAnimations(newAnimations)
@@ -80,10 +83,10 @@ export default function ChordRecognizer({currentlyPlayed}) {
         margin: 'auto'
         }} >
       <g transform="translate(50, 100)">
-      <NodeGroup
-        data={animations}
-        keyAccessor={a => a.time}
-        start={() => ({
+      {animations.map((animation) => <Animate
+        key={animation.time}
+        show={animation.active}
+        start={{
           circle: {
             fill: '#2E86C1',
           },
@@ -91,8 +94,8 @@ export default function ChordRecognizer({currentlyPlayed}) {
             transform: 'translate(0, 60)',
             opacity: 0,
           },
-        })}
-        enter={() => ({
+        }}
+        enter={{
           circle: {
             fill: ['#2E86C1'],
           },
@@ -101,8 +104,8 @@ export default function ChordRecognizer({currentlyPlayed}) {
             opacity: [1],
           },
           timing: { duration: 200, ease: easeSinOut },
-        })}
-        leave={() => [{
+        }}
+        leave={{
           circle: {
             fill: ['#A9CCE3'],
           },
@@ -110,21 +113,15 @@ export default function ChordRecognizer({currentlyPlayed}) {
             opacity: [.1],
             transform: ['translate(0, -200)'],
           },
-          events: {
-            end: () => {
-              console.log('hi')
-            }
-          },
           timing: { duration: 4000, ease: easeSinOut },
-        }, {
-        }]}
-        update={() => ({
+        }}
+        update={{
           g: {
             opacity: 1,
             transform: 'translate(0,-25)',
           },
           timing: { duration: 50, ease: easeSinOut },
-        })}
+        }}
         interpolation={(begValue, endValue, attr) => {
           if (attr === 'transform') {
             return interpolateTransformSvg(begValue, endValue)
@@ -132,12 +129,11 @@ export default function ChordRecognizer({currentlyPlayed}) {
           return interpolate(begValue, endValue)
         }}
       >
-        {(nodes) => (
-          <Fragment>{nodes.map(({key, data: {chord}, state: {circle, g}}) => (
-            <g key={key} {...g}>
+        {({circle, g}) => (
+            <g {...g}>
               <circle style={{x:0, y:0}} r="25" {...circle} />
               <text 
-              fill="black" 
+              fill="white" 
               fontSize="15"
               style = {{
                 x: "50%", 
@@ -145,14 +141,17 @@ export default function ChordRecognizer({currentlyPlayed}) {
                 dominantBaseline: "middle",
                 textAnchor: "middle",
               }} >
-                {chord}
+                {animation.chord}
               </text>
-            </g>))}
-        </Fragment>)}
-    </NodeGroup>
+            </g>)}
+    </Animate>)}
   </g></svg>
   )
 }
+/*
+(
+      )
+    */
   
 // TODO move to config.json
 export function config() {
