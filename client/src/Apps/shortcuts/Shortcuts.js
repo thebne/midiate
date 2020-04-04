@@ -143,7 +143,7 @@ export function StatusBar({lastEvent}) {
 
   // send events to mutator
   useEffect(() => {
-    if (!lastEvent)
+    if (!lastEvent || readyToToggle)
       return
 
     const note = Note.pitchClass(lastEvent.note)
