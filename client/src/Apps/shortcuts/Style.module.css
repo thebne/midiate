@@ -1,0 +1,37 @@
+.keyShortcut {
+  position: absolute ;
+  background: #ededed;
+  box-shadow: .1vw .1vw #333;
+  border-radius: 100%;
+  pointer-events: none;
+  width: 2.5vw;
+  height: 2.5vw;
+  top: .5vh;
+  color: black;
+  font-size: 2vw;
+  font-family: arial;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  text-transform: none;
+}
+
+:focus .keyShortcut {
+  background: #111166 !important;
+  box-shadow: .1vw .1vw #fff;
+  color: white;
+}
+
+.statusBarIcon {
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  background: gray;
+  border-radius: 100%;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+}
+.active { background: red; }
+.ready { background: darkgreen!important; }
+.tracking { background: orange; }
