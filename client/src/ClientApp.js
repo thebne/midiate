@@ -16,11 +16,6 @@ import { PROGRAM_NAME } from './constants'
 import Default from './Apps/Default'
 import ServerHandler from './ServerHandler'
 
-// apps
-import * as ChordRecognizer from './Apps/chord-recognizer/ChordRecognizer'
-import * as LastNote from './Apps/LastNote'
-
-
 import * as storeSelectors from './redux/selectors'
 import * as storeActions from './redux/actions'
 
@@ -40,12 +35,9 @@ class ClientApp extends React.Component {
     // load apps
     let statusBar = []
 
-    const apps = [ 
-      ChordRecognizer,
-      LastNote
-    ]
+    const apps = require('./config/apps')
 
-    apps.forEach((app, i) => {
+    apps.default.forEach((app, i) => {
       this.props.addApp(i, app.config())
 
 			const appSelectors = app.createSelectors ? ((state, ownProps) => app.createSelectors(storeSelectors, state, ownProps)) : null

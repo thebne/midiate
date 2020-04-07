@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^7.1.2",
     "@tonaljs/chord-detect": "^3.5.1",
     "@tonaljs/tonal": "^3.5.1",
+    "color-hash": "^1.0.3",
     "d3-ease": "^1.0.6",
     "d3-interpolate": "^1.4.0",
     "midimessage": "^1.0.5",
