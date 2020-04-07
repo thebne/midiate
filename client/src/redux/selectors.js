@@ -4,13 +4,9 @@ export const getRunningApps = store => getUiState(store) ? getUiState(store).run
 export const getForegroundAppId = (store) => getUiState(store) ? getUiState(store).foregroundApp : null
 export const getApp = (store, appId) => getRunningApps(store)[appId] || {}
 
-export const getCurrentlyPlayed = store => {
-    let s = new Set()
-    Object.values(store.events.currentByChannel).forEach(c => {
-      c.forEach(n => s.add(n))
-    })
-    return Array.from(s)
-}
+// getCurrently's only support one channel
+export const getCurrentlyPlayed = store => store.events.notes || []
+export const getCurrentChords = store => store.events.chords || {detection: null, id: 0}
 
 export const getLastEvent = store => store.events.lastEvent
 export const getAppConfig = (store, appId) => getApp(store, appId).config || {}
