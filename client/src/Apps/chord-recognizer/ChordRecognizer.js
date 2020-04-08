@@ -2,9 +2,13 @@ import React, { useEffect, useState, Fragment } from 'react'
 import { Animate } from 'react-move'
 import { interpolate, interpolateTransformSvg } from 'd3-interpolate'
 import { easeSinOut } from 'd3-ease'
+import styles from './Style.module.css'
 
+let ColorHash = require('color-hash')
 
-export default function ChordRecognizer({currentlyPlayed, currentChords}) {
+const colorHash = new ColorHash({lightness: .5})
+
+export default function ChordRecognizer({currentChords}) {
   const [animations, setAnimations] = useState([])
 
   // add or remove animation objects
@@ -45,8 +49,8 @@ export default function ChordRecognizer({currentlyPlayed, currentChords}) {
       viewBox="0 0 100 100" 
       xmlns="http://www.w3.org/2000/svg" 
       style={{
-        width: '400px',
-        height: '700px',
+        width: '100%',
+        height: '60vh',
         display: 'block',
         margin: 'auto'
         }} >
@@ -56,7 +60,6 @@ export default function ChordRecognizer({currentlyPlayed, currentChords}) {
         show={animation.active}
         start={{
           circle: {
-            fill: '#2E86C1',
           },
           g: {
             transform: 'translate(0, 60)',
@@ -65,7 +68,6 @@ export default function ChordRecognizer({currentlyPlayed, currentChords}) {
         }}
         enter={{
           circle: {
-            fill: ['#2E86C1'],
           },
           g: {
             transform: 'translate(0,-25)',
@@ -75,7 +77,6 @@ export default function ChordRecognizer({currentlyPlayed, currentChords}) {
         }}
         leave={{
           circle: {
-            fill: ['#A9CCE3'],
           },
           g: {
             opacity: [.1],
@@ -88,7 +89,7 @@ export default function ChordRecognizer({currentlyPlayed, currentChords}) {
             opacity: 1,
             transform: 'translate(0,-25)',
           },
-          timing: { duration: 50, ease: easeSinOut },
+          timing: { duration: 80, ease: easeSinOut },
         }}
         interpolation={(begValue, endValue, attr) => {
           if (attr === 'transform') {
@@ -97,21 +98,36 @@ export default function ChordRecognizer({currentlyPlayed, currentChords}) {
           return interpolate(begValue, endValue)
         }}
       >
-        {({circle, g}) => (
-            <g {...g}>
-              <circle style={{x:0, y:0}} r="25" {...circle} />
+        {({circle, g}) => {
+          const [main, ...rest] = animation.detection
+          return (
+            <g {...g}
+              className={styles.chordDetection}>
+              <circle r="25" fill={colorHash.hex(main)} {...circle} />
               <text 
               fill="white" 
-              fontSize="15"
+              fontSize="13"
               style = {{
-                x: "50%", 
-                y: "50%", 
                 dominantBaseline: "middle",
                 textAnchor: "middle",
               }} >
-                {animation.detection[0]}
+                {main}
               </text>
-            </g>)}
+            {rest.map((secondary, i) => (
+              <text 
+                key={secondary}
+                fill="white" 
+                fontSize="8"
+                y={5 * (i + 1)}
+                style = {{
+                  dominantBaseline: "hanging",
+                  textAnchor: "middle",
+                }} >
+                  {secondary}
+              </text>)
+            )}
+          </g>)
+        }}
     </Animate>)}
   </g></svg>
   )
@@ -124,11 +140,10 @@ export function config() {
 
 export function StatusBar({currentChords}) {
   const detection = currentChords.detection ? currentChords.detection[0] : <i style={{color: '#ccc'}}>chord</i>
-  return <Fragment>{detection}</Fragment>
+  return <span className={styles.statusBar}>{detection}</span>
 }
 
 export let createSelectors = (selectors, state) => ({
-   currentlyPlayed: selectors.getCurrentlyPlayed(state), 
    getLastEvent: selectors.getLastEvent(state),
    currentChords: selectors.getCurrentChords(state),
   })

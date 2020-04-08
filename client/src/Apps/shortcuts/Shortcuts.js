@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Note, Midi } from "@tonaljs/tonal"
-
 import styles from './Style.module.css'
+
+let ColorHash = require('color-hash')
 
 
 const NOTES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'Bb', 'C#', 'Eb', 'F#', 'G#']
 const hashNote = n => Midi.toMidi(`${n}1`)
-let ColorHash = require('color-hash')
 
 let assignedNotes = {}
 
