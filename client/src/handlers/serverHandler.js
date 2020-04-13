@@ -1,5 +1,5 @@
-import store from './redux/store'
-import { HANDLE_MIDI_EVENT } from "./redux/actionTypes"
+import store from '../redux/store'
+import { HANDLE_MIDI_EVENT } from "../redux/actionTypes"
 
 class ServerHandler {
   constructor(host) {

@@ -1,5 +1,5 @@
 export default [
-  require('../Apps/chord-recognizer/ChordRecognizer'),
-  require('../Apps/LastNote'),
-  require('../Apps/shortcuts/Shortcuts'),
+  require('@midiate/app-chord-recognizer'),
+  require('@midiate/app-piano-simulator'),
+  require('@midiate/app-shortcuts'),
 ]

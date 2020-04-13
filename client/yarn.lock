@@ -1179,6 +1179,38 @@
     prop-types "^15.7.2"
     react-is "^16.8.0"
 
+"@midiate/app-chord-recognizer@^1.0.3":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@midiate/app-chord-recognizer/-/app-chord-recognizer-1.0.4.tgz#8216c919ac7a0c28380f6a7c4c5a238a35431dc7"
+  integrity sha512-VslkaskMhvywivRU3ryevU4PpGzC2vB4JEP3xb3Rx75IiXGB6uyyZYMPxVD2ep6ZRtKZkwuX0TtFYMUysYIKeQ==
+  dependencies:
+    color-hash "^1.0.3"
+    d3-ease "^1.0.6"
+    d3-interpolate "^1.4.0"
+    react-move "^6.1.0"
+
+"@midiate/app-piano-simulator@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@midiate/app-piano-simulator/-/app-piano-simulator-1.0.1.tgz#33526319917699ffca34b60807003a32908be1de"
+  integrity sha512-a49uIkGDJUITAQTPRUvQgAjGb3I1HhAXj4Plrei0WnlDFLQP4JG43uFoMQwCoRTDiiY9ZD3P7Z8VjzMzfUoEMg==
+  dependencies:
+    "@midiate/gadget-piano" "^1.0.1"
+
+"@midiate/app-shortcuts@^1.0.1":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@midiate/app-shortcuts/-/app-shortcuts-1.0.3.tgz#69360f44bf86691d1402649dead8fea97e836091"
+  integrity sha512-VDmakq+2IQIqa9yveKBQLD0UQ6J8BMJRQFc4fGzEQW2WWxPeUlSwunsGWp7O2bhbtr3AVl+rYHgFd9OKqfB0Iw==
+  dependencies:
+    "@tonaljs/tonal" "^3.5.1"
+    color-hash "^1.0.3"
+
+"@midiate/gadget-piano@^1.0.1":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@midiate/gadget-piano/-/gadget-piano-1.0.2.tgz#e1585b0d0447a0beb02c3d1a8ab3bfbe1a8da455"
+  integrity sha512-vLN/66wen0nqevI+uaMPhOMwdnRndPfVViqajFfvcR0iFjafXzcnnh5Ht+izyrtRvufwHJu6sdVtyflvrZ5+gA==
+  dependencies:
+    "@tonaljs/tonal" "^3.5.1"
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"

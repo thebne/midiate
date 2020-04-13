@@ -5,7 +5,7 @@ import Container from '@material-ui/core/Container'
 import { addApp, switchForegroundApp } from '../redux/actions'
 import { getForegroundAppId, getAppConfig } from '../redux/selectors'
 
-import ServerHandler from '../ServerHandler'
+import ServerHandler from '../handlers/serverHandler'
 
 import DefaultApp from './DefaultApp'
 import useStyles from './styles'
@@ -36,7 +36,7 @@ class Client extends React.Component {
     let statusBar = [], apps = []
     appsFromConfig.default.forEach((app, i) => {
       // add app to store
-      this.props.addApp(i, app.config())
+      this.props.addApp(i, app.config)
       // assign selectors as props to app if requested
 			const appSelectors = app.createSelectors ? 
         ((state, ownProps) => app.createSelectors(storeSelectors, state, ownProps)) : null

@@ -1,24 +1,37 @@
 {
-  "name": "client",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@midiate/midiate",
+  "description": "Web platform for MIDI-based apps",
+  "version": "0.0.1",
+  "author": "Omer Perry",
+  "license": "MIT",
+  "respository": {
+    "type": "git",
+    "url": "https://github.com/thebne/midiate"
+  },
+  "keywords": [
+    "midi",
+    "piano",
+    "chord",
+    "music"
+  ],
   "dependencies": {
     "@material-ui/core": "^4.9.5",
+    "@midiate/app-chord-recognizer": "^1.0.3",
+    "@midiate/app-piano-simulator": "^1.0.1",
+    "@midiate/app-shortcuts": "^1.0.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@tonaljs/chord-detect": "^3.5.1",
     "@tonaljs/tonal": "^3.5.1",
-    "color-hash": "^1.0.3",
-    "d3-ease": "^1.0.6",
-    "d3-interpolate": "^1.4.0",
     "midimessage": "^1.0.5",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
-    "react-move": "^6.1.0",
     "react-redux": "^7.2.0",
-    "react-scripts": "3.4.0",
     "redux": "^4.0.5"
+  },
+  "devDependencies": {
+    "react-scripts": "3.4.0"
   },
   "scripts": {
     "start": "react-scripts start",
