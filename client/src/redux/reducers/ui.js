@@ -1,8 +1,5 @@
 import { SWITCH_APP, STOP_APP, ADD_APP } from "../actionTypes"
 
-// TODO move to chord app
-import { SET_CURRENT_CHANNEL } from "../actionTypes"
-
 const initialState = {
   foregroundApp: null,
   runningApps: [],
@@ -32,19 +29,6 @@ const ui = (state = initialState, action) => {
           ...state.appIdToName,
           [action.payload.appId]: action.payload.name
         }
-      }
-    }
-    // TODO move to chord app
-    case SET_CURRENT_CHANNEL: {
-      return {
-        ...state,
-       specific: {
-         ...state.specific,
-         [action.payload.appId]: {
-           ...state.specific[action.payload.appId],
-           currentChannel: action.payload.channel
-         }
-       }
       }
     }
 

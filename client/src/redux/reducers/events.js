@@ -1,37 +1,22 @@
-import { HANDLE_MIDI_EVENT } from "../actionTypes"
-import { Midi } from "@tonaljs/tonal"
-import { detect } from "@tonaljs/chord-detect"
+import { HANDLE_MIDI_EVENT, DETECT_STRICT_NOTES } from "../actionTypes"
+import { detectStrictNotes } from "../actions"
+import store from '../store'
 
-var MIDIMessage = require('midimessage')
+import { parseMessage } from '../../utils/midi'
 
 const initialState = {
   notes: [],
-  chords: {
-    detection: null,
+  smartNotes: {
+    notes: [],
     id: 0,
   },
-  chordsRawDetection: [],
+  strictNotes: {
+    notes: [],
+    id: 0,
+  },
   lastEvent: null,
 }
 
-function detectChord(notes) {
-  const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
-  return detect(current)
-}
-
-function parseMessage(rawMsg) {
-  let msg = MIDIMessage({data: new Uint8Array(rawMsg)})
-  // enrich with note and frequency
-  if (msg.key !== undefined) {
-    msg.note = Midi.midiToNoteName(msg.key)
-    msg.freq = Midi.midiToFreq(msg.key)
-  }
-  // treat note_on with velocity=0 as note_off
-  if (msg.messageType === 'noteon' && msg.velocity === 0) {
-    msg.messageType = 'noteoff'
-  }
-  return msg
-}
 
 const events = (state = initialState, action) => {
   switch (action.type) {
@@ -39,12 +24,29 @@ const events = (state = initialState, action) => {
       let event = parseMessage(action.payload)
 
       let stateChanges = {...state}
-      stateChanges.lastEvent = event
-      stateChanges.notes = getNotes(state, stateChanges)
-      stateChanges.chords = getChords(state, stateChanges)
-      // TODO stateChanges.chordsRawDetection = detectChord(stateChanges.notes)
 
-      return {...state, ...stateChanges}
+      // pass lastEvent as parameter
+      stateChanges.lastEvent = event
+
+      // find notes by events state
+      stateChanges.notes = getNotes(state, stateChanges)
+
+      // deduce notes in a stateful manner (respect time)
+      stateChanges.smartNotes = getSmartNotes(state, stateChanges)
+      // try to make a more strict guess
+      const strictNotes = getStrictNotes(stateChanges)
+      if (strictNotes) {
+        stateChanges.strictNotes = strictNotes
+      }
+
+      return stateChanges
+    }
+
+    case DETECT_STRICT_NOTES: { 
+      return {
+        ...state,
+        strictNotes: action.payload
+      }
     }
       
     default: {
@@ -67,54 +69,62 @@ const getNotes = (state, stateChanges) => {
   return state.notes
 }
 
-const getChords = (state, stateChanges) => {
+const getSmartNotes = (state, stateChanges) => {
   const {lastEvent} = stateChanges
 
   switch (lastEvent.messageType) {
     case 'noteon': 
     case 'noteoff': {
-      // handle alteration of current chord
-      if (state.chords.detection) {
+      const prevId = state.smartNotes.id
+      // handle alteration of current notes
+      if (state.smartNotes.notes.length) {
         if (stateChanges.notes.length === 0) {
         // all notes removed
           return {
-            detection: null,
-            id: state.chords.id + 1,
+            notes: [],
+            id: prevId + 1,
           }
         }
         else if (isSubset(stateChanges.notes, state.notes)) {
           // notes were removed, but not all - not a new detection
-          return state.chords
+          return state.smartNotes
         } else {
-          // new notes were added - don't treat as new detection
-          const detection = detectChord(stateChanges.notes)
-          if (detection.length) {
-            // new detection
-            return {
-              detection: detectChord(stateChanges.notes),
-              id: state.chords.id, 
-            }
+          return {
+            notes: stateChanges.notes,
+            id: prevId, 
           }
-          return state.chords
         }
       }
 
-      const detection = detectChord(stateChanges.notes)
-      if (detection.length) {
-        // new detection
-        return {
-          detection: detection,
-          id: state.chords.id + 1, 
-        }
-      }
       return {
-        detection: null,
-        id: state.chords.id, 
+        notes: stateChanges.notes,
+        id: prevId + 1,
       }
     }
     default:
   }
-  return state.chords
+  return state.smartNotes
+}
+
+let strictTimeout = null
+function getStrictNotes({smartNotes}) {
+  // clear any previous timeout for strict detection
+  if (strictTimeout)
+    clearTimeout(strictTimeout)
+
+  // if current detection is empty, it's safe to assume the strict detection should also be 
+  if (!smartNotes.notes.length) {
+    return smartNotes
+  }
+  
+  // otherwise only set it when enough time had passed
+  strictTimeout = setTimeout(() => {
+    // make sure store didn't change in any way
+    if (store.getState().events.smartNotes.id !== smartNotes.id)
+      return
+    store.dispatch(detectStrictNotes(smartNotes))
+  }, 150)
+  return
 }
 
 // is a subset of b

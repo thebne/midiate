@@ -1,5 +1,5 @@
 import store from '../redux/store'
-import { HANDLE_MIDI_EVENT } from "../redux/actionTypes"
+import { handleMidiEvent } from "../redux/actions"
 
 class ServerHandler {
   constructor(host) {
@@ -7,7 +7,7 @@ class ServerHandler {
 
     this.socket.onmessage = async (event) => {
       const buffer = await event.data.arrayBuffer()
-      store.dispatch({type: HANDLE_MIDI_EVENT, payload: buffer})
+      store.dispatch(handleMidiEvent(buffer))
     }
   }
 }
