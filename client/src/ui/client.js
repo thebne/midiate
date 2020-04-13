@@ -7,9 +7,9 @@ import { getForegroundAppId, getAppConfig } from '../redux/selectors'
 
 import ServerHandler from '../handlers/serverHandler'
 
-import DefaultApp from './DefaultApp'
+import DefaultApp from './defaultApp'
 import useStyles from './styles'
-import StatusBar from './StatusBar'
+import StatusBar from './statusBar'
 
 // passing this reference to apps later on
 import * as storeSelectors from '../redux/selectors'
