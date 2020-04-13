@@ -1,7 +1,7 @@
 {
   "name": "@midiate/midiate",
   "description": "Web platform for MIDI-based apps",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Omer Perry",
   "license": "MIT",
   "respository": {
