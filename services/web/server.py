@@ -3,10 +3,11 @@ from async_timeout import timeout
 import json
 import os
 from quart import Quart, websocket, request
+from quart_cors import cors
 import zmq
 import zmq.asyncio
+import sqlite3
 import re
-from quart_cors import cors
 
 # TODO use env vars
 HOST = "127.0.0.1"
@@ -84,13 +85,14 @@ chordmap = {
     'B': 11
 }
 
-replacors = {'\\': '',
+replacors = {
+    '\'': '',
     'Db': 'C#',
     'D#': 'Eb',
     'Bb': 'F#',
     'G#': 'Ab',
     'A#': 'Bb',
-    ',': ''}
+    ',': ' '}
     
 rep = dict((re.escape(k), v) for k, v in replacors.items()) 
 pattern = re.compile("|".join(replacors.keys()))
@@ -107,20 +109,21 @@ def create_transposed_string(sequence, offset):
     lst = []
     for chord in sequence.split(' '):
         lst.append(transpose_chord(chord, offset))
-    return "''" + "'',''".join(lst) + "''"
+    
+    # TODO: wrap chord as tokens to avoid C,D == C,Dm
+    return ",".join(lst)
 
 @app.route('/api')
 def data():
 	# get chords, e.g http://127.0.0.1:5000/api?chords=C,G
 	chords = request.args.get('chords')
-    
+
 	# normalize & transpose to all 12 scales
-	sequence = normalize(chords)   
-    
-	strings_to_search = [create_transposed_string(sequence, i) for i in range(12)]	
-    
+	sequence = normalize(chords)           
+	strings_to_search = [create_transposed_string(sequence, i) for i in range(12)]	   
+
 	# connect to DB
-	conn = sqlite3.connect('./ChorDB - 100 rows.db')
+	conn = sqlite3.connect('./ChorDB.db')
 	
 	# execute query
 	c = conn.cursor()
@@ -139,7 +142,6 @@ def data():
         OR chords LIKE '%{strings_to_search[9]}%'
         OR chords LIKE '%{strings_to_search[10]}%'
         OR chords LIKE '%{strings_to_search[11]}%'
-        LIMIT 10
         '''.format(strings_to_search=strings_to_search))
 	conn.commit()
 	

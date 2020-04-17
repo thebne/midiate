@@ -4,37 +4,45 @@ import styles from "./style.module.css";
 export default function Chordify({ currentChords }) {
   const [searchString, setSearchString] = useState("");
   const [isLoaded, setLoaded] = useState(false);
+  const [lastId, setLastId] = useState(-1);
   const [data, setData] = useState("");
 
   // Issue a REST API query per new chord entered
   useEffect(() => {
-    if (currentChords.detection[0]) {
+	let chord = currentChords.detection;
+    if (chord[0] && (currentChords.id != lastId)) {
+	  setLastId(currentChords.id);
       setLoaded(false);
 	  
-      let newString = searchString + ",''" + currentChords.detection[0] + "''";
+	  // Choose shortest representation - TODO: move this logic to @tonaljs
+	  if (chord[1]) {
+		chord = chord[1].length < chord[0].length ? chord[1] : chord[0]
+	  }
+	  
+      let newString = searchString + "," + chord;
       setSearchString(newString);
 
       // TODO: Make only first query to fetch from DB and cache it
-      /* fetch("http://localhost:5000/api?chords=" + newString.slice(1))
+      fetch("http://localhost:5000/api?chords=" + newString.slice(1))
         .then((response) => {
           return response.json();
         })
         .then((data) => {
           setLoaded(true);
           setData(data);
-        }); */
+        });
     }
   }, [currentChords.detection]);
 
   return (
-    <Fragment>
+    <Fragment>	
       <h1>{searchString.slice(1).split("'").join("").split(",").join("→")}</h1>
       {isLoaded && Object.keys(data).length !== 0 ? <Table data={data} /> : "No Results" }
     </Fragment>
   );
 }
 
-// TODO: should be in some general utils file
+// TODO: maybe move to some general resource file
 export class Table extends React.Component {
   constructor(props) {
     super(props);
