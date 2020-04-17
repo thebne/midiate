@@ -1,4 +1,4 @@
-:global(.root) {
+:global(.pianoGadgetRoot) {
   height: 80vh;
   display: flex;
   flex-direction: column;

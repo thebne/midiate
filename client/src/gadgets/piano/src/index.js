@@ -32,7 +32,7 @@ export default function Piano(props) {
     notes = [...Array(endMidi - startMidi + 1).keys()].map(m => Note.fromMidi(startMidi + m))
   }
 	
-	return <div className={'root'}><div className={styles.pianoContainer}>
+	return <div className={'pianoGadgetRoot'}><div className={styles.pianoContainer}>
           <div className={'pianoBody'}><ul className={styles.notesList}>
             {notes.map(n => 			
               <PianoKey key={n} note={n} className={classes[n]} style={props.styles[n]} />
