@@ -3,7 +3,6 @@ from async_timeout import timeout
 import json
 import os
 from quart import Quart, websocket, request
-import uvloop
 import zmq
 import zmq.asyncio
 
@@ -67,7 +66,6 @@ async def route_get_settings(app_name):
 
 
 def main():
-    uvloop.install()
     app.run(host="0.0.0.0")
 
 

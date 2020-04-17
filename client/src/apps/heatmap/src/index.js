@@ -1,0 +1,80 @@
+import React, { Fragment, useLayoutEffect, useState } from 'react'
+import Button from '@material-ui/core/Button'
+import { Note } from "@tonaljs/tonal"
+import Piano from '../../../gadgets/piano/src/index'
+import styles from './style.module.css'
+
+export default function LastNote(props) {
+  const[pressed, setPressed] = useState({})
+  const[toggle, setToggle] = useState(false)
+  const[max, setMax] = useState(1)
+
+  let heights = {}
+  let colors = {}
+  
+  useLayoutEffect(() => {	 
+	 // show animation only for note press
+	 if (!props.lastEvent || props.lastEvent.messageType != 'noteon') {
+		return
+	 }
+
+	// update note frequency dict
+	let n = props.lastEvent.note	
+	if (pressed[n]) {
+		pressed[n] += 1		
+	}
+	else {
+		pressed[n] = 1
+	}
+	setPressed({...pressed})	
+  }, [props.lastEvent])  		
+
+	for (const [note, x] of Object.entries(pressed)) {			
+		
+		// update maximum click count O(1)
+		if (x > max) {
+			setMax(x)
+		}
+		
+		// set color styling per key type (black/white)
+		if (Note.accidentals(Note.simplify(note)).length) {
+			colors[note] = {background: colorBlackKeys(x,0,max),  border: colorBlackKeys(x,0,max)}
+		}
+		else {
+			colors[note] = {background: colorWhiteKeys(x,0,max), boxShadow: whiteShadow(x,0,max), border: 'none'}
+		}
+		
+		// set animation height per key
+		heights[note] = {height: calculateHeight(x,0,max)}
+	}	
+    return <Fragment>				
+			<Button onClick={function(){setToggle(!toggle)}}>Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}</Button>
+			<Button style={{float: 'right'}} onClick={function(){setPressed({}); setMax(1)}}>Clear</Button>			
+			<Piano classes={{}} startNote="A0" endNote="C8" styles={toggle? colors : heights} />
+      </Fragment>
+  }
+
+// css styling per key stroke
+function whiteShadow(x, min, max) {
+	let minmax = x/max
+	return `-1px -1px 2px rgba(255,255,255,0.2) inset, 0 0 4px 1px rgba(190,30,30,0.6) inset, 0 0 ${minmax*8}px ${minmax*3}px rgba(255,${(1-minmax)*255},${(1-minmax)*255},${minmax*0.2})`
+}
+
+function colorWhiteKeys(x, min, max) {
+	let minmax = x/max
+	return `rgb(255,${(1-minmax)*255},${(1-minmax)*255})`
+}
+
+function colorBlackKeys(x, min, max) {
+	let minmax = x/max
+	return `rgb(${minmax*255},0,0)`
+}
+
+function calculateHeight(x, min, max) {
+	let minmax = x/max
+	return `${minmax*15 + 10}vw`
+}  
+  
+// midiate support
+export { default as config } from './midiate/config'
+export { default as createSelectors } from './midiate/selectors'

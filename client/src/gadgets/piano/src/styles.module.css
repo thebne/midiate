@@ -1,4 +1,4 @@
-.root {
+:global(.pianoGadgetRoot) {
   height: 80vh;
   display: flex;
   flex-direction: column;
@@ -11,7 +11,7 @@
   justify-content: center;
 }
 
-.pianoBody {
+:global(.pianoBody) {
   display: inline-block;
   border:1px solid #160801;
   border-radius:1vw;
@@ -36,7 +36,7 @@
   float:left
 }
 
-.noteRender {
+:global(.noteRender) {
   height:10vw;
   width:1.5vw;
   z-index:1;
@@ -47,7 +47,7 @@
   background:linear-gradient(to bottom,#eee 0%,#fff 100%);
 }
 
-.white:active .noteRender, .white.active .noteRender {
+.white:active :global(.noteRender), .white.active :global(.noteRender) {
   border-top:1px solid #777;
   border-left:1px solid #999;
   border-bottom:1px solid #999;
@@ -60,7 +60,7 @@
   left:-.4vw;
 }
 
-.black .noteRender {
+.black :global(.noteRender) {
   position: relative;
   height:6vw;
   width:.8vw;
@@ -71,7 +71,7 @@
   background:linear-gradient(45deg,#222 0%,#555 100%)
 }
 
-.black:active .noteRender, .black.active .noteRender {
+.black:active :global(.noteRender), .black.active :global(.noteRender) {
   box-shadow:-1px -1px 2px rgba(255,255,255,0.2) inset,0 -2px 2px 3px rgba(0,0,0,0.6) inset,0 1px 2px rgba(0,0,0,0.5);
   background:linear-gradient(to right,#444 0%,#222 100%)
 }
