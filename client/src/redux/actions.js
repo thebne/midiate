@@ -11,9 +11,9 @@ export const addApp = (appId, config) => ({
   payload: {appId, config},
 })
 
-export const handleMidiEvent  = buffer => ({
+export const handleMidiEvent  = (deltaTime, msg) => ({
   type: HANDLE_MIDI_EVENT, 
-  payload: buffer,
+  payload: {deltaTime, msg},
 })
 
 export const detectStrictNotes = notes => ({
