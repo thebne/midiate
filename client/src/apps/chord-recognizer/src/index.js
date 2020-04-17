@@ -29,7 +29,7 @@ export default function ChordRecognizer({chords}) {
         entries.push({...chords, time: new Date().getTime(), active: true})
       }
       // update existing detection
-      else if (prev && prev.id === chords.id) {
+      else if (prev && prev.id === chords.id && chords.detection.length) {
         prev.detection = chords.detection
       }
       return entries
