@@ -40,7 +40,7 @@ export default function ChordRecognizer({chords}) {
         && prevAnimation.id === chords.id) {
       prevAnimation.detection = chords.detection
       setAnimations(newAnimations)
-    }
+    }	
   }, [chords.detection])
 
   return (
