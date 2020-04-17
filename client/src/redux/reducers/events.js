@@ -79,7 +79,7 @@ const getSmartNotes = (state, stateChanges) => {
       // handle alteration of current notes
       if (state.smartNotes.notes.length) {
         if (stateChanges.notes.length === 0) {
-        // all notes removed
+          // all notes removed
           return {
             notes: [],
             id: prevId + 1,
