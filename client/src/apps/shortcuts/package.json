@@ -24,6 +24,7 @@
     "build": "rollup -c"
   },
   "dependencies": {
+    "@material-ui/core": "^4.9.11",
     "@tonaljs/tonal": "^3.5.1",
     "color-hash": "^1.0.3"
   },

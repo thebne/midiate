@@ -21,7 +21,7 @@ const initialState = {
 const events = (state = initialState, action) => {
   switch (action.type) {
     case HANDLE_MIDI_EVENT: {
-      let event = parseMessage(action.payload)
+      let event = parseMessage(action.payload.msg, action.payload.deltaTime)
 
       let stateChanges = {...state}
 

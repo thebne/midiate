@@ -31,9 +31,7 @@ async def broadcast_input_events():
 
     while True:
         data = await sock.recv()
-        current_ts, msg = data[:8], data[8:]
-        # TODO send current_ts to client
-        await websocket.send(msg)
+        await websocket.send(data)
 
 
 @app.route('/event', methods=['POST'])

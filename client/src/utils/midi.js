@@ -1,8 +1,9 @@
 import { Midi } from "@tonaljs/tonal"
 const MIDIMessage = require('midimessage')
 
-export function parseMessage(rawMsg) {
+export function parseMessage(rawMsg, deltaTime) {
   let msg = MIDIMessage({data: new Uint8Array(rawMsg)})
+  msg.deltaTime = deltaTime
   // enrich with note and frequency
   if (msg.key !== undefined) {
     msg.note = Midi.midiToNoteName(msg.key)

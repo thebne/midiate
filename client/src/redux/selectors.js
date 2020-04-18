@@ -5,6 +5,21 @@ export const getRunningApps = store => getUiState(store) ? getUiState(store).run
 export const getForegroundAppId = (store) => getUiState(store) ? getUiState(store).foregroundApp : null
 export const getApp = (store, appId) => getRunningApps(store)[appId] || {}
 
+export const getMidiServerHost = (store) => store.settings.midiServerHost || ""
+export const getMidiInputs = (store) => {
+  return (getUiState(store).midiInputs || []).map(i => {
+    i.active = isMidiInputActive(store)(i.name)
+    return i
+  })
+}
+export const isMidiInputActive = (store) => {
+  return input => store.settings.midiInputsActive[input] !== undefined 
+    ? store.settings.midiInputsActive[input] : true
+}
+export const getIsAnyMidiInputActive = (store) => 
+  getMidiServerHost(store).length || getMidiInputs(store).some(i => i.active)
+
+export const getMidiServerConnectionStatus = (store) => getUiState(store).midiServerConnectionStatus
 // get's only support one channel
 export const getNotes = store => store.events.notes || []
 export const getChords = (store, config = {mode: "smart"}) => {
