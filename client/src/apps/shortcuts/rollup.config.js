@@ -36,6 +36,11 @@ export default {
       exclude: 'node_modules/**',
 			presets: ['@babel/preset-env', '@babel/preset-react'],
     }),
-    commonjs(),
+    commonjs({
+      include: 'node_modules/**',
+      namedExports: {
+        'react-is': ['ForwardRef', 'Memo'],
+      }
+    }),
   ]
 }
