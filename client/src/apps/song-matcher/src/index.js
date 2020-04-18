@@ -1,22 +1,24 @@
 import React, { useEffect, useState, Fragment } from "react";
+import Button from '@material-ui/core/Button'
 import styles from "./style.module.css";
 
 export default function Chordify({ currentChords }) {
-  const [searchString, setSearchString] = useState("");
+  const [searchString, setSearchString] = useState('');
   const [isLoaded, setLoaded] = useState(false);
   const [lastId, setLastId] = useState(-1);
-  const [data, setData] = useState("");
+  const [data, setData] = useState('');
 
   // Issue a REST API query per new chord entered
   useEffect(() => {
 	let chord = currentChords.detection;
-    if (chord[0] && (currentChords.id != lastId)) {
+    if (chord && chord[0] && (currentChords.id != lastId)) {
+      chord = chord.sort(function(a, b){ return a.length - b.length; });;
 	  setLastId(currentChords.id);
       setLoaded(false);
 	  
 	  // Choose shortest representation - TODO: move this logic to @tonaljs
 	  if (chord[1]) {
-		chord = chord[1].length < chord[0].length ? chord[1] : chord[0]
+		  chord = chord[1].length < chord[0].length ? chord[1] : chord[0]
 	  }
 	  
       let newString = searchString + "," + chord;
@@ -35,7 +37,8 @@ export default function Chordify({ currentChords }) {
   }, [currentChords.detection]);
 
   return (
-    <Fragment>	
+    <Fragment>
+      <Button onClick={function(){setLoaded(false); setSearchString('')}}>Clear</Button>
       <h1>{searchString.slice(1).split("'").join("").split(",").join("→")}</h1>
       {isLoaded && Object.keys(data).length !== 0 ? <Table data={data} /> : "No Results" }
     </Fragment>

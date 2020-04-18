@@ -25,13 +25,14 @@ export default function ChordRecognizer({chords}) {
         }), 4000)
       }
       // add new detections
-      if ((!prev || prev.id !== chords.id) && chords.detection.length) {
+      if ((!prev || prev.id !== chords.id) && chords.detection && chords.detection.length) {
         entries.push({...chords, time: new Date().getTime(), active: true})
       }
       // update existing detection
       else if (prev && prev.id === chords.id && chords.detection.length) {
         prev.detection = chords.detection
-      }
+	  }
+	  
       return entries
     })
   }, [chords])
@@ -91,7 +92,7 @@ export default function ChordRecognizer({chords}) {
 				}}
 			>
 				{({circle, g}) => {
-					const [main, ...rest] = animation.detection
+					const [main, ...rest] = animation.detection.sort(function(a, b){ return a.length - b.length; });
 					return (
 						<g {...g}
 							className={styles.chordDetection}>
@@ -115,9 +116,9 @@ export default function ChordRecognizer({chords}) {
 									dominantBaseline: "hanging",
 									textAnchor: "middle",
 								}} >
-									{secondary}
+									{secondary.length == main.length ? secondary : ''}
 							</text>)
-						)}
+							)}
 					</g>)
 				}}
 		</Animate>)}
