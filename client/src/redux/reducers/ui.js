@@ -1,6 +1,10 @@
-import { SWITCH_APP, STOP_APP, ADD_APP } from "../actionTypes"
+import { SET_MIDI_INPUTS, SWITCH_APP, STOP_APP, ADD_APP,
+  SET_MIDI_SERVER_CONNECTION_STATUS
+} from "../actionTypes"
 
 const initialState = {
+  midiInputs: [],
+  midiServerConnectionStatus: false,
   foregroundApp: null,
   runningApps: [],
   appIdToName: {},
@@ -29,6 +33,18 @@ const ui = (state = initialState, action) => {
           ...state.appIdToName,
           [action.payload.appId]: action.payload.name
         }
+      }
+    }
+    case SET_MIDI_INPUTS: {
+      return {
+        ...state,
+        midiInputs: action.payload,
+      }
+    }
+    case SET_MIDI_SERVER_CONNECTION_STATUS: {
+      return {
+        ...state,
+        midiServerConnectionStatus: action.payload,
       }
     }
 

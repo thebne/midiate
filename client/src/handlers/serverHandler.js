@@ -1,18 +1,67 @@
-import store from '../redux/store'
-import { handleMidiEvent } from "../redux/actions"
+import React, { Fragment, useEffect, useState } from 'react'
+import { connect } from 'react-redux'
+import { getMidiServerHost } from '../redux/selectors'
+import { 
+  handleMidiEvent, setMidiServerConnectionStatus 
+} from "../redux/actions"
 
-class ServerHandler {
-  constructor(host) {
-    this.socket = new WebSocket(`ws://${host}/ws/input`)
-
-    this.socket.onmessage = async (event) => {
-      const buffer = await event.data.arrayBuffer()
-
-      const view = new DataView(buffer)
-      const deltaTime = view.getFloat64(0)
-      const msg = new Uint8Array(buffer, 8)
-      store.dispatch(handleMidiEvent(deltaTime, msg))
-    }
-  }
+let connection = {
+  host: '',
+  socket: null,
 }
-export default ServerHandler
+
+function ServerHandler({midiServerHost, handleMidiEvent,
+  setMidiServerConnectionStatus}) {
+  const [tick, setTick] = useState(null)
+
+  useEffect(() => {
+    console.log('hi')
+      if (midiServerHost !== connection.host && connection.socket) {
+        connection.socket.close()
+        connection.socket = null
+      }
+      if (!midiServerHost.length) {
+        return
+      }
+
+      // create a new connection
+      connection.host = midiServerHost
+      try {
+        connection.socket = new WebSocket(`ws://${midiServerHost}/ws/input`)
+      } catch (e) {
+        setMidiServerConnectionStatus(false)
+        console.error('error initializing:', e)
+        // TODO render some Toast
+        return
+      }
+
+      connection.socket.onmessage = async (event) => {
+        const buffer = await event.data.arrayBuffer()
+
+        const view = new DataView(buffer)
+        const deltaTime = view.getFloat64(0)
+        const msg = new Uint8Array(buffer, 8)
+        handleMidiEvent(deltaTime, msg)
+      }
+
+      connection.socket.onopen = () => {
+        setMidiServerConnectionStatus(true)
+      }
+
+      connection.socket.onclose = (e) => {
+        setMidiServerConnectionStatus(false)
+        console.log('Server closed connection, reconnecting in 3 s', e)
+        setTimeout(() => setTick({}), 3000)
+      }
+
+  }, [midiServerHost, tick])
+
+  return <Fragment />
+}
+
+export default connect(
+  (state) => ({
+    midiServerHost: getMidiServerHost(state),
+  }),
+  { handleMidiEvent, setMidiServerConnectionStatus }
+)(ServerHandler)

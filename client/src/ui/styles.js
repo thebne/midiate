@@ -34,4 +34,17 @@ export default makeStyles(theme => ({
     paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4),
   },
+  infoChip: {
+    marginLeft: theme.spacing(1.5),
+  },
+
+  '@global': {
+    '.hasMidiInputs': {
+    },
+    '.noMidiInputs': {
+      '& .app-bar': {
+        background: '#d10' 
+      }
+    },
+  }
 }))
