@@ -19,9 +19,10 @@ export default function ChordRecognizer({chords}) {
       // check if there's an existing detection. if so, remove it
       if (prev && prev.active && chords.id !== prev.id) {
         prev.active = false
-        setTimeout(() => setAnimations((animations) => {
-          animations.splice(animations.indexOf(prev), 1)
-          return animations
+        setTimeout(() => setAnimations((entries) => {
+          entries = [...entries]
+          entries.splice(entries.indexOf(prev), 1)
+          return entries 
         }), 4000)
       }
       // add new detections
@@ -40,49 +41,46 @@ export default function ChordRecognizer({chords}) {
 	return (
 		<svg 
 			viewBox="0 0 100 100" 
-			xmlns="http://www.w3.org/2000/svg" 
 			style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
 				width: '100%',
-				height: '60vh',
-				display: 'block',
-				margin: 'auto'
+				height: '100%',
 				}} >
-			<g transform="translate(50, 100)">
 			{animations.map((animation) => <Animate
-				key={animation.time}
+				key={animation.id}
 				show={animation.active}
 				start={{
-					circle: {
-					},
+          sizeFactor: .5,
 					g: {
-						transform: 'translate(0, 60)',
+						transform: 'translate(50, 100)',
 						opacity: 0,
 					},
 				}}
 				enter={{
-					circle: {
-					},
+          sizeFactor: [1],
 					g: {
-						transform: 'translate(0,-25)',
+						transform: 'translate(50, 60)',
 						opacity: [1],
 					},
 					timing: { duration: 200, ease: easeSinOut },
 				}}
-				leave={{
-					circle: {
-					},
-					g: {
-						opacity: [.1],
-						transform: ['translate(0, -200)'],
-					},
-					timing: { duration: 4000, ease: easeSinOut },
-				}}
 				update={{
+          sizeFactor: [1],
 					g: {
 						opacity: 1,
-						transform: 'translate(0,-25)',
+						transform: 'translate(50, 60)',
 					},
 					timing: { duration: 80, ease: easeSinOut },
+				}}
+				leave={{
+          sizeFactor: [.6],
+					g: {
+						opacity: [1],
+						transform: ['translate(50, -20)'],
+					},
+					timing: { duration: 4000, ease: easeSinOut },
 				}}
 				interpolation={(begValue, endValue, attr) => {
 					if (attr === 'transform') {
@@ -91,15 +89,16 @@ export default function ChordRecognizer({chords}) {
 					return interpolate(begValue, endValue)
 				}}
 			>
-				{({circle, g}) => {
+				{({circle, g, sizeFactor}) => {
 					const [main, ...rest] = animation.detection
 					return (
 						<g {...g}
 							className={styles.chordDetection}>
-							<circle r="25" fill={colorHash.hex(main)} {...circle} />
+							<ellipse rx={20 * sizeFactor} ry={10 * sizeFactor}
+                fill={colorHash.hex(main)} {...circle} />
 							<text 
 							fill="white" 
-							fontSize="13"
+							fontSize={6 * sizeFactor}
 							style = {{
 								dominantBaseline: "middle",
 								textAnchor: "middle",
@@ -110,8 +109,8 @@ export default function ChordRecognizer({chords}) {
 							<text 
 								key={secondary}
 								fill="white" 
-								fontSize="8"
-								y={5 * (i + 1)}
+								fontSize={3 * sizeFactor}
+								y={2 * sizeFactor * (i + 1)}
 								style = {{
 									dominantBaseline: "hanging",
 									textAnchor: "middle",
@@ -122,7 +121,7 @@ export default function ChordRecognizer({chords}) {
 					</g>)
 				}}
 		</Animate>)}
-	</g></svg>
+	</svg>
 	)
 }
   

@@ -39,6 +39,7 @@ export default makeStyles(theme => ({
   },
   container: {
     flexGrow: 1,
+    position: 'relative',
     '@global > .MuiContainer-root': {
       padding: theme.spacing(4),
     }
