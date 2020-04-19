@@ -15,7 +15,6 @@ function ServerHandler({midiServerHost, handleMidiEvent,
   const [tick, setTick] = useState(null)
 
   useEffect(() => {
-    console.log('hi')
       if (midiServerHost !== connection.host && connection.socket) {
         connection.socket.close()
         connection.socket = null

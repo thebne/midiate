@@ -31,7 +31,8 @@ export default function ChordRecognizer({chords}) {
       // update existing detection
       else if (prev && prev.id === chords.id && chords.detection.length) {
         prev.detection = chords.detection
-      }
+	  }
+	  
       return entries
     })
   }, [chords])
@@ -115,9 +116,9 @@ export default function ChordRecognizer({chords}) {
 									dominantBaseline: "hanging",
 									textAnchor: "middle",
 								}} >
-									{secondary}
+									{secondary.length === main.length ? secondary : ''}
 							</text>)
-						)}
+							)}
 					</g>)
 				}}
 		</Animate>)}
