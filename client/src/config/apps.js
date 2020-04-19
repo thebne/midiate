@@ -1,5 +1,6 @@
 export default [
-  require('@midiate/app-chord-recognizer'),
-  require('@midiate/app-piano-simulator'),
-  require('@midiate/app-shortcuts'),
+  require('../apps/chord-recognizer/src'),
+  require('../apps/piano-simulator/src'),
+  require('../apps/shortcuts/src'),
+  require('../apps/heatmap/src'),
 ]

@@ -1,11 +1,17 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { connect } from 'react-redux'
 import Container from '@material-ui/core/Container'
+import Snackbar from '@material-ui/core/Snackbar'
+import Button from '@material-ui/core/Button'
 
 import { addApp, switchForegroundApp } from '../redux/actions'
-import { getForegroundAppId, getAppConfig } from '../redux/selectors'
+import { 
+  getForegroundAppId, 
+  getIsAnyMidiInputActive,
+} from '../redux/selectors'
 
 import ServerHandler from '../handlers/serverHandler'
+import WebHandler from '../handlers/webHandler'
 
 import DefaultApp from './defaultApp'
 import useStyles from './styles'
@@ -19,8 +25,6 @@ import * as storeActions from '../redux/actions'
 class Client extends React.Component {
   constructor(props) {
     super(props)
-    // TODO change to window.location.host || envVar if exists (compile time)
-    this.serverHandler = new ServerHandler(`${window.location.hostname}:5000`)
     this.defaultApp = <DefaultApp />
 
     this.state = {
@@ -61,16 +65,26 @@ class Client extends React.Component {
 		let app = this.state.apps[this.props.foregroundAppId] || this.defaultApp
 
     // render with all the other UI elements
-		return <AppContainer {...this.props} statusBar={this.state.statusBar}>
-             {app}
-           </AppContainer>
+		return (
+      <Fragment> 
+        <WebHandler />
+        <ServerHandler />
+        <AppContainer {...this.props} statusBar={this.state.statusBar}>
+          {app}
+        </AppContainer>
+      </Fragment>
+    )
   }
 }
 
 function AppContainer(props) {
 	const classes = useStyles()
 
-	return <div className={classes.root}>
+	return <div className={
+    [
+      classes.root, 
+      props.isAnyMidiInputActive ? "hasMidiInputs" : "noMidiInputs",
+    ].join(' ')}>
         <StatusBar {...props} />
 				<main className={classes.content}>
 					<div className={classes.appBarSpacer} />
@@ -78,13 +92,26 @@ function AppContainer(props) {
             {props.children}
 					</Container>
 				</main>
+        {!props.isAnyMidiInputActive && (
+          <Snackbar
+            open
+            message="No active MIDI inputs"
+          action={
+            <Button color="inherit" 
+              onClick={() => props.switchForegroundApp(null)}>
+              Choose
+            </Button>
+          }
+          className={classes.snackbar}
+        />
+       )}
 			</div>
 }
 
 export default connect(
   (state, ownProps) => ({
     foregroundAppId: getForegroundAppId(state),
-    foregroundAppName: getAppConfig(state, getForegroundAppId(state)).name,
+    isAnyMidiInputActive: getIsAnyMidiInputActive(state),
   }),
   { 
     addApp, 
