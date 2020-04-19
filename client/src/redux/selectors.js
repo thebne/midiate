@@ -37,9 +37,9 @@ export const getChords = (store, config = {mode: "smart"}) => {
       break
   }
   if (!notes) {
-    return {detection: null, notes: [], id: 0}
+    return {detection: [], notes: [], id: 0}
   }
-  const detection = notes.notes.length ? detect(notes.notes) : null
+  const detection = detect(notes.notes)
   return {
     ...notes,
     detection,

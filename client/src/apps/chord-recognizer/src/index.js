@@ -25,7 +25,7 @@ export default function ChordRecognizer({chords}) {
         }), 4000)
       }
       // add new detections
-      if ((!prev || prev.id !== chords.id) && chords.detection && chords.detection.length) {
+      if ((!prev || prev.id !== chords.id) && chords.detection.length) {
         entries.push({...chords, time: new Date().getTime(), active: true})
       }
       // update existing detection
@@ -116,7 +116,7 @@ export default function ChordRecognizer({chords}) {
 									dominantBaseline: "hanging",
 									textAnchor: "middle",
 								}} >
-									{secondary.length == main.length ? secondary : ''}
+									{secondary.length === main.length ? secondary : ''}
 							</text>)
 							)}
 					</g>)

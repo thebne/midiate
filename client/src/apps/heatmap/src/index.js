@@ -14,14 +14,14 @@ export default function LastNote(props) {
   
   useLayoutEffect(() => {	 
 	 // show animation only for note press
-	 if (!props.lastEvent || props.lastEvent.messageType != 'noteon') {
+	 if (!props.lastEvent || props.lastEvent.messageType !== 'noteon') {
 		return
 	 }
 
 	// update note frequency dict
 	let n = props.lastEvent.note	
 	if (pressed[n]) {
-		pressed[n] += 1		
+		pressed[n] += 15	
 	}
 	else {
 		pressed[n] = 1
@@ -61,13 +61,13 @@ function whiteShadow(x, min, max) {
 }
 
 function colorWhiteKeys(x, min, max) {
-	let minmax = x/max
-	return `rgb(255,${(1-minmax)*255},${(1-minmax)*255})`
+	let normalized = max < 255 ? 255-x : (1 - (x/max)) * 255
+	return `rgb(255,${normalized},${normalized})`
 }
 
 function colorBlackKeys(x, min, max) {
-	let minmax = x/max
-	return `rgb(${minmax*255},0,0)`
+	let normalized = max < 255 ? x : x/max * 255
+	return `rgb(${normalized},0,0)`
 }
 
 function calculateHeight(x, min, max) {

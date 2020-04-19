@@ -11,14 +11,12 @@ export default function Chordify({ currentChords }) {
   // Issue a REST API query per new chord entered
   useEffect(() => {
 	let chord = currentChords.detection;
-    if (chord && chord[0] && (currentChords.id != lastId)) {
+    if (chord && chord[0] && (currentChords.id !== lastId)) {
 	  setLastId(currentChords.id);
       setLoaded(false);
 	  
 	  // Choose shortest representation - TODO: move this logic to @tonaljs
-	  if (chord[1]) {
-		  chord = chord[1].length < chord[0].length ? chord[1] : chord[0]
-	  }
+	  chord = chord[1] && (chord[1].length < chord[0].length) ? chord[1] : chord[0]	  
 	  
       let newString = searchString + "," + chord;
       setSearchString(newString);
