@@ -4,3 +4,5 @@ mido
 python-rtmidi
 async_timeout
 uvloop
+sqlite3
+quart_cors

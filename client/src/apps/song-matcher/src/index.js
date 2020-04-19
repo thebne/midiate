@@ -12,7 +12,6 @@ export default function Chordify({ currentChords }) {
   useEffect(() => {
 	let chord = currentChords.detection;
     if (chord && chord[0] && (currentChords.id != lastId)) {
-      chord = chord.sort(function(a, b){ return a.length - b.length; });;
 	  setLastId(currentChords.id);
       setLoaded(false);
 	  

@@ -92,7 +92,7 @@ export default function ChordRecognizer({chords}) {
 				}}
 			>
 				{({circle, g}) => {
-					const [main, ...rest] = animation.detection.sort(function(a, b){ return a.length - b.length; });
+					const [main, ...rest] = animation.detection
 					return (
 						<g {...g}
 							className={styles.chordDetection}>
