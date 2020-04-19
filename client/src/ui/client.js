@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react'
 import { connect } from 'react-redux'
-import Container from '@material-ui/core/Container'
 import Snackbar from '@material-ui/core/Snackbar'
 import Button from '@material-ui/core/Button'
+import { CssBaseline } from '@material-ui/core'
 
 import { addApp, switchForegroundApp } from '../redux/actions'
 import { 
@@ -69,6 +69,8 @@ class Client extends React.Component {
       <Fragment> 
         <WebHandler />
         <ServerHandler />
+
+        <CssBaseline />
         <AppContainer {...this.props} statusBar={this.state.statusBar}>
           {app}
         </AppContainer>
@@ -88,9 +90,9 @@ function AppContainer(props) {
         <StatusBar {...props} />
 				<main className={classes.content}>
 					<div className={classes.appBarSpacer} />
-					<Container maxWidth="xl" className={classes.container}>
+					<div className={classes.container}>
             {props.children}
-					</Container>
+					</div>
 				</main>
         {!props.isAnyMidiInputActive && (
           <Snackbar

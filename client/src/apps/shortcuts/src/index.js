@@ -1,5 +1,6 @@
-import React, { Fragment, useState, useLayoutEffect } from 'react'
+import React, { useState, useLayoutEffect } from 'react'
 import Button from '@material-ui/core/Button'
+import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 
 import './style.module.css'
@@ -20,12 +21,12 @@ export default ({lastEvent}) => {
   }, [lastEvent])
 
   return (
-    <Fragment>
+    <Container maxWidth="xl">
       <Typography variant="h3">Shortcuts</Typography>
       <Button onClick={() => toggle()} color={stateActive ? 'primary' : 'secondary'}>
       {stateActive ? "Disable" : "Activate"}
       </Button>
-    </Fragment>
+    </Container>
   )
 }
 export { default as config } from './midiate/config'

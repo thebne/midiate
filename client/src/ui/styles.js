@@ -2,6 +2,12 @@ import { makeStyles } from '@material-ui/core/styles'
 
 export default makeStyles(theme => ({
   root: {
+    position: 'fixed',
+    width: '100%',
+    height: '100%',
+  },
+
+  toolbar: {
     display: 'flex',
   },
   title: {
@@ -26,13 +32,16 @@ export default makeStyles(theme => ({
   },
   appBarSpacer: theme.mixins.toolbar,
   content: {
-    flexGrow: 1,
-    height: '100vh',
+    height: '100%',
     overflow: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
   },
   container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    flexGrow: 1,
+    '@global > .MuiContainer-root': {
+      padding: theme.spacing(4),
+    }
   },
   infoChip: {
     marginLeft: theme.spacing(1.5),
