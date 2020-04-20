@@ -9,17 +9,15 @@ export default makeStyles(theme => ({
 
   toolbar: {
     display: 'flex',
+    itemAlign: 'middle',
   },
   title: {
     flexGrow: 1,
+    display: 'flex',
+    alignItems: 'center',
   },
 
-	titleText: {
-		display: 'inline-block',	
-	},
-
 	titleSecondaryText: {
-		display: 'inline-block',	
 		paddingLeft: theme.spacing(4),
 	},
 
@@ -31,6 +29,14 @@ export default makeStyles(theme => ({
     }),
   },
   appBarSpacer: theme.mixins.toolbar,
+
+  logo: {
+    verticalAlign: 'middle',
+    width: '50px',
+    height: '50px',
+    marginRight: '1vw',
+  },
+
   content: {
     height: '100%',
     overflow: 'auto',
