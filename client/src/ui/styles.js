@@ -2,18 +2,22 @@ import { makeStyles } from '@material-ui/core/styles'
 
 export default makeStyles(theme => ({
   root: {
+    position: 'fixed',
+    width: '100%',
+    height: '100%',
+  },
+
+  toolbar: {
     display: 'flex',
+    itemAlign: 'middle',
   },
   title: {
     flexGrow: 1,
+    display: 'flex',
+    alignItems: 'center',
   },
 
-	titleText: {
-		display: 'inline-block',	
-	},
-
 	titleSecondaryText: {
-		display: 'inline-block',	
 		paddingLeft: theme.spacing(4),
 	},
 
@@ -25,14 +29,26 @@ export default makeStyles(theme => ({
     }),
   },
   appBarSpacer: theme.mixins.toolbar,
+
+  logo: {
+    verticalAlign: 'middle',
+    width: '50px',
+    height: '50px',
+    marginRight: '1vw',
+  },
+
   content: {
-    flexGrow: 1,
-    height: '100vh',
+    height: '100%',
     overflow: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
   },
   container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    flexGrow: 1,
+    position: 'relative',
+    '@global > .MuiContainer-root': {
+      padding: theme.spacing(4),
+    }
   },
   infoChip: {
     marginLeft: theme.spacing(1.5),

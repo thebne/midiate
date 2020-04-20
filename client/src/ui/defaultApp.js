@@ -1,6 +1,7 @@
 import React, { Fragment, useState } from 'react'
 import { connect } from 'react-redux'
 import Chip from '@material-ui/core/Chip'
+import Container from '@material-ui/core/Container'
 import DoneIcon from '@material-ui/icons/Done'
 import ErrorIcon from '@material-ui/icons/Error'
 import Button from '@material-ui/core/Button'
@@ -87,7 +88,7 @@ function DefaultApp({currentApps, switchForegroundApp,
   midiServerConnectionStatus}) {
     
   return (
-    <Fragment>
+    <Container maxWidth="xl">
       <Grid container spacing={3}>
         <Grid item xs={8}>
           <ButtonGroup color="secondary">
@@ -123,7 +124,7 @@ function DefaultApp({currentApps, switchForegroundApp,
           </FormControl>
         </Grid>
       </Grid>
-    </Fragment>
+    </Container>
   )
 }
 

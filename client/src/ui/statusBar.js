@@ -15,6 +15,7 @@ import {
 
 import { PROGRAM_NAME } from '../constants'
 import useStyles from './styles.js'
+import { ReactComponent as Logo } from '../logo.svg'
 
 function StatusBar({foregroundAppName, foregroundAppId, 
   statusBar, switchForegroundApp}) {
@@ -25,7 +26,8 @@ function StatusBar({foregroundAppName, foregroundAppId,
 					<Toolbar className={classes.toolbar}>
 						<div className={classes.title}>
 							<Typography component="h1" variant="h5" color="inherit" noWrap className={classes.titleText}>
-								♫{PROGRAM_NAME}♫
+                <Logo className={classes.logo} />
+								{PROGRAM_NAME}
 							</Typography>
 							<Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
 								{foregroundAppName}

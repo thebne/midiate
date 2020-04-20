@@ -1,5 +1,6 @@
 import React, { Fragment, useLayoutEffect, useState } from 'react'
 import Button from '@material-ui/core/Button'
+import Container from '@material-ui/core/Container'
 import { Note } from "@tonaljs/tonal"
 import Piano from '../../../gadgets/piano/src/index'
 import styles from './style.module.css'
@@ -47,11 +48,11 @@ export default function LastNote(props) {
 		// set animation height per key
 		heights[note] = {height: calculateHeight(x,0,max)}
 	}	
-    return <Fragment>				
+    return <Container maxWidth="xl">
 			<Button onClick={function(){setToggle(!toggle)}}>Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}</Button>
 			<Button style={{float: 'right'}} onClick={function(){setPressed({}); setMax(1)}}>Clear</Button>			
 			<Piano classes={{}} startNote="A0" endNote="C8" styles={toggle? colors : heights} />
-      </Fragment>
+      </Container>
   }
 
 // css styling per key stroke
