@@ -3,8 +3,6 @@ import { connect } from 'react-redux'
 import { handleKeyboardEvent, setMidiInputs } from "../redux/actions"
 import { isMidiInputActive } from "../redux/selectors"
 
-const zip = rows=>rows[0].map((_,c)=>rows.map(row=>row[c]))
-
 // initalize keyboard mapping to notes - validKeys order will be by octave order
 const validKeys = Array.from('q2w3er5t6y7uzsxdcvgbhnjm')
 const midiBindingsPerKey = validKeys.map((x, index) => new Uint8Array([144, 60+index, 0]))
