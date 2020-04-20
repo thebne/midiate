@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { handleKeyboardEvent, setMidiInputs } from "../redux/actions"
-import { isMidiInputActive } from "../redux/selectors"
+import { handleKeyboardEvent } from "../redux/actions"
 
 // initalize keyboard mapping to notes - validKeys order will be by octave order
 const validKeys = Array.from('q2w3er5t6y7uzsxdcvgbhnjm')
@@ -40,9 +39,6 @@ function KeyboardHandler({handleKeyboardEvent}) {
   return <Fragment />
 }
 
-export default connect(
-  (state) => ({
-    isMidiInputActive: isMidiInputActive(state),
-  }),
-  { handleKeyboardEvent, setMidiInputs }
+export default connect(null,
+  { handleKeyboardEvent }
 )(KeyboardHandler)

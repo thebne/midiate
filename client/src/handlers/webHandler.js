@@ -5,7 +5,7 @@ import { isMidiInputActive } from "../redux/selectors"
 
 // uses WebMIDI
 function WebHandler({isMidiInputActive, handleMidiEvent, setMidiInputs}) {
-  useEffect(() => {
+  useEffect(() => {	  
 		navigator.requestMIDIAccess().then(function(access) {
       const createOnMidiMessage = (inputName) => {
         let prevTime = null
@@ -14,6 +14,12 @@ function WebHandler({isMidiInputActive, handleMidiEvent, setMidiInputs}) {
             return
 
           const deltaTime = prevTime === null ? 0 : message.timeStamp - prevTime 
+		  
+			// TODO: move to forked @midimessage
+			if (message.data[0] === 254) {
+				return
+			}
+  
           handleMidiEvent(deltaTime, message.data)
           prevTime = message.timeStamp
         }
