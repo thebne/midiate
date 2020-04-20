@@ -95,7 +95,7 @@ export default function ChordRecognizer({chords}) {
 						<g {...g}
 							className={styles.chordDetection}>
 							<ellipse rx={20 * sizeFactor} ry={10 * sizeFactor}
-                fill={colorHash.hex(main)} {...circle} />
+                fill={colorHash.hex(main.split("/")[0])} {...circle} />
 							<text 
 							fill="white" 
 							fontSize={6 * sizeFactor}
