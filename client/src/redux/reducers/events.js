@@ -1,4 +1,4 @@
-import { HANDLE_MIDI_EVENT, DETECT_STRICT_NOTES } from "../actionTypes"
+import { HANDLE_KEYBOARD_EVENT, HANDLE_MIDI_EVENT, DETECT_STRICT_NOTES } from "../actionTypes"
 import { detectStrictNotes } from "../actions"
 import store from '../store'
 
@@ -17,10 +17,10 @@ const initialState = {
   lastEvent: null,
 }
 
-
-const events = (state = initialState, action) => {
-  switch (action.type) {
-    case HANDLE_MIDI_EVENT: {
+const events = (state = initialState, action) => {  
+  switch (action.type) {	    
+	case HANDLE_KEYBOARD_EVENT:	
+    case HANDLE_MIDI_EVENT: {		
       let event = parseMessage(action.payload.msg, action.payload.deltaTime)
 
       let stateChanges = {...state}

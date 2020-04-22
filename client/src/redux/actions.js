@@ -2,6 +2,7 @@ import {
   SWITCH_APP, 
   ADD_APP, 
   HANDLE_MIDI_EVENT, 
+  HANDLE_KEYBOARD_EVENT, 
   DETECT_STRICT_NOTES,
   TOGGLE_MIDI_INPUT,
   SET_MIDI_INPUTS,
@@ -21,6 +22,11 @@ export const addApp = (appId, config) => ({
 
 export const handleMidiEvent  = (deltaTime, msg) => ({
   type: HANDLE_MIDI_EVENT, 
+  payload: {deltaTime, msg},
+})
+
+export const handleKeyboardEvent  = (deltaTime, msg) => ({
+  type: HANDLE_KEYBOARD_EVENT, 
   payload: {deltaTime, msg},
 })
 

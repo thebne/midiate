@@ -11,6 +11,7 @@ import {
 } from '../redux/selectors'
 
 import ServerHandler from '../handlers/serverHandler'
+import KeyboardHandler from '../handlers/keyboardHandler'
 import WebHandler from '../handlers/webHandler'
 
 import DefaultApp from './defaultApp'
@@ -67,7 +68,8 @@ class Client extends React.Component {
     // render with all the other UI elements
 		return (
       <Fragment> 
-        <WebHandler />
+	    <KeyboardHandler />
+        <WebHandler />		
         <ServerHandler />
 
         <CssBaseline />
