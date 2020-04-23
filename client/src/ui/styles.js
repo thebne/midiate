@@ -59,7 +59,7 @@ export default makeStyles(theme => ({
     },
     '.noMidiInputs': {
       '& .app-bar': {
-        background: '#d10' 
+        background: '#666' 
       }
     },
   }
