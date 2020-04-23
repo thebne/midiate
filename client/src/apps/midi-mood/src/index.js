@@ -1,5 +1,6 @@
 import React, { Fragment, useLayoutEffect, useState } from 'react'
 import Button from '@material-ui/core/Button'
+import Container from '@material-ui/core/Container'
 import { Note } from "@tonaljs/tonal"
 import Piano from '../../../gadgets/piano/src/index'
 import styles from './style.module.css'
@@ -50,10 +51,10 @@ export default function LastNote(props) {
 			colors[note] = {background: colorWhiteKeys(x), height: `${(x/127)+10}vw`, width: `${(x/127)+1.5}vw`}
 		}
 	}	
-    return <Fragment>
+	return <Container maxWidth={false} style={{backgroundColor: colorWhiteKeys(props.lastEvent.velocity), height: '100%', transition: '0.5s ease-in'}}>
 			<Button style={{float: 'right'}} onClick={function(){setPressed({})}}>Clear</Button>			
 			<Piano classes={{}} startNote="A0" endNote="C8" styles={colors} />
-      </Fragment>
+      </Container>
   }
 
 
