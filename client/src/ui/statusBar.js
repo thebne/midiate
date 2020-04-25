@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { connect } from 'react-redux'
 import AppBar from '@material-ui/core/AppBar'
 import Button from '@material-ui/core/Button'
@@ -19,15 +19,17 @@ import { ReactComponent as Logo } from '../logo.svg'
 
 function StatusBar({foregroundAppName, foregroundAppId, 
   statusBar, switchForegroundApp}) {
-	const classes = useStyles()
+    const classes = useStyles()
   return (
 				<AppBar position="absolute" 
             className={[classes.appBar, 'app-bar'].join(' ')}>
 					<Toolbar className={classes.toolbar}>
 						<div className={classes.title}>
-							<Typography component="h1" variant="h5" color="inherit" noWrap className={classes.titleText}>
-                <Logo className={classes.logo} />
-								{PROGRAM_NAME}
+              <Logo 
+                  onClick={() => switchForegroundApp(null)} 
+                  className={classes.logo} />
+							<Typography component="h1" variant="h5" color="inherit" noWrap >
+                {PROGRAM_NAME}
 							</Typography>
 							<Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
 								{foregroundAppName}
@@ -39,7 +41,8 @@ function StatusBar({foregroundAppName, foregroundAppId,
                 {item}
               </IconButton> 
               : null)}
-            {foregroundAppId != null && 
+            {foregroundAppId != null && // TODO: Check if foregroundAppId is needed in this component
+            // Remove this Back button
 			        <Button onClick={() => switchForegroundApp(null)} color="inherit"
 									className={classes.backButton}>Back</Button>}
 					</Toolbar>
