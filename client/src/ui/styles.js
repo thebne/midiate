@@ -40,7 +40,7 @@ export default makeStyles(theme => ({
     cursor: "pointer",
     width: '50px',
     height: '50px',
-    tapHighlightColortap: "transparent",
+    WebkitTapHighlightColor: "transparent"
   },
 
   content: {
