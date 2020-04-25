@@ -8,40 +8,60 @@ import { addApp, switchForegroundApp } from '../redux/actions'
 import { 
   getForegroundAppId, 
   getIsAnyMidiInputActive,
+  getAppConfig,
 } from '../redux/selectors'
 
 import ServerHandler from '../handlers/serverHandler'
 import KeyboardHandler from '../handlers/keyboardHandler'
 import WebHandler from '../handlers/webHandler'
 
-import DefaultApp from './defaultApp'
 import useStyles from './styles'
 import StatusBar from './statusBar'
+import LoadingScreen from './loadingScreen'
+import { SETTINGS_APP_ID } from '../constants'
 
 // passing this reference to apps later on
 import * as storeSelectors from '../redux/selectors'
 import * as storeActions from '../redux/actions'
 
-
 class Client extends React.Component {
   constructor(props) {
     super(props)
-    this.defaultApp = <DefaultApp />
-
     this.state = {
-      statusBar: [], 
-      apps: [],
+      statusBar: {}, 
+      apps: {},
     }
   }
 
   componentDidMount() {
+    let statusBar = {}, apps = {}
+
+    // load system apps
+    const systemApps = [
+      require('./defaultApp'), 
+      require('./settingsApp'), 
+    ]
+    systemApps.forEach(app => {
+      if (!app.config || typeof app.config.id !== "string") {
+        throw new Error(`system app does not define valid id`)
+      }
+      
+      this.props.addApp(app.config.id, app.config)
+      apps[app.config.id] = app.default
+    })
+
     // load apps from config file 
     const appsFromConfig = require('../config/apps')
 
-    let statusBar = [], apps = []
     appsFromConfig.default.forEach((app, i) => {
-      // add app to store
-      this.props.addApp(i, app.config)
+      if (app.config && typeof app.config.id === "string") {
+        throw new Error(`apps should not define id ${app.config.name}`)
+      }
+
+      // add app to store - positive indices (0, 1, ...)
+      const appId = i + 1
+
+      this.props.addApp(appId, app.config)
       // assign selectors as props to app if requested
 			const appSelectors = app.createSelectors ? 
         ((state, ownProps) => app.createSelectors(storeSelectors, state, ownProps)) : null
@@ -52,18 +72,25 @@ class Client extends React.Component {
 			let connectFn = connect(appSelectors, appDispatchers)
 
       // save apps on state
-      apps.push(app.default 
-        ? React.createElement(connectFn(app.default), {appId: i}) : null)
-      statusBar.push(app.StatusBar ? 
-        React.createElement(connectFn(app.StatusBar), {appId: i}) : null)
+      if (app.default)
+        apps[appId] = connectFn(app.default)
+      if (app.StatusBar)
+        statusBar[appId] = connectFn(app.StatusBar)
     })
 
     this.setState({apps, statusBar})
   }
 
   render() {
-    // find active app, or render default one
-		let app = this.state.apps[this.props.foregroundAppId] || this.defaultApp
+    const {apps, statusBar} = this.state
+    const {foregroundAppId, getAppConfig} = this.props
+
+    let app
+    if (apps[foregroundAppId]) {
+      app = React.createElement(apps[foregroundAppId], {appId: foregroundAppId, config: getAppConfig(foregroundAppId)})
+    }
+    const bars = Object.entries(statusBar).map(([id, s]) => 
+      React.createElement(s, {appId: id, config: getAppConfig(id)}))
 
     // render with all the other UI elements
 		return (
@@ -73,7 +100,9 @@ class Client extends React.Component {
         <ServerHandler />
 
         <CssBaseline />
-        <AppContainer {...this.props} statusBar={this.state.statusBar}>
+
+        <LoadingScreen /> 
+        <AppContainer {...this.props} statusBar={bars}>
           {app}
         </AppContainer>
       </Fragment>
@@ -96,25 +125,25 @@ function AppContainer(props) {
             {props.children}
 					</div>
 				</main>
-        {!props.isAnyMidiInputActive && (
           <Snackbar
-            open
+            open={!props.isAnyMidiInputActive 
+              && props.foregroundAppId !== SETTINGS_APP_ID}
             message="No active MIDI inputs"
           action={
             <Button color="inherit" 
-              onClick={() => props.switchForegroundApp(null)}>
+              onClick={() => props.switchForegroundApp(SETTINGS_APP_ID)}>
               Choose
             </Button>
           }
           className={classes.snackbar}
         />
-       )}
 			</div>
 }
 
 export default connect(
   (state, ownProps) => ({
     foregroundAppId: getForegroundAppId(state),
+    getAppConfig: id => getAppConfig(state, id),
     isAnyMidiInputActive: getIsAnyMidiInputActive(state),
   }),
   { 

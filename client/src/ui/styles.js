@@ -18,7 +18,11 @@ export default makeStyles(theme => ({
   },
 
 	titleSecondaryText: {
-		paddingLeft: theme.spacing(4),
+		paddingLeft: theme.spacing(3),
+    '& svg': {
+      verticalAlign: 'middle',
+      marginRight: theme.spacing(1),
+    },
 	},
 
   appBar: {

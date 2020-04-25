@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
+import AppDefaultIcon from '@material-ui/icons/MusicVideo'
 import { 
   getForegroundAppId,
   getAppConfig,
@@ -13,11 +14,11 @@ import {
   switchForegroundApp, 
 } from '../redux/actions'
 
-import { PROGRAM_NAME } from '../constants'
+import { PROGRAM_NAME, DEFAULT_APP_ID } from '../constants'
 import useStyles from './styles.js'
 import { ReactComponent as Logo } from '../logo.svg'
 
-function StatusBar({foregroundAppName, foregroundAppId, 
+function StatusBar({foregroundAppConfig, foregroundAppId, 
   statusBar, switchForegroundApp}) {
 	const classes = useStyles()
   return (
@@ -29,9 +30,12 @@ function StatusBar({foregroundAppName, foregroundAppId,
                 <Logo className={classes.logo} />
 								{PROGRAM_NAME}
 							</Typography>
-							<Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
-								{foregroundAppName}
-							</Typography>
+              {foregroundAppConfig.name && (
+                <Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
+                  {foregroundAppConfig.icon || <AppDefaultIcon />}
+                  {foregroundAppConfig.name}
+                </Typography>
+              )}
 						</div>
             {statusBar.map(item => item != null ? 
               <IconButton color="inherit" style={{width: "5vw", minWidth: "3em"}}
@@ -39,8 +43,8 @@ function StatusBar({foregroundAppName, foregroundAppId,
                 {item}
               </IconButton> 
               : null)}
-            {foregroundAppId != null && 
-			        <Button onClick={() => switchForegroundApp(null)} color="inherit"
+            {foregroundAppId !== DEFAULT_APP_ID && 
+			        <Button onClick={() => switchForegroundApp(DEFAULT_APP_ID)} color="inherit"
 									className={classes.backButton}>Back</Button>}
 					</Toolbar>
 				</AppBar>
@@ -49,7 +53,7 @@ function StatusBar({foregroundAppName, foregroundAppId,
 
 export default connect((state) => ({
     foregroundAppId: getForegroundAppId(state),
-    foregroundAppName: getAppConfig(state, getForegroundAppId(state)).name,
+    foregroundAppConfig: getAppConfig(state, getForegroundAppId(state)),
 }), {
   switchForegroundApp
 })(StatusBar)

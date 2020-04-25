@@ -1,9 +1,10 @@
 import { detect } from '../utils/chords'
+import { DEFAULT_APP_ID } from '../constants'
 
 export const getUiState = store => store.ui
-export const getRunningApps = store => getUiState(store) ? getUiState(store).runningApps : {}
-export const getForegroundAppId = (store) => getUiState(store) ? getUiState(store).foregroundApp : null
-export const getApp = (store, appId) => getRunningApps(store)[appId] || {}
+export const getApps = store => getUiState(store) ? (getUiState(store).appIdToConfig || {}) : {}
+export const getForegroundAppId = (store) => getUiState(store) ? getUiState(store).foregroundApp : DEFAULT_APP_ID
+export const getApp = (store, appId) => getApps(store)[appId] || {}
 
 export const getMidiServerHost = (store) => store.settings.midiServerHost || ""
 export const getMidiInputs = (store) => {
