@@ -2,12 +2,13 @@ import { SET_MIDI_INPUTS, SWITCH_APP, STOP_APP, ADD_APP,
   SET_MIDI_SERVER_CONNECTION_STATUS
 } from "../actionTypes"
 
+import { DEFAULT_APP_ID } from '../../constants'
+
 const initialState = {
   midiInputs: [],
   midiServerConnectionStatus: false,
-  foregroundApp: null,
-  runningApps: [],
-  appIdToName: {},
+  foregroundApp: DEFAULT_APP_ID,
+  appIdToConfig: {},
 }
 
 const ui = (state = initialState, action) => {
@@ -18,20 +19,12 @@ const ui = (state = initialState, action) => {
         foregroundApp: action.payload,
       }
     }
-    case STOP_APP: {
-      state.runningAppPids.pop(action.payload)
-      if (action.payload === state.foregroundApp) {
-        state.foregroundApp = null
-      }
-      return state
-    }
     case ADD_APP: {
       return {
         ...state,
-         runningApps: [...state.runningApps, action.payload],
-        appIdToName: {
-          ...state.appIdToName,
-          [action.payload.appId]: action.payload.name
+        appIdToConfig: {
+          ...state.appIdToConfig,
+          [action.payload.appId]: action.payload
         }
       }
     }
