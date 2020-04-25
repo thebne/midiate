@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import AppBar from '@material-ui/core/AppBar'
 import Button from '@material-ui/core/Button'
@@ -20,7 +20,7 @@ import { ReactComponent as Logo } from '../logo.svg'
 
 function StatusBar({foregroundAppConfig, foregroundAppId, 
   statusBar, switchForegroundApp}) {
-    const classes = useStyles()
+  const classes = useStyles()
   return (
 				<AppBar position="absolute" 
             className={[classes.appBar, 'app-bar'].join(' ')}>
