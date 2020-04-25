@@ -27,7 +27,7 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
 					<Toolbar className={classes.toolbar}>
 						<div className={classes.title}>
               <Logo 
-                  onClick={() => switchForegroundApp(null)} 
+                  onClick={() => switchForegroundApp(DEFAULT_APP_ID)} 
                   className={classes.logo} />
 							<Typography component="h1" variant="h5" color="inherit" noWrap >
                 {PROGRAM_NAME}
@@ -45,9 +45,6 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
                 {item}
               </IconButton> 
               : null)}
-            {foregroundAppId !== DEFAULT_APP_ID && 
-			        <Button onClick={() => switchForegroundApp(DEFAULT_APP_ID)} color="inherit"
-									className={classes.backButton}>Back</Button>}
 					</Toolbar>
 				</AppBar>
   )
