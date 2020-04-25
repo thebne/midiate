@@ -39,7 +39,8 @@ export default makeStyles(theme => ({
     marginRight: '1vw',
     cursor: "pointer",
     width: '50px',
-    height: '50px'
+    height: '50px',
+    tapHighlightColortap: "transparent",
   },
 
   content: {
