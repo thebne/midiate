@@ -20,15 +20,17 @@ import { ReactComponent as Logo } from '../logo.svg'
 
 function StatusBar({foregroundAppConfig, foregroundAppId, 
   statusBar, switchForegroundApp}) {
-	const classes = useStyles()
+  const classes = useStyles()
   return (
 				<AppBar position="absolute" 
             className={[classes.appBar, 'app-bar'].join(' ')}>
 					<Toolbar className={classes.toolbar}>
 						<div className={classes.title}>
-							<Typography component="h1" variant="h5" color="inherit" noWrap className={classes.titleText}>
-                <Logo className={classes.logo} />
-								{PROGRAM_NAME}
+              <Logo 
+                  onClick={() => switchForegroundApp(DEFAULT_APP_ID)} 
+                  className={classes.logo} />
+							<Typography component="h1" variant="h5" color="inherit" noWrap >
+                {PROGRAM_NAME}
 							</Typography>
               {foregroundAppConfig.name && (
                 <Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
@@ -43,9 +45,6 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
                 {item}
               </IconButton> 
               : null)}
-            {foregroundAppId !== DEFAULT_APP_ID && 
-			        <Button onClick={() => switchForegroundApp(DEFAULT_APP_ID)} color="inherit"
-									className={classes.backButton}>Back</Button>}
 					</Toolbar>
 				</AppBar>
   )

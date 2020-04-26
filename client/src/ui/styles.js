@@ -36,9 +36,11 @@ export default makeStyles(theme => ({
 
   logo: {
     verticalAlign: 'middle',
+    marginRight: '1vw',
+    cursor: "pointer",
     width: '50px',
     height: '50px',
-    marginRight: '1vw',
+    WebkitTapHighlightColor: "transparent"
   },
 
   content: {

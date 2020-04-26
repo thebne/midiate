@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import Modal from '@material-ui/core/Modal'
 import Fade from '@material-ui/core/Fade'
@@ -14,7 +14,7 @@ import {
 import { switchForegroundApp } from '../redux/actions'
 import { ReactComponent as Logo } from '../logo.svg'
 import { useSessionStorage } from '../utils/react'
-import { SETTINGS_APP_ID } from '../constants'
+import { SETTINGS_APP_ID, DEFAULT_APP_ID } from '../constants'
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -37,10 +37,16 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '512px',
   },
 
-  fab: {
+  advancedFab: {
     position: 'absolute',
     bottom: '3vw',
     right: '3vw',
+  },
+  ignoreFab :{
+    position: 'absolute',
+    bottom: '3vw',
+    left: '3vw',
+    opacity:'70%'
   },
 
   extendedIcon: {
@@ -67,13 +73,20 @@ function LoadingScreen({isAnyMidiInputActive, switchForegroundApp}) {
       >
 				<Fade in={showScreen}>
           <Container className={classes.container}>
-            <Fab variant="extended" className={classes.fab} 
+          <Fab variant="extended" className={classes.ignoreFab} 
+              onClick={() => {
+                switchForegroundApp(DEFAULT_APP_ID)
+                setSkip(true)
+              }}>
+              Ignore
+            </Fab>
+            <Fab variant="extended" className={classes.advancedFab} 
               onClick={() => {
                 switchForegroundApp(SETTINGS_APP_ID)
                 setSkip(true)
               }}>
               <SettingsIcon className={classes.extendedIcon} />
-              Advanced
+              Configure
             </Fab>
             <Logo className={classes.logo} />
             <Typography variant="h2">Connect a MIDI device to get started!</Typography>
