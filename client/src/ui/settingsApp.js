@@ -15,7 +15,7 @@ import TextField from '@material-ui/core/TextField'
 import DoneIcon from '@material-ui/icons/Done'
 import ErrorIcon from '@material-ui/icons/Error'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
-import useStyles from './styles'
+import { makeStyles } from '@material-ui/core/styles'
 import { SETTINGS_APP_ID } from '../constants'
 import { 
   toggleMidiInput, setMidiServerHost
@@ -26,6 +26,11 @@ import {
   getMidiServerConnectionStatus
 } from '../redux/selectors'
 
+const useStyles = makeStyles(theme => ({
+  infoChip: {
+    marginLeft: theme.spacing(1.5),
+  },
+}))
 
 function ConnectToServerDialog({showSelectServer, setShowSelectServer,
   setMidiServerHost}) {
@@ -50,6 +55,7 @@ function ConnectToServerDialog({showSelectServer, setShowSelectServer,
       </Dialog>
   )
 }
+
 
 function ConnectToServerFormField({midiServerHost, midiServerConnectionStatus,
   setMidiServerHost}) { 

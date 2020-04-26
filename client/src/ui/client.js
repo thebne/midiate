@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import Snackbar from '@material-ui/core/Snackbar'
 import Button from '@material-ui/core/Button'
 import { CssBaseline } from '@material-ui/core'
+import { makeStyles } from '@material-ui/core/styles'
 
 import { addApp, switchForegroundApp } from '../redux/actions'
 import { 
@@ -15,7 +16,6 @@ import ServerHandler from '../handlers/serverHandler'
 import KeyboardHandler from '../handlers/keyboardHandler'
 import WebHandler from '../handlers/webHandler'
 
-import useStyles from './styles'
 import StatusBar from './statusBar'
 import LoadingScreen from './loadingScreen'
 import { SETTINGS_APP_ID } from '../constants'
@@ -23,6 +23,38 @@ import { SETTINGS_APP_ID } from '../constants'
 // passing this reference to apps later on
 import * as storeSelectors from '../redux/selectors'
 import * as storeActions from '../redux/actions'
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    position: 'fixed',
+    width: '100%',
+    height: '100%',
+  },
+  appBarSpacer: theme.mixins.toolbar,
+  content: {
+    height: '100%',
+    overflow: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  container: {
+    flexGrow: 1,
+    position: 'relative',
+    '@global > .MuiContainer-root': {
+      padding: theme.spacing(4),
+    }
+  },
+
+  '@global': {
+    '.hasMidiInputs': {
+    },
+    '.noMidiInputs': {
+      '& .app-bar': {
+        background: '#666' 
+      }
+    },
+  }
+}))
 
 class Client extends React.Component {
   constructor(props) {
@@ -135,7 +167,6 @@ function AppContainer(props) {
               Choose
             </Button>
           }
-          className={classes.snackbar}
         />
 			</div>
 }
