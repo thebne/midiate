@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import AppBar from '@material-ui/core/AppBar'
+import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
 import Zoom from '@material-ui/core/Zoom'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -40,9 +41,6 @@ const useStyles = makeStyles(theme => ({
   },
   titleText: {
     cursor: 'pointer',
-    [theme.breakpoints.down('sm')]: {
-      display: 'none',
-    },
   },
 	titleSecondaryText: {
 		paddingLeft: theme.spacing(3),
@@ -54,16 +52,17 @@ const useStyles = makeStyles(theme => ({
 
   logo: {
     verticalAlign: 'middle',
+    minWidth: 0,
     width: '50px',
     height: '50px',
     position: 'relative',
+    marginRight: '1vw',
     '& svg': {
       position: 'absolute',
       top: 0,
       left: 0,
       width: '50px',
       height: '50px',
-      marginRight: '1vw',
       cursor: 'pointer',
     }
   },
@@ -92,7 +91,7 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
 							<Typography component="h1" variant="h5" color="inherit" noWrap
                 onClick={() => switchForegroundApp(DEFAULT_APP_ID)} 
                 className={classes.titleText}>
-                {PROGRAM_NAME}
+                <Box display={{xs: 'none', md: 'initial'}}>{PROGRAM_NAME}</Box>
 							</Typography>
               {foregroundAppConfig.name && (
                 <Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
