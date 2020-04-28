@@ -7,19 +7,20 @@
 
 .detection {
   font-family: 'Baloo Tamma 2', cursive;
+  transform: translate(50%, 60%) scale(1);
 }
 
-:global(.chordRecognizer-animation-enter) > g {
+:global(.chordRecognizer-animation-enter) > .detection {
   transform: translate(50%, 60%) scale(0);
 }
-:global(.chordRecognizer-animation-enter-active) > g {
+:global(.chordRecognizer-animation-enter-active) > .detection {
   transform: translate(50%, 60%) scale(1);
   transition: transform 150ms;
 }
-:global(.chordRecognizer-animation-exit) > g {
-  transform: translate(50%, 60%);
+:global(.chordRecognizer-animation-exit) > .detection {
+  transform: translate(50%, 60%) scale(1);
 }
-:global(.chordRecognizer-animation-exit-active) > g {
+:global(.chordRecognizer-animation-exit-active) > .detection {
   transform: translate(50%, -10%) scale(.4);
   transition: transform 4s ease-out;
 }
