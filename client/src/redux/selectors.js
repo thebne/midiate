@@ -1,54 +1,102 @@
+import { createSelector } from 'reselect'
 import { detect } from '../utils/chords'
 import { DEFAULT_APP_ID } from '../constants'
 
 export const getUiState = store => store.ui
-export const getApps = store => getUiState(store) ? (getUiState(store).appIdToConfig || {}) : {}
-export const getForegroundAppId = (store) => getUiState(store) ? getUiState(store).foregroundApp : DEFAULT_APP_ID
-export const getApp = (store, appId) => getApps(store)[appId] || {}
+export const getSettingsState = store => store.settings
+export const getEventsState = store => store.events
 
-export const getMidiServerHost = (store) => store.settings.midiServerHost || ""
-export const getMidiInputs = (store) => {
-  return (getUiState(store).midiInputs || []).map(i => {
-    i.active = isMidiInputActive(store)(i.name)
+export const getApps = createSelector(
+  [getUiState],
+  ui => ui.appIdToConfig || {}
+)
+
+export const getForegroundAppId = createSelector(
+  [getUiState],
+  ui => ui.foregroundApp
+)
+
+export const getApp = (store, appId) => 
+  getApps(store)[appId] || {}
+
+export const getAppConfig = (store, appId) => 
+  getApp(store, appId).config || {}
+
+
+export const getMidiServerHost = createSelector(
+  [getSettingsState],
+  settings => settings.midiServerHost || ""
+)
+
+export const isMidiInputActive = createSelector(
+  [getSettingsState],
+  settings => {
+    return input => settings.midiInputsActive[input] !== undefined 
+      ? settings.midiInputsActive[input] : true
+  }
+)
+
+export const getMidiInputs = createSelector(
+  [getUiState, isMidiInputActive],
+  (ui, isActive) => (ui.midiInputs || []).map(i => {
+    i.active = isActive(i.name)
     return i
   })
-}
-export const isMidiInputActive = (store) => {
-  return input => store.settings.midiInputsActive[input] !== undefined 
-    ? store.settings.midiInputsActive[input] : true
-}
-export const getIsAnyMidiInputActive = (store) => 
-  getMidiServerHost(store).length || getMidiInputs(store).some(i => i.active)
+)
+export const getIsAnyMidiInputActive = createSelector(
+  [getMidiInputs, getMidiServerHost],
+  (inputs, serverHost) => serverHost.length || inputs.some(i => i.active)
+)
 
-export const getMidiServerConnectionStatus = (store) => getUiState(store).midiServerConnectionStatus
-// get's only support one channel
-export const getNotes = store => store.events.notes || []
+export const getMidiServerConnectionStatus = createSelector(
+  [getUiState],
+  ui => ui.midiServerConnectionStatus
+)
+
+export const getNotes = createSelector(
+  [getEventsState],
+  events => events.notes || []
+)
+
+const getStrictNotes = createSelector(
+  [getEventsState],
+  events => events.strictNotes
+)
+
+const getSmartNotes = createSelector(
+  [getEventsState],
+  events => events.smartNotes
+)
+
+const getLooseChords = createSelector(
+  [getNotes],
+  notes => ({notes, id: -1, detection: detect(notes)})
+)
+const getStrictChords = createSelector(
+  [getStrictNotes],
+  notes => ({...notes, detection: detect(notes.notes)})
+)
+const getSmartChords = createSelector(
+  [getSmartNotes],
+  notes => ({...notes, detection: detect(notes.notes)})
+)
+
 export const getChords = (store, config = {mode: "smart"}) => {
-  let notes
   switch (config.mode) {
     case 'loose':
-      notes = {notes: store.events.notes, id: -1}
-      break
+      return getLooseChords(store)
     case 'strict':
-      notes = store.events.strictNotes
-      break
+      return getStrictChords(store)
     case 'smart':
-    default:
-      notes = store.events.smartNotes
-      break
+      return getSmartChords(store)
   }
-  if (!notes) {
-    return {detection: [], notes: [], id: 0}
-  }
-  const detection = detect(notes.notes)
-  return {
-    ...notes,
-    detection,
-  }
+  throw new Error(`unknown mode ${config.mode}`)
 }
 
-export const getLastEvent = store => store.events.lastEvent
-export const getAppConfig = (store, appId) => getApp(store, appId).config || {}
+export const getLastEvent = createSelector(
+  [getEventsState],
+  events => events.lastEvent
+)
 
 // deprecated functions
 export const getCurrentlyPlayed = store => {

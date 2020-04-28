@@ -31,7 +31,8 @@
     "react-dom": "^16.13.0",
     "react-redux": "^7.2.0",
     "react-transition-group": "^4.3.0",
-    "redux": "^4.0.5"
+    "redux": "^4.0.5",
+    "reselect": "^4.0.0"
   },
   "devDependencies": {
     "react-scripts": "3.4.0"
