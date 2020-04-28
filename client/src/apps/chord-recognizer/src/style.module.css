@@ -5,7 +5,21 @@
   font-family: 'Baloo Tamma 2', cursive;
 }
 
-.chordDetection {
+.detection {
   font-family: 'Baloo Tamma 2', cursive;
 }
 
+:global(.chordRecognizer-animation-enter) > g {
+  transform: translate(50%, 60%) scale(0);
+}
+:global(.chordRecognizer-animation-enter-active) > g {
+  transform: translate(50%, 60%) scale(1);
+  transition: transform 150ms;
+}
+:global(.chordRecognizer-animation-exit) > g {
+  transform: translate(50%, 60%);
+}
+:global(.chordRecognizer-animation-exit-active) > g {
+  transform: translate(50%, -10%) scale(.4);
+  transition: transform 4s ease-out;
+}

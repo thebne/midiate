@@ -27,8 +27,7 @@
   "dependencies": {
     "color-hash": "^1.0.3",
     "d3-ease": "^1.0.6",
-    "d3-interpolate": "^1.4.0",
-    "react-move": "^6.1.0"
+    "d3-interpolate": "^1.4.0"
   },
   "peerDependencies": {
     "react": "^16.13.0",
