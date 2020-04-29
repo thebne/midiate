@@ -2,28 +2,38 @@ import React, { Fragment, useState } from 'react'
 import { connect } from 'react-redux'
 import Button from '@material-ui/core/Button'
 import ButtonGroup from '@material-ui/core/ButtonGroup'
+import Fade from '@material-ui/core/Fade'
 import Chip from '@material-ui/core/Chip'
 import Container from '@material-ui/core/Container'
+import Radio from '@material-ui/core/Radio'
 import Typography from '@material-ui/core/Typography'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
-import FormControl from '@material-ui/core/FormControl'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import FormGroup from '@material-ui/core/FormGroup'
-import Checkbox from '@material-ui/core/Checkbox'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
+import ListItemText from '@material-ui/core/ListItemText'
+import ListSubheader from '@material-ui/core/ListSubheader'
+import Switch from '@material-ui/core/Switch'
 import TextField from '@material-ui/core/TextField'
 import DoneIcon from '@material-ui/icons/Done'
 import ErrorIcon from '@material-ui/icons/Error'
+import UsbIcon from '@material-ui/icons/Usb'
+import PublicIcon from '@material-ui/icons/Public'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import { makeStyles } from '@material-ui/core/styles'
 import { SETTINGS_APP_ID } from '../constants'
+import themes from './themes'
 import { 
-  toggleMidiInput, setMidiServerHost
+  toggleMidiInput, setMidiServerHost,
+  setThemeId,
 } from '../redux/actions'
 import { 
   getMidiInputs, 
   getMidiServerHost, 
-  getMidiServerConnectionStatus
+  getMidiServerConnectionStatus,
+  getThemeId,
 } from '../redux/selectors'
 
 const useStyles = makeStyles(theme => ({
@@ -57,65 +67,112 @@ function ConnectToServerDialog({showSelectServer, setShowSelectServer,
 }
 
 
-function ConnectToServerFormField({midiServerHost, midiServerConnectionStatus,
+function ConnectToServerListItem({midiServerHost, midiServerConnectionStatus,
   setMidiServerHost}) { 
   const [showSelectServer, setShowSelectServer] = useState(false)
 	const classes = useStyles()
 
+  const serverText = (
+    <Fragment>
+      {!midiServerHost.length 
+        ? <i>server...</i>
+        : midiServerHost}
+      <Fade in={midiServerHost.length}>
+        <Chip
+          className={classes.infoChip}
+          icon={midiServerConnectionStatus ? <DoneIcon /> : <ErrorIcon />}
+          label={midiServerConnectionStatus ? "Connected" : "Not connected"}
+          color={midiServerConnectionStatus ? "primary" : "secondary"}
+          />
+      </Fade>
+    </Fragment>
+  )
   return (
     <Fragment>
-      <FormControlLabel
-        key={'_server'}    
-        onChange={() => setShowSelectServer(true)}
-        checked={midiServerHost.length !== 0}
-        control={<Checkbox color="primary" />}
-        label={!midiServerHost.length 
-          ? <i>server...</i>
-          : <Fragment>
-              <i>{midiServerHost}</i>
-              <Chip
-                className={classes.infoChip}
-                icon={midiServerConnectionStatus ? <DoneIcon /> : <ErrorIcon />}
-                label={midiServerConnectionStatus ? "Connected" : "Not connected"}
-                color={midiServerConnectionStatus ? "primary" : "secondary"}
-              />
-            </Fragment>}
-        labelPlacement="end"
-      />
-      <ConnectToServerDialog 
-        showSelectServer={showSelectServer}
-        setShowSelectServer={setShowSelectServer}
-        setMidiServerHost={setMidiServerHost} />
+      <ListItem>
+        <ListItemIcon>
+          <PublicIcon />
+        </ListItemIcon>
+        <ListItemText primary={serverText} />
+        <ListItemSecondaryAction>
+          <Switch
+            edge="end"
+            onChange={() => setShowSelectServer(true)}
+            checked={midiServerHost.length !== 0}
+            />
+        </ListItemSecondaryAction>
+        <ConnectToServerDialog 
+          showSelectServer={showSelectServer}
+          setShowSelectServer={setShowSelectServer}
+          setMidiServerHost={setMidiServerHost} />
+      </ListItem>
     </Fragment>
   )
 }
 
-function SettingsApp({midiInputs, toggleMidiInput, 
-  midiServerHost, setMidiServerHost, midiServerConnectionStatus}) {
+const MidiInputs = connect(
+  state => ({
+    midiInputs: getMidiInputs(state),
+    midiServerHost: getMidiServerHost(state),
+    midiServerConnectionStatus: getMidiServerConnectionStatus(state),
+  }),
+  { toggleMidiInput, setMidiServerHost }
+)(({midiInputs, toggleMidiInput, 
+  midiServerHost, setMidiServerHost, midiServerConnectionStatus}) => {
   return (
-    <Container>
-      <Typography variant="h4">
-        Available MIDI inputs:
-      </Typography>
-      <FormControl component="fieldset">
-        <FormGroup aria-label="position"> 
-          {midiInputs.map(input => (
-            <FormControlLabel
-              key={input.name}    
+    <List subheader={<ListSubheader>MIDI Inputs</ListSubheader>}>
+      {midiInputs.map(input => (
+        <ListItem key={input.name}>
+          <ListItemIcon>
+            <UsbIcon />
+          </ListItemIcon>
+          <ListItemText primary={input.name} />
+          <ListItemSecondaryAction>
+            <Switch
+              edge="end"
               onChange={e => toggleMidiInput(input.name, e.target.checked)}
               checked={input.active}
-              control={<Checkbox color="primary" />}
-              label={input.name}
-              labelPlacement="end"
-            />
-          ))}
-          <ConnectToServerFormField
-            midiServerConnectionStatus={midiServerConnectionStatus}
-            midiServerHost={midiServerHost}
-            setMidiServerHost={setMidiServerHost}
-            />
-        </FormGroup>
-      </FormControl>
+        />
+          </ListItemSecondaryAction>
+        </ListItem>
+      ))}
+        <ConnectToServerListItem
+          midiServerConnectionStatus={midiServerConnectionStatus}
+          midiServerHost={midiServerHost}
+          setMidiServerHost={setMidiServerHost}
+          />
+    </List>
+  )
+})
+
+const ThemeSelector = connect(
+  state => ({
+    themeId: getThemeId(state),
+  }),
+  { setThemeId }
+)(({themeId, setThemeId}) => {
+  return (
+    <List subheader={<ListSubheader>Theme</ListSubheader>}>
+      {themes.map(({name, description}, id) => (
+        <ListItem button onClick={() => setThemeId(id)}>
+          <ListItemIcon>
+            <Radio
+              edge="start"
+              checked={id === themeId}
+              />
+          </ListItemIcon>
+          <ListItemText primary={name} secondary={description} />
+        </ListItem>
+      ))}
+    </List>
+  )
+})
+
+function SettingsApp() {
+  return (
+    <Container>
+      <MidiInputs />
+      <ThemeSelector />
     </Container>
   )
 }
@@ -126,11 +183,4 @@ export const config = {
   icon: <SettingsApplicationsIcon />,
 }
 
-export default connect(
-  state => ({
-    midiInputs: getMidiInputs(state),
-    midiServerHost: getMidiServerHost(state),
-    midiServerConnectionStatus: getMidiServerConnectionStatus(state),
-  }),
-  { toggleMidiInput, setMidiServerHost }
-)(SettingsApp)
+export default SettingsApp

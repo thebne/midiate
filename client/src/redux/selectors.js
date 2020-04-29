@@ -22,6 +22,10 @@ export const getApp = (store, appId) =>
 export const getAppConfig = (store, appId) => 
   getApp(store, appId).config || {}
 
+export const getThemeId = createSelector(
+  [getSettingsState],
+  settings => settings.themeId || 0
+)
 
 export const getMidiServerHost = createSelector(
   [getSettingsState],

@@ -1,10 +1,14 @@
-import { TOGGLE_MIDI_INPUT, SET_MIDI_SERVER_HOST } from "../actionTypes"
+import { 
+  TOGGLE_MIDI_INPUT, 
+  SET_MIDI_SERVER_HOST,
+  SET_THEME_ID,
+} from "../actionTypes"
 
 const initialState = {
   midiInputs: [],
   midiInputsActive: {},
   midiServerHost: "",
-  appSettings: {},
+  themeId: 0,
 }
 
 const settings = (state = initialState, action) => {
@@ -23,6 +27,12 @@ const settings = (state = initialState, action) => {
       return {
         ...state,
         midiServerHost: action.payload
+      }
+    }
+    case SET_THEME_ID: {
+      return {
+        ...state,
+        themeId: action.payload
       }
     }
     default: {

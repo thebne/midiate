@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
       height: 'auto',
     },
     '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
+      backgroundColor: theme.palette.primary.light,
       color: theme.palette.background.paper,
       '& > svg': {
         fill: theme.palette.background.paper,

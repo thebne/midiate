@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import Snackbar from '@material-ui/core/Snackbar'
 import Button from '@material-ui/core/Button'
 import { CssBaseline } from '@material-ui/core'
+import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles'
 
 import { addApp, switchForegroundApp } from '../redux/actions'
@@ -10,6 +11,7 @@ import {
   getForegroundAppId, 
   getIsAnyMidiInputActive,
   getAppConfig,
+  getThemeId,
 } from '../redux/selectors'
 
 import ServerHandler from '../handlers/serverHandler'
@@ -18,6 +20,7 @@ import WebHandler from '../handlers/webHandler'
 
 import StatusBar from './statusBar'
 import LoadingScreen from './loadingScreen'
+import themes from './themes'
 import { SETTINGS_APP_ID } from '../constants'
 
 // passing this reference to apps later on
@@ -29,6 +32,7 @@ const useStyles = makeStyles(theme => ({
     position: 'fixed',
     width: '100%',
     height: '100%',
+    backgroundColor: theme.palette.background.default,
   },
   appBarSpacer: theme.mixins.toolbar,
   content: {
@@ -126,44 +130,57 @@ class Client extends React.Component {
 
     // render with all the other UI elements
 		return (
-      <Fragment> 
-	    <KeyboardHandler />
-        <WebHandler />		
-        <ServerHandler />
-
-        <CssBaseline />
-
-        <LoadingScreen /> 
-        <AppContainer {...this.props} statusBar={bars}>
-          {app}
-        </AppContainer>
-      </Fragment>
+      <Content {...this.props} statusBar={bars}>
+        {app}
+      </Content>
     )
   }
 }
 
-function AppContainer(props) {
+// separate to functional component to easily include themes
+function Content(props) {
+  console.log(props.theme, props.theme.breakpoints.down('sm'))
+  return (
+    <ThemeProvider theme={props.theme}> 
+      {/* handles */}
+      <KeyboardHandler />
+      <WebHandler />		
+      <ServerHandler />
+      {/* css */}
+      <CssBaseline />
+      {/* content */}
+      <LoadingScreen /> 
+      <AppLayout {...props}>
+        {props.children}
+      </AppLayout>
+    </ThemeProvider>
+  )
+}
+
+function AppLayout(props) {
 	const classes = useStyles()
+  const {isAnyMidiInputActive, foregroundAppId,
+    switchForegroundApp, children} = props
 
 	return <div className={
     [
       classes.root, 
-      props.isAnyMidiInputActive ? "hasMidiInputs" : "noMidiInputs",
+      isAnyMidiInputActive ? "hasMidiInputs" : "noMidiInputs",
     ].join(' ')}>
         <StatusBar {...props} />
 				<main className={classes.content}>
 					<div className={classes.appBarSpacer} />
 					<div className={classes.container}>
-            {props.children}
+            {children}
 					</div>
 				</main>
           <Snackbar
-            open={!props.isAnyMidiInputActive 
-              && props.foregroundAppId !== SETTINGS_APP_ID}
+            open={!isAnyMidiInputActive 
+              && foregroundAppId !== SETTINGS_APP_ID}
             message="No active MIDI inputs"
           action={
             <Button color="inherit" 
-              onClick={() => props.switchForegroundApp(SETTINGS_APP_ID)}>
+              onClick={() => switchForegroundApp(SETTINGS_APP_ID)}>
               Choose
             </Button>
           }
@@ -176,6 +193,7 @@ export default connect(
     foregroundAppId: getForegroundAppId(state),
     getAppConfig: id => getAppConfig(state, id),
     isAnyMidiInputActive: getIsAnyMidiInputActive(state),
+    theme: themes[getThemeId(state)].theme,
   }),
   { 
     addApp, 

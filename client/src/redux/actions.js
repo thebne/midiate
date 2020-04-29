@@ -8,6 +8,7 @@ import {
   SET_MIDI_INPUTS,
   SET_MIDI_SERVER_HOST,
   SET_MIDI_SERVER_CONNECTION_STATUS,
+  SET_THEME_ID,
 } from './actionTypes'
 
 export const switchForegroundApp = appId => ({
@@ -53,4 +54,9 @@ export const setMidiServerHost = host => ({
 export const setMidiServerConnectionStatus = status => ({
   type: SET_MIDI_SERVER_CONNECTION_STATUS, 
   payload: status,
+})
+
+export const setThemeId = id => ({
+  type: SET_THEME_ID, 
+  payload: id,
 })
