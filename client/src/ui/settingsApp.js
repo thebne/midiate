@@ -10,6 +10,7 @@ import Radio from '@material-ui/core/Radio'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import DialogContent from '@material-ui/core/DialogContent'
+import DialogActions from '@material-ui/core/DialogActions'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
@@ -41,9 +42,6 @@ import {
 
 const useStyles = makeStyles(theme => ({
   dialogRoot: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   inputRow: {
     padding: theme.spacing(1),
@@ -66,18 +64,18 @@ function ConnectToServerDialog({showSelectServer, setShowSelectServer,
           <TextField onChange={e => setServerInputText(e.target.value)}
             fullWidth
             label='WebSocket URL' value={serverInputText} variant="filled" placeholder="e.g. 127.0.0.1:5000" />
-          <ButtonGroup fullWidth={true} variant='text'>
-            <Button size="small" onClick={() => setShowSelectServer(false)} color="secondary" variant="contained">Close</Button>
+        </DialogContent>
+        <DialogActions>
             <Button size="small" onClick={() => {
               setMidiServerHost('')
               setShowSelectServer(false)
-            }} color="default" variant="contained">Clear</Button>
+            }}>Clear</Button>
+            <Button size="small" onClick={() => setShowSelectServer(false)} >Close</Button>
             <Button onClick={() => {
               setMidiServerHost(serverInputText)
               setShowSelectServer(false)
-            }} color="primary" size="large" variant="contained">Connect</Button>
-          </ButtonGroup>
-        </DialogContent>
+            }} color="primary" size="large">Connect</Button>
+        </DialogActions>
       </Dialog>
   )
 }
@@ -257,16 +255,15 @@ function ChordDetectionRangeDialog({showRangeDialog, setShowRangeDialog,
       >
         <DialogTitle>Note range for chord detection</DialogTitle>
         <DialogContent className={classes.dialogRoot}>
-          from <TextField
+          <TextField
                 className={classes.inputRow}
                 label="start note"
                 placeholder='e.g. A1, blank for none'
                 value={start || ''}
                 onChange={e => setStart(e.target.value)}
                 error={!!(start.length && Midi.toMidi(start) === null)}
-                helperText={start.length && Midi.toMidi(start) === null ? "Invalid note name" : null}
+                helperText={start.length && Midi.toMidi(start) === null ? "Invalid note name" : ' '}
               />
-          to 
           <TextField
                 className={classes.inputRow}
                 label="end note"
@@ -274,10 +271,13 @@ function ChordDetectionRangeDialog({showRangeDialog, setShowRangeDialog,
                 value={end || ''}
                 onChange={e => setEnd(e.target.value)}
                 error={!!(end.length && Midi.toMidi(end) === null)}
-                helperText={end.length && Midi.toMidi(end) === null ? "Invalid note name" : null}
+                helperText={end.length && Midi.toMidi(end) === null ? "Invalid note name" : ' '}
               />
-          <Button size="small" onClick={() => setShowRangeDialog(false)} color="secondary" variant="contained">Close</Button>
         </DialogContent>
+        <DialogActions>
+          <Button size="small" onClick={() => {setStart(''); setEnd('')}}>Reset</Button>
+          <Button size="small" onClick={() => setShowRangeDialog(false)}>Close</Button>
+        </DialogActions>
       </Dialog>
   )
 }
