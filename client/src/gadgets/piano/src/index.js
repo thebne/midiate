@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useLayoutEffect } from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 
 import styles from './styles.module.css'
@@ -45,28 +45,30 @@ function PianoKey(props) {
     const type = Note.accidentals(Note.simplify(props.note)).length ? "black" : "white"
     const [animations, setAnimations] = useState([])
 
-    useEffect(() => {
-      let newAnimations = [...animations]
-      const now = new Date().getTime()
-      switch (props.className) {
-        case 'active':
-          // the class is added, start a new animation (if there isn't one any)
-          if (newAnimations.filter(a => a.active).length === 0)
-            newAnimations.push({active: true, startTime: now })
-          break
-        default:
-          // the class is removed, stop current animation
-          newAnimations = (newAnimations
-            .map(a => ({ ...a, active: false, endTime: a.active ? now : a.endTime }))
-          )
-          break
-      }
+    useLayoutEffect(() => {
+      setAnimations(animations => {
+        let newAnimations = [...animations]
+        const now = new Date().getTime()
+        switch (props.className) {
+          case 'active':
+            // the class is added, start a new animation (if there isn't one any)
+            if (newAnimations.filter(a => a.active).length === 0)
+              newAnimations.push({active: true, startTime: now })
+            break
+          default:
+            // the class is removed, stop current animation
+            newAnimations = (newAnimations
+              .map(a => ({ ...a, active: false, endTime: a.active ? now : a.endTime }))
+            )
+            break
+        }
 
-      // remove animations that are too old
-      newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= ANIMATION_DURATION_S * 1000)
+        // remove animations that are too old
+        newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= ANIMATION_DURATION_S * 1000)
 
-      // update all
-      setAnimations(newAnimations)
+        // update all
+        return newAnimations
+      })
     }, [props.className])
 
     return <li className={[styles.noteItem, styles[type], styles[props.className], props.note].join(' ')}>
