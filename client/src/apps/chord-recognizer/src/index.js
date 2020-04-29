@@ -1,6 +1,4 @@
 import React, { useLayoutEffect, useState } from 'react'
-import { interpolate, interpolateTransformSvg } from 'd3-interpolate'
-import { easeSinOut } from 'd3-ease'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 import { arePropsEqual } from './utils.js'
 import styles from './style.module.css'
@@ -38,62 +36,68 @@ export default React.memo(function ChordRecognizer({chords}) {
     })
   }, [chords])
 
-  // render SVG for each object because react-transition-group renders the elements in reverse order,
-  // which doesn't allow to create zIndex-like new-chord-first hierarchy
 	return (
-      <TransitionGroup enter component={null}>
-			{animations.map((animation) => {
-        const [main, ...rest] = animation.detection
-        return (
-          <CSSTransition
-            key={animation.id}
-            timeout={4000}
-            classNames='chordRecognizer-animation'
-            >
-            <svg 
-              viewBox="0 0 100 100" 
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 100 + animation.id,
-                }} >
-              <g 
-                className={styles.detection}>
-                <ellipse rx={20} ry={10}
-                  fill={colorHash.hex(main.split("/")[0])} />
-                <text 
-                fill="white" 
-                fontSize={6}
-                style = {{
-                  dominantBaseline: "middle",
-                  textAnchor: "middle",
-                }} >
-                  {main}
-                </text>
-                {rest.map((secondary, i) => (
-                  <text 
-                    key={secondary}
-                    fill="white" 
-                    fontSize={3}
-                    y={2 * (i + 1)}
-                    style = {{
-                      dominantBaseline: "hanging",
-                      textAnchor: "middle",
-                    }} >
-                      {secondary.length === main.length ? secondary : ''}
-                  </text>)
-                  )}
-              </g>
-            </svg>
-          </CSSTransition>
-        )
-      })}
-    </TransitionGroup>
+    <Animations>{animations}</Animations>
 	)
 }, arePropsEqual)
+
+function Animations({children}) {
+  return (
+    <TransitionGroup enter component={null}>
+    {children.map((animation) => {
+      const [main, ...rest] = animation.detection
+      // render SVG for each object because react-transition-group renders the elements in reverse order,
+      // which doesn't allow to create zIndex-like new-chord-first hierarchy
+      return (
+        <CSSTransition
+          key={animation.id}
+          timeout={4000}
+          classNames='chordRecognizer-animation'
+          >
+          <svg 
+            viewBox="0 0 100 100" 
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 100 + animation.id,
+              }} >
+            <g 
+              className={styles.detection}>
+              <ellipse rx={20} ry={10}
+                fill={colorHash.hex(main.split("/")[0])} />
+              <text 
+              fill="white" 
+              fontSize={6}
+              style = {{
+                dominantBaseline: "middle",
+                textAnchor: "middle",
+              }} >
+                {main}
+              </text>
+              {rest.map((secondary, i) => (
+                <text 
+                  key={secondary}
+                  fill="white" 
+                  fontSize={3}
+                  y={2 * (i + 1)}
+                  style = {{
+                    dominantBaseline: "hanging",
+                    textAnchor: "middle",
+                  }} >
+                    {secondary.length === main.length ? secondary : ''}
+                </text>)
+                )}
+            </g>
+          </svg>
+        </CSSTransition>
+      )
+    })}
+  </TransitionGroup>
+  )
+}
 
 // midiate support
 export { default as config } from './midiate/config'
