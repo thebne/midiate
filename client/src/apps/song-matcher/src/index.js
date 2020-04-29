@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Fragment } from "react";
 import Button from '@material-ui/core/Button'
-import styles from "./style.module.css";
+import "./style.module.css"
 
 export default function Chordify({ currentChords }) {
   const [searchString, setSearchString] = useState('');
