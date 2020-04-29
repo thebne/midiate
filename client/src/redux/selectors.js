@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
+import { Midi } from '@tonaljs/tonal'
 import { detect } from '../utils/chords'
-import { DEFAULT_APP_ID } from '../constants'
 
 export const getUiState = store => store.ui
 export const getSettingsState = store => store.settings
@@ -25,6 +25,11 @@ export const getAppConfig = (store, appId) =>
 export const getThemeId = createSelector(
   [getSettingsState],
   settings => settings.themeId || 0
+)
+
+export const getChordDetectionRange = createSelector(
+  [getSettingsState],
+  settings => settings.chordDetectionRange || [null, null]
 )
 
 export const getMidiServerHost = createSelector(
@@ -72,17 +77,25 @@ const getSmartNotes = createSelector(
   events => events.smartNotes
 )
 
+const filterNotes = (notes, [start, end]) => {
+  const filtered = notes.notes.filter(n => {
+    const midi = Midi.toMidi(n)
+    return (start === null || midi >= start) && (end === null || midi <= end)
+  })
+  return {...notes, notes: filtered, detection: detect(filtered)}
+}
+
 const getLooseChords = createSelector(
-  [getNotes],
-  notes => ({notes, id: -1, detection: detect(notes)})
+  [getNotes, getChordDetectionRange],
+  (notes, [start, end]) => filterNotes({notes, id: -1}, [start, end])
 )
 const getStrictChords = createSelector(
-  [getStrictNotes],
-  notes => ({...notes, detection: detect(notes.notes)})
+  [getStrictNotes, getChordDetectionRange],
+  filterNotes
 )
 const getSmartChords = createSelector(
-  [getSmartNotes],
-  notes => ({...notes, detection: detect(notes.notes)})
+  [getSmartNotes, getChordDetectionRange],
+  filterNotes
 )
 
 export const getChords = (store, config = {mode: "smart"}) => {
@@ -93,30 +106,12 @@ export const getChords = (store, config = {mode: "smart"}) => {
       return getStrictChords(store)
     case 'smart':
       return getSmartChords(store)
+    default:
+      throw new Error(`unknown mode ${config.mode}`)
   }
-  throw new Error(`unknown mode ${config.mode}`)
 }
 
 export const getLastEvent = createSelector(
   [getEventsState],
   events => events.lastEvent
 )
-
-// deprecated functions
-export const getCurrentlyPlayed = store => {
-  if (!getCurrentlyPlayed.reportedDeprecated) {
-    console.warn('selector getCurrentlyPlayed() is deprecated and will be removed in next major release, use getNotes() instead')
-    getCurrentlyPlayed.reportedDeprecated = true
-  }
-  return getNotes(store)
-}
-getCurrentlyPlayed.reportedDeprecated = false
-
-export const getCurrentChords = store => {
-  if (!getCurrentChords.reportedDeprecated) {
-    console.warn('selector getCurrentChords() is deprecated and will be removed in next major release, use getChords() instead')
-    getCurrentChords.reportedDeprecated = true
-  }
-  return getChords(store)
-}
-getCurrentChords.reportedDeprecated = false

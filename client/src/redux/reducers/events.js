@@ -123,7 +123,7 @@ function getStrictNotes({smartNotes}) {
     if (store.getState().events.smartNotes.id !== smartNotes.id)
       return
     store.dispatch(detectStrictNotes(smartNotes))
-  }, 150)
+  }, 100)
   return
 }
 

@@ -1,14 +1,15 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import { connect } from 'react-redux'
+import { Midi } from '@tonaljs/tonal'
 import Button from '@material-ui/core/Button'
 import ButtonGroup from '@material-ui/core/ButtonGroup'
 import Fade from '@material-ui/core/Fade'
 import Chip from '@material-ui/core/Chip'
 import Container from '@material-ui/core/Container'
 import Radio from '@material-ui/core/Radio'
-import Typography from '@material-ui/core/Typography'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
+import DialogContent from '@material-ui/core/DialogContent'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
@@ -20,6 +21,7 @@ import TextField from '@material-ui/core/TextField'
 import DoneIcon from '@material-ui/icons/Done'
 import ErrorIcon from '@material-ui/icons/Error'
 import UsbIcon from '@material-ui/icons/Usb'
+import EditIcon from '@material-ui/icons/Edit'
 import PublicIcon from '@material-ui/icons/Public'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import { makeStyles } from '@material-ui/core/styles'
@@ -27,16 +29,26 @@ import { SETTINGS_APP_ID } from '../constants'
 import themes from './themes'
 import { 
   toggleMidiInput, setMidiServerHost,
-  setThemeId,
+  setThemeId, setChordDetectionRange
 } from '../redux/actions'
 import { 
   getMidiInputs, 
   getMidiServerHost, 
   getMidiServerConnectionStatus,
   getThemeId,
+  getChordDetectionRange,
 } from '../redux/selectors'
 
 const useStyles = makeStyles(theme => ({
+  dialogRoot: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inputRow: {
+    padding: theme.spacing(1),
+    margin: theme.spacing(1.5),
+  },
   infoChip: {
     marginLeft: theme.spacing(1.5),
   },
@@ -44,24 +56,28 @@ const useStyles = makeStyles(theme => ({
 
 function ConnectToServerDialog({showSelectServer, setShowSelectServer,
   setMidiServerHost}) {
+  const classes = useStyles()
   const [serverInputText, setServerInputText] = useState('')
 
   return (
       <Dialog open={showSelectServer} onClose={() => setShowSelectServer(false)}>
         <DialogTitle>Connect to remote MIDI server</DialogTitle>
-        <TextField onChange={e => setServerInputText(e.target.value)}
-          label='WebSocket URL' value={serverInputText} variant="filled" placeholder="e.g. 127.0.0.1:5000" />
-        <Button onClick={() => {
-          setMidiServerHost(serverInputText)
-          setShowSelectServer(false)
-        }} color="primary" size="large">Connect</Button>
-        <ButtonGroup fullWidth={true} variant='text'>
-          <Button size="small" onClick={() => setShowSelectServer(false)} color="secondary">Close</Button>
-          <Button size="small" onClick={() => {
-            setMidiServerHost('')
-            setShowSelectServer(false)
-          }} color="default">Clear</Button>
-        </ButtonGroup>
+        <DialogContent className={classes.dialogRoot}>
+          <TextField onChange={e => setServerInputText(e.target.value)}
+            fullWidth
+            label='WebSocket URL' value={serverInputText} variant="filled" placeholder="e.g. 127.0.0.1:5000" />
+          <ButtonGroup fullWidth={true} variant='text'>
+            <Button size="small" onClick={() => setShowSelectServer(false)} color="secondary" variant="contained">Close</Button>
+            <Button size="small" onClick={() => {
+              setMidiServerHost('')
+              setShowSelectServer(false)
+            }} color="default" variant="contained">Clear</Button>
+            <Button onClick={() => {
+              setMidiServerHost(serverInputText)
+              setShowSelectServer(false)
+            }} color="primary" size="large" variant="contained">Connect</Button>
+          </ButtonGroup>
+        </DialogContent>
       </Dialog>
   )
 }
@@ -77,7 +93,7 @@ function ConnectToServerListItem({midiServerHost, midiServerConnectionStatus,
       {!midiServerHost.length 
         ? <i>server...</i>
         : midiServerHost}
-      <Fade in={midiServerHost.length}>
+      <Fade in={!!midiServerHost.length}>
         <Chip
           className={classes.infoChip}
           icon={midiServerConnectionStatus ? <DoneIcon /> : <ErrorIcon />}
@@ -101,11 +117,11 @@ function ConnectToServerListItem({midiServerHost, midiServerConnectionStatus,
             checked={midiServerHost.length !== 0}
             />
         </ListItemSecondaryAction>
-        <ConnectToServerDialog 
-          showSelectServer={showSelectServer}
-          setShowSelectServer={setShowSelectServer}
-          setMidiServerHost={setMidiServerHost} />
       </ListItem>
+      <ConnectToServerDialog 
+        showSelectServer={showSelectServer}
+        setShowSelectServer={setShowSelectServer}
+        setMidiServerHost={setMidiServerHost} />
     </Fragment>
   )
 }
@@ -154,7 +170,7 @@ const ThemeSelector = connect(
   return (
     <List subheader={<ListSubheader>Theme</ListSubheader>}>
       {themes.map(({name, description}, id) => (
-        <ListItem button onClick={() => setThemeId(id)}>
+        <ListItem button onClick={() => setThemeId(id)} key={id}>
           <ListItemIcon>
             <Radio
               edge="start"
@@ -168,11 +184,110 @@ const ThemeSelector = connect(
   )
 })
 
+const DetectionSettings = connect(
+  state => ({
+    chordDetectionRange: getChordDetectionRange(state),
+  }),
+  { setChordDetectionRange }
+)(({chordDetectionRange, setChordDetectionRange}) => {
+  const [showRangeDialog, setShowRangeDialog] = useState(false)
+  const [start, end] = chordDetectionRange
+
+  let rangeString
+  if (typeof start === 'number' && typeof end === 'number') {
+    rangeString = `${Midi.midiToNoteName(start)} to ${Midi.midiToNoteName(end)}`
+  } else if (typeof start === 'number') {
+    rangeString = `starting at ${Midi.midiToNoteName(start)}`
+  } else if (typeof end === 'number') {
+    rangeString = `ending at ${Midi.midiToNoteName(end)}`
+  } else {
+    rangeString = `not defined`
+  }
+
+  return (
+    <Fragment>
+      <List subheader={<ListSubheader>Chord Detection</ListSubheader>}>
+        <ListItem button onClick={() => setShowRangeDialog(true)}>
+          <ListItemIcon>
+            <EditIcon />
+          </ListItemIcon>
+          <ListItemText primary='Chord detection note range'
+            secondary={rangeString} />
+        </ListItem>
+      </List>
+      <ChordDetectionRangeDialog
+        showRangeDialog={showRangeDialog}
+        setShowRangeDialog={setShowRangeDialog}
+        setChordDetectionRange={setChordDetectionRange}
+        initialValue={chordDetectionRange}
+      />
+    </Fragment>
+  )
+})
+
+function ChordDetectionRangeDialog({showRangeDialog, setShowRangeDialog,
+  setChordDetectionRange, initialValue}) {
+  const classes = useStyles()
+  const [initialStart, initialEnd] = initialValue
+  const [start, setStart] = useState(initialStart ? Midi.midiToNoteName(initialStart) : '')
+  const [end, setEnd] = useState(initialEnd ? Midi.midiToNoteName(initialEnd) : '')
+
+  useEffect(() => {
+    let newStart, newEnd
+    if (start.length) {
+      newStart = Midi.toMidi(start)
+      if (newStart === null) 
+        return
+    } else {
+      newStart = null
+    }
+    if (end.length) {
+      newEnd = Midi.toMidi(end)
+      if (newEnd === null) 
+        return
+    } else {
+      newEnd = null
+    }
+    setChordDetectionRange(newStart, newEnd)
+  }, [start, end])
+
+  return (
+      <Dialog open={showRangeDialog} 
+        onClose={() => setShowRangeDialog(false)}
+      >
+        <DialogTitle>Note range for chord detection</DialogTitle>
+        <DialogContent className={classes.dialogRoot}>
+          from <TextField
+                className={classes.inputRow}
+                label="start note"
+                placeholder='e.g. A1, blank for none'
+                value={start || ''}
+                onChange={e => setStart(e.target.value)}
+                error={!!(start.length && Midi.toMidi(start) === null)}
+                helperText={start.length && Midi.toMidi(start) === null ? "Invalid note name" : null}
+              />
+          to 
+          <TextField
+                className={classes.inputRow}
+                label="end note"
+                placeholder='e.g. B3, blank for none'
+                value={end || ''}
+                onChange={e => setEnd(e.target.value)}
+                error={!!(end.length && Midi.toMidi(end) === null)}
+                helperText={end.length && Midi.toMidi(end) === null ? "Invalid note name" : null}
+              />
+          <Button size="small" onClick={() => setShowRangeDialog(false)} color="secondary" variant="contained">Close</Button>
+        </DialogContent>
+      </Dialog>
+  )
+}
+
 function SettingsApp() {
   return (
     <Container>
       <MidiInputs />
       <ThemeSelector />
+      <DetectionSettings />
     </Container>
   )
 }
