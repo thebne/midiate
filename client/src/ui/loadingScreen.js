@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    color: theme.palette.background.paper,
+    color: '#fff',
   },
   backdrop: {
     backgroundColor: theme.palette.primary.dark,
