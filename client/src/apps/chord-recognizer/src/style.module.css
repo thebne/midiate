@@ -10,6 +10,26 @@
   transform: translate(50%, 60%) scale(1);
 }
 
+.welcome {
+  font-family: 'Baloo Tamma 2', cursive;
+  animation-name: welcomeIn;
+  animation-duration: 150ms;
+  transform: translate(50%, 80%) scale(1);
+  opacity: 1;
+}
+
+@keyframes welcomeIn {
+  from {
+    opacity: 0;
+    transform: translate(50%, 80%) scale(.5);
+  }
+  to {
+    opacity: 1;
+    transform: translate(50%, 80%) scale(1);
+  }
+}
+
+
 :global(.chordRecognizer-animation-enter) > .detection {
   transform: translate(50%, 60%) scale(0);
 }

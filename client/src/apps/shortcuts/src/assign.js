@@ -4,6 +4,8 @@ const NOTES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'Bb', 'C#', 'Eb', 'F#', 'G#']
 
 let assignedNotes = {}
 
+let warnedNotImplemented = false
+
 export const hashNote = n => Midi.toMidi(`${n}1`)
 export const assignNote = (element) => {
   for (const [noteMidi, [e,]] of Object.entries(assignedNotes)) {
@@ -15,7 +17,10 @@ export const assignNote = (element) => {
 
   const notePos = Object.keys(assignedNotes).length
   if (notePos >= NOTES.length) {
-    console.error('Too many links - not implemented')
+    if (!warnedNotImplemented) {
+      console.warn('shortcuts: Too many links - not implemented')
+      warnedNotImplemented = true
+    }
     return [null, null]
   }
 

@@ -2,7 +2,6 @@ import React, { Fragment, useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { Midi } from '@tonaljs/tonal'
 import Button from '@material-ui/core/Button'
-import ButtonGroup from '@material-ui/core/ButtonGroup'
 import Fade from '@material-ui/core/Fade'
 import Chip from '@material-ui/core/Chip'
 import Container from '@material-ui/core/Container'
@@ -66,15 +65,16 @@ function ConnectToServerDialog({showSelectServer, setShowSelectServer,
             label='WebSocket URL' value={serverInputText} variant="filled" placeholder="e.g. 127.0.0.1:5000" />
         </DialogContent>
         <DialogActions>
-            <Button size="small" onClick={() => {
+            <Button onClick={() => {
               setMidiServerHost('')
               setShowSelectServer(false)
             }}>Clear</Button>
-            <Button size="small" onClick={() => setShowSelectServer(false)} >Close</Button>
+            <Button onClick={() => setShowSelectServer(false)} >Close</Button>
             <Button onClick={() => {
               setMidiServerHost(serverInputText)
               setShowSelectServer(false)
-            }} color="primary" size="large">Connect</Button>
+            }} color="primary" variant='contained'
+            >Connect</Button>
         </DialogActions>
       </Dialog>
   )
@@ -247,7 +247,9 @@ function ChordDetectionRangeDialog({showRangeDialog, setShowRangeDialog,
       newEnd = null
     }
     setChordDetectionRange(newStart, newEnd)
-  }, [start, end])
+  }, [start, end,
+    // redux
+    setChordDetectionRange])
 
   return (
       <Dialog open={showRangeDialog} 

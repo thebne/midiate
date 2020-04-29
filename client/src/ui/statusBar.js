@@ -91,7 +91,10 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
 							<Typography component="h1" variant="h5" color="inherit" noWrap
                 onClick={() => switchForegroundApp(DEFAULT_APP_ID)} 
                 className={classes.titleText}>
-                <Box display={{xs: 'none', md: 'initial'}}>{PROGRAM_NAME}</Box>
+                  {foregroundAppId !== DEFAULT_APP_ID
+                    ? <Box display={{xs: 'none', md: 'initial'}}>{PROGRAM_NAME}</Box> 
+                    : PROGRAM_NAME
+                  }
 							</Typography>
               {foregroundAppConfig.name && (
                 <Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
@@ -100,12 +103,14 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
                 </Typography>
               )}
 						</div>
-            {statusBar.map(item => item != null ? 
-              <IconButton color="inherit" style={{width: "5vw", minWidth: "3em"}}
-                  key={item.props.appId} onClick={() => switchForegroundApp(item.props.appId)}>
-                {item}
-              </IconButton> 
-              : null)}
+            <Box display={{xs: 'none', sm: 'initial'}}>
+              {statusBar.map(item => item != null ? 
+                <IconButton color="inherit" style={{width: "5vw", minWidth: "3em"}}
+                    key={item.props.appId} onClick={() => switchForegroundApp(item.props.appId)}>
+                  {item}
+                </IconButton> 
+                : null)}
+            </Box>
 					</Toolbar>
 				</AppBar>
   )

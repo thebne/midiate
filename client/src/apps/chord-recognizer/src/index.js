@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { Fragment, useLayoutEffect, useState } from 'react'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 import { arePropsEqual } from './utils.js'
 import styles from './style.module.css'
@@ -37,9 +37,38 @@ export default React.memo(function ChordRecognizer({chords}) {
   }, [chords])
 
 	return (
-    <Animations>{animations}</Animations>
+    <Fragment>
+      <Welcome />
+      <Animations>{animations}</Animations>
+    </Fragment>
 	)
 }, arePropsEqual)
+
+function Welcome() {
+  return (
+    <svg 
+      viewBox="0 0 100 100" 
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        }}>
+      <g className={styles.welcome}>
+        <text 
+        fill="#bbb" 
+        fontSize={12}
+        style = {{
+          dominantBaseline: "middle",
+          textAnchor: "middle",
+        }}>
+          Play some chords!
+        </text>
+      </g>
+    </svg>
+  )
+}
 
 function Animations({children}) {
   return (
