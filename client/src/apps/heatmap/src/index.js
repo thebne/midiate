@@ -1,9 +1,9 @@
-import React, { Fragment, useLayoutEffect, useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import { Note } from "@tonaljs/tonal"
 import Piano from '../../../gadgets/piano/src/index'
-import styles from './style.module.css'
+import './style.module.css'
 
 export default function LastNote(props) {
   const[pressed, setPressed] = useState({})
@@ -16,18 +16,21 @@ export default function LastNote(props) {
   useLayoutEffect(() => {	 
 	 // show animation only for note press
 	 if (!props.lastEvent || props.lastEvent.messageType !== 'noteon') {
-		return
+		return 
 	 }
 
-	// update note frequency dict
-	let n = props.lastEvent.note	
-	if (pressed[n]) {
-		pressed[n] += 15	
-	}
-	else {
-		pressed[n] = 1
-	}
-	setPressed({...pressed})	
+   setPressed(pressed => {
+     let newPressed = {...pressed}
+     // update note frequency dict
+     let n = props.lastEvent.note	
+     if (newPressed[n]) {
+       newPressed[n] += 15	
+     }
+     else {
+       newPressed[n] = 1
+     }
+     return newPressed
+   })
   }, [props.lastEvent])  		
 
 	for (const [note, x] of Object.entries(pressed)) {			
