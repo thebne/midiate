@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import Snackbar from '@material-ui/core/Snackbar'
 import Button from '@material-ui/core/Button'
@@ -139,7 +139,6 @@ class Client extends React.Component {
 
 // separate to functional component to easily include themes
 function Content(props) {
-  console.log(props.theme, props.theme.breakpoints.down('sm'))
   return (
     <ThemeProvider theme={props.theme}> 
       {/* handles */}
