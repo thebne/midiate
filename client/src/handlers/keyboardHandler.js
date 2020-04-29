@@ -34,7 +34,10 @@ function KeyboardHandler({handleKeyboardEvent}) {
 	  // add event listeners
 	  window.addEventListener('keydown', (e)=>{handleKeyStroke(e)});
 	  window.addEventListener('keyup', (e)=>{handleKeyStroke(e)});			 
-  }, [])
+  }, [
+    // redux
+    handleKeyboardEvent
+  ])
 
   return <Fragment />
 }

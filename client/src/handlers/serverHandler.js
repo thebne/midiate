@@ -53,7 +53,9 @@ function ServerHandler({midiServerHost, handleMidiEvent,
         setTimeout(() => setTick({}), 3000)
       }
 
-  }, [midiServerHost, tick])
+  }, [midiServerHost, tick, 
+    // redux
+    handleMidiEvent, setMidiServerConnectionStatus])
 
   return <Fragment />
 }

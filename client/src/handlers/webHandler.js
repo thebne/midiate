@@ -45,7 +45,9 @@ function WebHandler({isMidiInputActive, handleMidiEvent, setMidiInputs}) {
         e.port.onmidimessage = createOnMidiMessage(e.port.name)
       }
     })
-  }, [])
+  }, [
+    // redux
+    handleMidiEvent, isMidiInputActive, setMidiInputs])
 
   return <Fragment />
 }
