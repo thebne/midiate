@@ -1,10 +1,67 @@
 import React, { Fragment, useLayoutEffect, useState } from 'react'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
+import { makeStyles } from '@material-ui/core/styles'
 import { arePropsEqual } from './utils.js'
-import styles from './style.module.css'
 
 const ColorHash = require('color-hash')
 const colorHash = new ColorHash({lightness: .5})
+
+const useStyles = makeStyles(theme => ({
+  statusBar:  {
+    fontFamily: "'Baloo Tamma 2', cursive",
+  },
+  detection: {
+    fontFamily: "'Baloo Tamma 2', cursive",
+    transform: "translate(50%, 60%) scale(1)",
+  },
+  welcome: {
+    fontFamily: "'Baloo Tamma 2', cursive",
+    animationName: "$welcomeIn",
+    animationDuration: "150ms",
+    transform: "translate(50%, 80%) scale(1)",
+    opacity: 1,
+  },
+
+  svg: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+  },
+  "animation-enter": {
+    "& > $detection": {
+      transform: "translate(50%, 60%) scale(0)",
+    }
+  },
+  "animation-enter-active": {
+    "& > $detection": {
+      transform: "translate(50%, 60%) scale(1)",
+      transition: "transform 150ms",
+    }
+  },
+  "animation-exit": {
+    "& > $detection": {
+      transform: "translate(50%, 60%) scale(1)",
+    }
+  },
+  "animation-exit-active": {
+    "& > $detection": {
+      transform: "translate(50%, -10%) scale(.4)",
+      transition: "transform 4s ease-out",
+    }
+  },
+  '@keyframes welcomeIn': {
+    from: {
+      opacity: 0,
+      transform: "translate(50%, 80%) scale(.5)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translate(50%, 80%) scale(1)",
+    },
+  },
+}))
 
 export default React.memo(function ChordRecognizer({chords}) {
   const [animations, setAnimations] = useState([])
@@ -45,17 +102,12 @@ export default React.memo(function ChordRecognizer({chords}) {
 }, arePropsEqual)
 
 function Welcome() {
+  const classes = useStyles()
   return (
     <svg 
       viewBox="0 0 100 100" 
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        }}>
-      <g className={styles.welcome}>
+      className={classes.svg}>
+      <g className={classes.welcome}>
         <text 
         fill="#bbb" 
         fontSize={12}
@@ -71,6 +123,7 @@ function Welcome() {
 }
 
 function Animations({children}) {
+  const classes = useStyles()
   return (
     <TransitionGroup enter component={null}>
     {children.map((animation) => {
@@ -81,20 +134,21 @@ function Animations({children}) {
         <CSSTransition
           key={animation.id}
           timeout={4000}
-          classNames='chordRecognizer-animation'
+          classNames={{
+            enter: classes['animation-enter'],
+            enterActive: classes['animation-enter-active'],
+            exit: classes['animation-exit'],
+            exitActive: classes['animation-exit-active'],
+          }}
           >
           <svg 
             viewBox="0 0 100 100" 
+            className={classes.svg}
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
               zIndex: 100 + animation.id,
               }} >
             <g 
-              className={styles.detection}>
+              className={classes.detection}>
               <ellipse rx={20} ry={10}
                 fill={colorHash.hex(main.split("/")[0])} />
               <text 
