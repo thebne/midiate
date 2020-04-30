@@ -7,9 +7,6 @@ const ColorHash = require('color-hash')
 const colorHash = new ColorHash({lightness: .5})
 
 const useStyles = makeStyles(theme => ({
-  statusBar:  {
-    fontFamily: "'Baloo Tamma 2', cursive",
-  },
   detection: {
     fontFamily: "'Baloo Tamma 2', cursive",
     transform: "translate(50%, 60%) scale(1)",
