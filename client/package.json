@@ -40,6 +40,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build-chrome-extension": "REACT_APP_CHROME_EXTENSION=1 react-scripts build",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -22,6 +22,7 @@ import StatusBar from './statusBar'
 import LoadingScreen from './loadingScreen'
 import themes from './themes'
 import { SETTINGS_APP_ID } from '../constants'
+import { Css as ChromeExtensionCss } from './chromeExtension'
 
 // passing this reference to apps later on
 import * as storeSelectors from '../redux/selectors'
@@ -147,6 +148,7 @@ function Content(props) {
       <ServerHandler />
       {/* css */}
       <CssBaseline />
+      <ChromeExtensionCss />
       {/* content */}
       <LoadingScreen /> 
       <AppLayout {...props}>

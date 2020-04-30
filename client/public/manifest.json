@@ -1,6 +1,9 @@
 {
+  "manifest_version": 2,
   "short_name": "MIDIate",
   "name": "MIDIate - Web MIDI Apps",
+  "description": "Apps for your MIDI Piano",
+  "version": "1.0.0",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,8 +21,15 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_title": "Show overlay"
+  },
+	"icons": {
+		"16": "logo128.png",
+		"48": "logo128.png",
+		"128": "logo128.png"
+	},
+  "content_security_policy": "script-src 'self' 'sha256-4zJH29EJxauV1NbVedBCT/dooTptIna99HJhHTbjrH8='; object-src 'self'",
+  "permissions": []
 }
