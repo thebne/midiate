@@ -1,93 +1,170 @@
 import React, { useState, useLayoutEffect } from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
+import { makeStyles } from '@material-ui/core/styles'
 
-import styles from './styles.module.css'
+const useStyles = makeStyles(theme => ({
+  root: {
+    height: "80vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-end",
+  },
+  pianoContainer: {
+    display: "flex",
+    justifyContent: "center",
+  },
+  
+  pianoBody: {
+    display: "inline-block",
+    border: "1px solid #160801",
+    borderRadius: "1vw",
+    background: "linear-gradient(to bottom right,rgba(80,40,0,1),rgba(45,15,0,1))",
+    boxShadow: "0 0 50px rgba(0,0,0,0.5) inset,0 1px rgba(212,152,125,0.2) inset,0 5px 15px rgba(0,0,0,0.5)",
+    position: "relative",
+  },
+  
+  notesList: {
+    display: "flex",
+    height: "9.5vw",
+    maxWidth: "98vw",
+    padding: "0 1vw 1vw 1vw",
+    marginBlockStart: 0,
+  },
+  
+  noteRender: {
+    height: "10vw",
+    width: "1.5vw",
+    zIndex: 1,
+    borderLeft: "1px solid #bbb",
+    borderBottom: "1px solid #bbb",
+    borderRadius: "0 0 5px 5px",
+    boxShadow: "-1px 0 0 rgba(255,255,255,0.8) inset,0 0 5px #ccc inset,0 0 3px rgba(0,0,0,0.2)",
+    background: "linear-gradient(to bottom,#eee 0%,#fff 100%)",
 
-// TODO props...
-const ANIMATION_DURATION_S = 8
+    '$white:active &, $white.pressed &': {
+      borderTop: "1px solid #777",
+      borderLeft: "1px solid #999",
+      borderBottom: "1px solid #999",
+      boxShadow: "2px 0 3px rgba(0,0,0,0.1) inset,-5px 5px 20px rgba(0,0,0,0.2) inset,0 0 3px rgba(0,0,0,0.2)",
+      background: "linear-gradient(to bottom,#fff 0%,#e9e9e9 100%)",
+    },
+    
+    '$black &': {
+      position: 'relative',
+      height: '6vw',
+      width: '.8vw',
+      zIndex: 2,
+      border: '1px solid #000',
+      borderRadius: '0 0 3px 3px',
+      boxShadow: '-1px -1px 2px rgba(255,255,255,0.2) inset,0 -5px 2px 3px rgba(0,0,0,0.6) inset,0 2px 4px rgba(0,0,0,0.5)',
+      background: 'linear-gradient(45deg,#222 0%,#555 100%)',
+    },
+    '$black:active &, $black.pressed &': {
+      boxShadow: '-1px -1px 2px rgba(255,255,255,0.2) inset,0 -2px 2px 3px rgba(0,0,0,0.6) inset,0 1px 2px rgba(0,0,0,0.5)',
+      background: 'linear-gradient(to right,#444 0%,#222 100%)',
+    }
+  },
+  
+  noteBody: {},
+  black: {
+    '& $noteBody': {
+      position: "absolute",
+      left: "-.4vw",
+    },
+  },
+  white: {},
+  
+  noteItem: {
+    margin: 0,
+    padding: 0,
+    listStyle: "none",
+    position: "relative",
+    float: "left",
+
+    '&:first-child': {
+      borderRadius: '5px 0 5px 5px',
+    },
+    '&:last-child': {
+      borderRadius: '0 5px 5px 5px',
+    },
+  },
+}))
+
+const MIDI_START_NOTE = 0
+const MIDI_END_NOTE = 127
 
 // if singleOctave is a note name, create only a single octave starting from this name
-export default function Piano(props) {
+export default function Piano({classNames={}, styles={}, singleOctave, startNote, endNote,
+  NoteEffectComponent, NoteEffectProps={}}) {
+  const classes = useStyles()
   let notes
-  let classes = {}
 
-  if (props.singleOctave) {
+  if (singleOctave) {
     // aggregate notes, ignore different octaves (use 1 as the octave)
-    for (const n in props.classes) {
-      classes[`${Note.pitchClass(n)}1`] = props.classes[n]
+    for (const [note, cls] in Object.entries(classNames)) {
+      classNames[`${Note.pitchClass(note)}1`] = cls
     }
-    
-    notes = Scale.get(`${props.singleOctave}1 chromatic`).notes
+    // create a chromatic scale (including blacks and whites) from root
+    notes = Scale.get(`${singleOctave}1 chromatic`).notes
   } else {
-    classes = props.classes
-
-    // range (tonaljs returns null if given an undefined)
-    const startMidi = Midi.toMidi(props.startNote) || 0
-    const endMidi = Midi.toMidi(props.endNote) || 127
+    // convert textual note (e.g. Ab4) to midi numbers, check range and return to text
+    const startMidi = Midi.toMidi(startNote) || MIDI_START_NOTE
+    const endMidi = Midi.toMidi(endNote) || MIDI_END_NOTE
     if (startMidi > endMidi)
-      throw new Error(`start > end: ${props.startNote} > ${props.endNote}`)
-    if (endMidi > 127 || startMidi < 0)
-      throw new Error(`start or end out of bounds: ${props.startNote} < 0 ||  ${props.endNote} > 127`)
+      throw new Error(`start > end: ${startNote} > ${endNote}`)
+    if (endMidi > MIDI_END_NOTE || startMidi < MIDI_START_NOTE)
+      throw new Error(`start or end out of bounds: `
+        `${startNote} < ${MIDI_START_NOTE} ||  ${endNote} > ${MIDI_END_NOTE}`)
 
+    // translate range back from midi numbers to textual notes
     notes = [...Array(endMidi - startMidi + 1).keys()].map(m => Note.fromMidi(startMidi + m))
   }
 	
-	return <div className={'pianoGadgetRoot'}><div className={styles.pianoContainer}>
-          <div className={'pianoBody'}><ul className={styles.notesList}>
+	return (
+    <div className={classes.root}>
+      <div className={classes.pianoContainer}>
+        <div className={classes.pianoBody}>
+          <ul className={classes.notesList}>
             {notes.map(n => 			
-              <PianoKey key={n} note={n} className={classes[n]} style={props.styles[n]} />
+              <PianoKey 
+                key={n} 
+                note={n} 
+                className={classNames[n]} 
+                style={styles[n]}
+              >
+                {NoteEffectComponent && 
+                  <NoteEffectComponent 
+                    note={n}
+                    {...(NoteEffectProps[n] || {})}
+                  />
+                }
+              </PianoKey>
             )}
-          </ul></div>
-        </div></div>
-}
-
-function PianoKey(props) { 
-    const type = Note.accidentals(Note.simplify(props.note)).length ? "black" : "white"
-    const [animations, setAnimations] = useState([])
-
-    useLayoutEffect(() => {
-      setAnimations(animations => {
-        let newAnimations = [...animations]
-        const now = new Date().getTime()
-        switch (props.className) {
-          case 'active':
-            // the class is added, start a new animation (if there isn't one any)
-            if (newAnimations.filter(a => a.active).length === 0)
-              newAnimations.push({active: true, startTime: now })
-            break
-          default:
-            // the class is removed, stop current animation
-            newAnimations = (newAnimations
-              .map(a => ({ ...a, active: false, endTime: a.active ? now : a.endTime }))
-            )
-            break
-        }
-
-        // remove animations that are too old
-        newAnimations = newAnimations.filter(a => a.active || now - a.endTime <= ANIMATION_DURATION_S * 1000)
-
-        // update all
-        return newAnimations
-      })
-    }, [props.className])
-
-    return <li className={[styles.noteItem, styles[type], styles[props.className], props.note].join(' ')}>
-        <div className={styles.noteBody}>
-          <div className={'noteRender'} style={props.style} />
-          {animations.map(a => 
-            <NoteAnimation key={a.startTime} {...a} />
-          )}
+          </ul>
         </div>
-      </li>
+      </div>
+    </div>
+  )
 }
 
-function NoteAnimation({active, startTime, endTime}) {
-  const timePassedSec = !active ? (endTime - startTime) / 1000 : null
-  const style = {
-    animationDuration: `${ANIMATION_DURATION_S}s`,
-    maxHeight: active ? "inherit" : timePassedSec * ANIMATION_DURATION_S * 2 + "vh",
-  }
-	return <div className={styles.animationContainer}>
-          <div className={styles.animationRender} style={style} />
-    	</div>
-}
+const PianoKey = React.memo(({note, className, style, children}) => { 
+  const classes = useStyles()
+  const type = Note.accidentals(Note.simplify(note)).length ? "black" : "white"
+
+  return (
+    <li className={[
+      // generic styling
+      classes.noteItem, 
+      // className from props.classNames[note]
+      className, 
+      // black / white
+      classes[type], 
+      ].join(' ')}
+    >
+      <div className={classes.noteBody}>
+        <div className={classes.noteRender} style={style} />
+        {children}
+      </div>
+    </li>
+  )
+})
