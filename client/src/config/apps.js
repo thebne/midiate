@@ -4,4 +4,5 @@ export default [
   require('../apps/heatmap/src'),
   require('../apps/song-matcher/src'),
   require('../apps/shortcuts/src'),
+  require('../apps/scale-challenge/src')
 ]
