@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import Piano from '../../../gadgets/piano/src'
 import { makeStyles } from '@material-ui/core/styles'
 import { zip } from './utils'
@@ -26,6 +26,7 @@ const useStyles = makeStyles(theme => ({
     border: "1px solid #222",
     borderRadius: ".3vw",
     animationName: "$grow",
+    animationDuration: `${ANIMATION_DURATION_S}s`,
     animationTimingFunction: "linear",
     animationFillMode: "forwards", 
   },
@@ -33,13 +34,11 @@ const useStyles = makeStyles(theme => ({
   '@keyframes grow': {
     from: {
       height: '.6vh',
-      //transform: 'translateY(0)',
-      top: 0,
+      transform: 'translateY(0)',
     },
     to: {
       height: '100vh', 
-      //transform: 'translateY(-100%)',
-      top: '-100vh',
+      transform: 'translateY(-100vh)',
     }
   },
 
@@ -89,7 +88,7 @@ const NoteAnimation = React.memo(({pressed}) => {
   const [currentAnimationStartTime, setCurrentAnimationStartTime] = useState(null)
   const [currentAnimationEndTime, setCurrentAnimationEndTime] = useState(null)
   
-  useLayoutEffect(() => {
+  useEffect(() => {
     setCurrentAnimationStartTime(startTime => {
       if (pressed) {
         if (startTime === null) {
@@ -131,10 +130,10 @@ const NoteAnimation = React.memo(({pressed}) => {
         >
             <div className={classes.animationContainer}>
               <div className={classes.animationRender} style={{
-                animationDuration: `${ANIMATION_DURATION_S}s`,
                 maxHeight: currentAnimationEndTime === null 
                   ? "inherit" 
-                  : (currentAnimationEndTime - currentAnimationStartTime) / 1000 * ANIMATION_DURATION_S * 2 + "vh",
+                  : Math.min((currentAnimationEndTime - currentAnimationStartTime) 
+                      / 1000 * ANIMATION_DURATION_S * 2, 100) + "vh",
               }} />
           </div>
         </CSSTransition>

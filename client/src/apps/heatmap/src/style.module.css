@@ -1,15 +1,15 @@
-:global(.pianoGadgetRoot) {
+.root {
   height: 50vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
 }
 
-:global(.noteRender) {  
+.noteRender {  
   transition: .5s ease-out;
 }
 
-:global(.pianoBody) {
+.pianoBody {
   border: none;
   border-radius: 0;
   background: none;

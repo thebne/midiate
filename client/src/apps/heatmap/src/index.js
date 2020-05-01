@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import { Note } from "@tonaljs/tonal"
 import Piano from '../../../gadgets/piano/src/index'
-import './style.module.css'
+import styles from './style.module.css'
 
 export default function LastNote(props) {
   const[pressed, setPressed] = useState({})
@@ -54,7 +54,7 @@ export default function LastNote(props) {
     return <Container maxWidth="xl">
 			<Button onClick={function(){setToggle(!toggle)}}>Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}</Button>
 			<Button style={{float: 'right'}} onClick={function(){setPressed({}); setMax(1)}}>Clear</Button>			
-			<Piano classes={{}} startNote="A0" endNote="C8" styles={toggle? colors : heights} />
+			<Piano startNote="A0" endNote="C8" styles={toggle? colors : heights} overrideClasses={styles} />
       </Container>
   }
 

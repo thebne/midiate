@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react'
+import React from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 import { makeStyles } from '@material-ui/core/styles'
 
@@ -95,8 +95,9 @@ const MIDI_END_NOTE = 127
 
 // if singleOctave is a note name, create only a single octave starting from this name
 export default function Piano({classNames={}, styles={}, singleOctave, startNote, endNote,
-  NoteEffectComponent, NoteEffectProps={}}) {
+  NoteEffectComponent, NoteEffectProps={}, overrideClasses={}}) {
   const classes = useStyles()
+  const getClass = name => `${classes[name] || ''} ${overrideClasses[name] || ''}`
   let notes
 
   if (singleOctave) {
@@ -121,16 +122,17 @@ export default function Piano({classNames={}, styles={}, singleOctave, startNote
   }
 	
 	return (
-    <div className={classes.root}>
-      <div className={classes.pianoContainer}>
-        <div className={classes.pianoBody}>
-          <ul className={classes.notesList}>
+    <div className={getClass('root')}>
+      <div className={getClass('pianoContainer')}>
+        <div className={getClass('pianoBody')}>
+          <ul className={getClass('notesList')}>
             {notes.map(n => 			
               <PianoKey 
                 key={n} 
                 note={n} 
                 className={classNames[n]} 
                 style={styles[n]}
+                getClass={getClass}
               >
                 {NoteEffectComponent && 
                   <NoteEffectComponent 
@@ -147,22 +149,21 @@ export default function Piano({classNames={}, styles={}, singleOctave, startNote
   )
 }
 
-const PianoKey = React.memo(({note, className, style, children}) => { 
-  const classes = useStyles()
+const PianoKey = React.memo(({note, className, style, getClass, children}) => { 
   const type = Note.accidentals(Note.simplify(note)).length ? "black" : "white"
 
   return (
     <li className={[
       // generic styling
-      classes.noteItem, 
+      getClass('noteItem'), 
       // className from props.classNames[note]
       className, 
       // black / white
-      classes[type], 
+      getClass(type), 
       ].join(' ')}
     >
-      <div className={classes.noteBody}>
-        <div className={classes.noteRender} style={style} />
+      <div className={getClass('noteBody')}>
+        <div className={getClass('noteRender')} style={style} />
         {children}
       </div>
     </li>
