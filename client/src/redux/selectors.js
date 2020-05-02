@@ -52,6 +52,11 @@ export const getMidiInputs = createSelector(
     return i
   })
 )
+export const getMidiOutputs = createSelector(
+  [getUiState],
+  (ui) => ui.midiOutputs || []
+)
+
 export const getIsAnyMidiInputActive = createSelector(
   [getMidiInputs, getMidiServerHost],
   (inputs, serverHost) => serverHost.length || inputs.some(i => i.active)

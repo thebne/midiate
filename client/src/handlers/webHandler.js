@@ -1,10 +1,10 @@
 import React, { Fragment, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { handleMidiEvent, setMidiInputs } from "../redux/actions"
+import { handleMidiEvent, setMidiDevices } from "../redux/actions"
 import { isMidiInputActive } from "../redux/selectors"
 
 // uses WebMIDI
-function WebHandler({isMidiInputActive, handleMidiEvent, setMidiInputs}) {
+function WebHandler({isMidiInputActive, handleMidiEvent, setMidiDevices}) {
   useEffect(() => {	  
 		navigator.requestMIDIAccess().then(function(access) {
       const createOnMidiMessage = (inputName) => {
@@ -26,7 +26,10 @@ function WebHandler({isMidiInputActive, handleMidiEvent, setMidiInputs}) {
       }
 
       // update store with inputs
-      setMidiInputs(Array.from(access.inputs.values()))
+      setMidiDevices(
+        Array.from(access.inputs.values()),
+        Array.from(access.outputs.values()),
+      )
 
       // for now, just connect all the MIDI inputs
       for (const input of access.inputs.values()) {
@@ -35,7 +38,10 @@ function WebHandler({isMidiInputActive, handleMidiEvent, setMidiInputs}) {
 
       access.onstatechange = e => {
         // update store with inputs
-        setMidiInputs(Array.from(access.inputs.values()))
+        setMidiDevices(
+          Array.from(access.inputs.values()),
+          Array.from(access.outputs.values()),
+        )
 
         if (e.port.state !== 'connected') { 
           return
@@ -47,7 +53,7 @@ function WebHandler({isMidiInputActive, handleMidiEvent, setMidiInputs}) {
     })
   }, [
     // redux
-    handleMidiEvent, isMidiInputActive, setMidiInputs])
+    handleMidiEvent, isMidiInputActive, setMidiDevices])
 
   return <Fragment />
 }
@@ -56,5 +62,5 @@ export default connect(
   (state) => ({
     isMidiInputActive: isMidiInputActive(state),
   }),
-  { handleMidiEvent, setMidiInputs }
+  { handleMidiEvent, setMidiDevices }
 )(WebHandler)

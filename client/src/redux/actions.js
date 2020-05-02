@@ -5,7 +5,7 @@ import {
   HANDLE_KEYBOARD_EVENT, 
   DETECT_STRICT_NOTES,
   TOGGLE_MIDI_INPUT,
-  SET_MIDI_INPUTS,
+  SET_MIDI_DEVICES,
   SET_MIDI_SERVER_HOST,
   SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_THEME_ID,
@@ -42,9 +42,9 @@ export const toggleMidiInput = (input, isActive) => ({
   payload: {input, isActive},
 })
 
-export const setMidiInputs = inputs => ({
-  type: SET_MIDI_INPUTS, 
-  payload: inputs,
+export const setMidiDevices = (inputs, outputs) => ({
+  type: SET_MIDI_DEVICES, 
+  payload: {inputs, outputs},
 })
 
 export const setMidiServerHost = host => ({
