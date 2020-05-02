@@ -66,6 +66,10 @@ const useStyles = makeStyles(theme => ({
       cursor: 'pointer',
     }
   },
+
+  statusBarItem: {
+    fontFamily: "'Baloo Tamma 2', cursive",
+  },
 }))
 
 
@@ -105,8 +109,13 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
 						</div>
             <Box display={{xs: 'none', sm: 'initial'}}>
               {statusBar.map(item => item != null ? 
-                <IconButton color="inherit" style={{width: "5vw", minWidth: "3em"}}
-                    key={item.props.appId} onClick={() => switchForegroundApp(item.props.appId)}>
+                <IconButton 
+                  color="inherit" 
+                  style={{width: "5vw", minWidth: "3em"}}
+                  key={item.props.appId}
+                  onClick={() => switchForegroundApp(item.props.appId)} 
+                  className={classes.statusBarItem}
+                >
                   {item}
                 </IconButton> 
                 : null)}
