@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
   '@keyframes grow': {
     from: {
       height: '.6vh',
-      transform: 'translateY(0)',
+      transform: 'translateY(-.6vh)',
     },
     to: {
       height: '100vh', 
@@ -85,41 +85,38 @@ export default function PianoSimulator ({ notes }) {
 
 const NoteAnimation = React.memo(({pressed}) => {
   const classes = useStyles()
-  const [currentAnimationStartTime, setCurrentAnimationStartTime] = useState(null)
-  const [currentAnimationEndTime, setCurrentAnimationEndTime] = useState(null)
+  const [animationTime, setAnimationTime] = useState({})
   
   useEffect(() => {
-    setCurrentAnimationStartTime(startTime => {
+    setAnimationTime(time => {
       if (pressed) {
-        if (startTime === null) {
+        if (time.start == null) {
           // new note-on event
-          return new Date().getTime()
+          return {start: new Date().getTime()}
         }
-        return startTime
+        return time
       }
-      if (startTime === null) {
+      if (time.start === null) {
         // note-off, but it's already off
-        return startTime
+        return time
       }
       // note-off with current animation active
-      setCurrentAnimationEndTime(new Date().getTime())
-      return startTime
+      return {...time, end: new Date().getTime()}
     })
   }, [pressed])
 
   useEffect(() => {
-    if (currentAnimationEndTime !== null) {
-      // assuming it already rendered, delete it
-      setCurrentAnimationStartTime(null)
-      setCurrentAnimationEndTime(null)
+    if (animationTime.end == null) {
+      return
     }
-  }, [currentAnimationEndTime])
+    setAnimationTime({})
+  }, [animationTime.end])
 
   return (
     <TransitionGroup component={null}>
-      {currentAnimationStartTime &&
+      {animationTime.start &&
         <CSSTransition
-          key={currentAnimationStartTime}
+          key={animationTime.start}
           timeout={ANIMATION_DURATION_S * 1000}
           classNames={{
             enter: classes['animation-enter'],
@@ -130,9 +127,9 @@ const NoteAnimation = React.memo(({pressed}) => {
         >
             <div className={classes.animationContainer}>
               <div className={classes.animationRender} style={{
-                maxHeight: currentAnimationEndTime === null 
+                maxHeight: animationTime.end === null 
                   ? "inherit" 
-                  : Math.min((currentAnimationEndTime - currentAnimationStartTime) 
+                  : Math.min((animationTime.end - animationTime.start) 
                       / 1000 * ANIMATION_DURATION_S * 2, 100) + "vh",
               }} />
           </div>
