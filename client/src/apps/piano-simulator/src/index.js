@@ -5,6 +5,7 @@ import { zip } from './utils'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
 const ANIMATION_DURATION_S = 15
+const MATRIX_REGEX = new RegExp(/matrix\((.+?)\)/)
 
 const useStyles = makeStyles(theme => ({
 
@@ -100,16 +101,19 @@ const NoteAnimation = React.memo(({pressed}) => {
 
   const applyFixedTransform = node => {
     const transform = window.getComputedStyle(node).getPropertyValue('transform')
-    const matrix = /matrix\((.+?)\)/.exec(transform)[1].split(',').map(parseFloat)
-    // matrix[3] is scaleY
-    let scaleY = matrix[3]
-    if (scaleY == 0) {
-      // sometimes getComputedStyle isn't quick enough
-      // FIXME solve it in a better way. if translate is applied separately it doesn't happen
-      setTimeout(() => applyFixedTransform(node), 100)
-      return
+    const matched = MATRIX_REGEX.exec(transform)
+    if (matched && matched[1]) {
+      const matrix = matched[1].split(',').map(parseFloat)
+      // matrix[3] is scaleY
+      let scaleY = matrix[3]
+      if (scaleY !== 0) {
+        node.style.transform = `translateY(-100em) scaleY(${scaleY})`
+        return
+      }
     }
-    node.style.transform = `translateY(-100em) scaleY(${scaleY})`
+    // sometimes getComputedStyle isn't quick enough
+    // FIXME solve it in a better way. if translate is applied separately it doesn't happen
+    setTimeout(() => applyFixedTransform(node), 100)
   }
 
 
