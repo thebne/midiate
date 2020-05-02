@@ -4,64 +4,57 @@ import { makeStyles } from '@material-ui/core/styles'
 import { zip } from './utils'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
-const ANIMATION_DURATION_S = 8
+const ANIMATION_DURATION_S = 15
 
 const useStyles = makeStyles(theme => ({
-  animationContainer: {
-    //position: "absolute",
-    //display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-end",
-    top: "-.5vh",
-    left: 0,
-  },
-  
-  animationRender: {
+
+  transform: {
     position: "absolute",
     width: "100%",
-    top: 0,
     left: 0,
-    height: ".6vh",
-    backgroundColor: "#d10",
-    border: "1px solid #222",
-    borderRadius: ".3vw",
-    animationName: "$grow",
-    animationDuration: `${ANIMATION_DURATION_S}s`,
-    animationTimingFunction: "linear",
-    animationFillMode: "forwards", 
+    top: '-1.8vh',
+    height: "1em",
+    minHeight: ".2em",
+    transformOrigin: 'bottom center',
+    zIndex: 100,
   },
-  
-  '@keyframes grow': {
-    from: {
-      height: '.6vh',
-      transform: 'translateY(-.6vh)',
-    },
-    to: {
-      height: '100vh', 
-      transform: 'translateY(-100vh)',
-    }
+
+  body: {
+    borderRight: "3px solid #00000033",
+    width: '100%',
+    height: '100%',
+    backgroundColor: "#d10",
+    transition: `background-color ${ANIMATION_DURATION_S / 2}s`,
+    willChange: "background-color",
   },
 
   "animation-enter": {
-    "& > $animationRender": {
+    transform: 'scaleY(0)',
+    transition: 'none',
+    "& $body": {
       backgroundColor: '#392',
-    }
+    },
   },
   "animation-enter-active": {
-    "& > $animationRender": {
+    "& $body": {
       backgroundColor: '#3f2',
-      transition: "background-color 500ms",
-    }
+      transition: 'background-color 500ms',
+    },
   },
-  "animation-exit": {
-    "& > $animationRender": {
+  "animation-in-scene": {
+    transform: 'scaleY(100)',
+    transition: `transform ${ANIMATION_DURATION_S}s linear`,
+    willChange: "transform",
+  },
+  "animation-exit":{
+    "& $body": {
+      transform: 'translateY(0)',
       backgroundColor: '#3f2',
     }
   },
   "animation-exit-active": {
-    "& > $animationRender": {
+    "& $body": {
       backgroundColor: '#d10',
-      transition: `background-color ${ANIMATION_DURATION_S / 2}s`,
     }
   },
 }))
@@ -85,38 +78,46 @@ export default function PianoSimulator ({ notes }) {
 
 const NoteAnimation = React.memo(({pressed}) => {
   const classes = useStyles()
-  const [animationTime, setAnimationTime] = useState({})
+  const [animationTime, setAnimationTime] = useState(null)
   
   useEffect(() => {
     setAnimationTime(time => {
       if (pressed) {
-        if (time.start == null) {
+        if (time == null) {
           // new note-on event
-          return {start: new Date().getTime()}
+          return new Date().getTime()
         }
         return time
       }
-      if (time.start === null) {
+      if (time === null) {
         // note-off, but it's already off
         return time
       }
       // note-off with current animation active
-      return {...time, end: new Date().getTime()}
+      return null
     })
   }, [pressed])
 
-  useEffect(() => {
-    if (animationTime.end == null) {
+  const applyFixedTransform = node => {
+    const transform = window.getComputedStyle(node).getPropertyValue('transform')
+    const matrix = /matrix\((.+?)\)/.exec(transform)[1].split(',').map(parseFloat)
+    // matrix[3] is scaleY
+    let scaleY = matrix[3]
+    if (scaleY == 0) {
+      // sometimes getComputedStyle isn't quick enough
+      // FIXME solve it in a better way. if translate is applied separately it doesn't happen
+      setTimeout(() => applyFixedTransform(node), 100)
       return
     }
-    setAnimationTime({})
-  }, [animationTime.end])
+    node.style.transform = `translateY(-100em) scaleY(${scaleY})`
+  }
+
 
   return (
     <TransitionGroup component={null}>
-      {animationTime.start &&
+      {animationTime !== null &&
         <CSSTransition
-          key={animationTime.start}
+          key={animationTime}
           timeout={ANIMATION_DURATION_S * 1000}
           classNames={{
             enter: classes['animation-enter'],
@@ -124,14 +125,12 @@ const NoteAnimation = React.memo(({pressed}) => {
             exit: classes['animation-exit'],
             exitActive: classes['animation-exit-active'],
           }}
+          onEntering={node => 
+            node.className += ' ' + classes['animation-in-scene']}
+          onExit={applyFixedTransform}
         >
-            <div className={classes.animationContainer}>
-              <div className={classes.animationRender} style={{
-                maxHeight: animationTime.end === null 
-                  ? "inherit" 
-                  : Math.min((animationTime.end - animationTime.start) 
-                      / 1000 * ANIMATION_DURATION_S * 2, 100) + "vh",
-              }} />
+          <div className={classes.transform}> 
+            <div className={classes.body} />
           </div>
         </CSSTransition>
       }

@@ -162,12 +162,12 @@ const PianoKey = React.memo(({note, className, style, getClass,
     >
       <div className={getClass('noteBody')}>
         <div className={getClass('noteRender')} style={style} />
-          {NoteEffectComponent && 
-            <NoteEffectComponent 
-              note={note}
-              {...(NoteEffectProps || {})}
-            />
-          }
+        {NoteEffectComponent && 
+          <NoteEffectComponent 
+            note={note}
+            {...(NoteEffectProps || {})}
+          />
+        }
       </div>
     </li>
   )
