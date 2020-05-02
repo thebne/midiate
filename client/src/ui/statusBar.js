@@ -69,6 +69,8 @@ const useStyles = makeStyles(theme => ({
 
   statusBarItem: {
     fontFamily: "'Baloo Tamma 2', cursive",
+    width: '5vw',
+    minWidth: '3em',
   },
 }))
 
@@ -81,37 +83,15 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
 				<AppBar position="absolute" 
             className={[classes.appBar, 'app-bar'].join(' ')}>
 					<Toolbar className={classes.toolbar}>
-						<div className={classes.title}>
-              <Button 
-                onClick={() => switchForegroundApp(DEFAULT_APP_ID)}
-                className={classes.logo}>
-                <Zoom in={foregroundAppId === DEFAULT_APP_ID}>
-                  <Logo />
-                </Zoom>
-                <Zoom in={foregroundAppId !== DEFAULT_APP_ID}>
-                  <ArrowBackIcon />
-                </Zoom>
-              </Button>
-							<Typography component="h1" variant="h5" color="inherit" noWrap
-                onClick={() => switchForegroundApp(DEFAULT_APP_ID)} 
-                className={classes.titleText}>
-                  {foregroundAppId !== DEFAULT_APP_ID
-                    ? <Box display={{xs: 'none', md: 'initial'}}>{PROGRAM_NAME}</Box> 
-                    : PROGRAM_NAME
-                  }
-							</Typography>
-              {foregroundAppConfig.name && (
-                <Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
-                  {foregroundAppConfig.icon || <AppDefaultIcon />}
-                  {foregroundAppConfig.name}
-                </Typography>
-              )}
-						</div>
+            <AppTitle
+              foregroundAppId={foregroundAppId}
+              foregroundAppConfig={foregroundAppConfig}
+              switchForegroundApp={switchForegroundApp}
+            />
             <Box display={{xs: 'none', sm: 'initial'}}>
               {statusBar.map(item => item != null ? 
                 <IconButton 
                   color="inherit" 
-                  style={{width: "5vw", minWidth: "3em"}}
                   key={item.props.appId}
                   onClick={() => switchForegroundApp(item.props.appId)} 
                   className={classes.statusBarItem}
@@ -124,6 +104,39 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
 				</AppBar>
   )
 }
+
+const AppTitle = React.memo(
+  function AppTitle({foregroundAppId, foregroundAppConfig, switchForegroundApp}) {
+	const classes = useStyles()
+  return (
+    <div className={classes.title}>
+      <Button 
+        onClick={() => switchForegroundApp(DEFAULT_APP_ID)}
+        className={classes.logo}>
+        <Zoom in={foregroundAppId === DEFAULT_APP_ID}>
+          <Logo />
+        </Zoom>
+        <Zoom in={foregroundAppId !== DEFAULT_APP_ID}>
+          <ArrowBackIcon />
+        </Zoom>
+      </Button>
+      <Typography component="h1" variant="h5" color="inherit" noWrap
+        onClick={() => switchForegroundApp(DEFAULT_APP_ID)} 
+        className={classes.titleText}>
+          {foregroundAppId !== DEFAULT_APP_ID
+            ? <Box display={{xs: 'none', md: 'initial'}}>{PROGRAM_NAME}</Box> 
+            : PROGRAM_NAME
+          }
+      </Typography>
+      {foregroundAppConfig.name && (
+        <Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
+          {foregroundAppConfig.icon || <AppDefaultIcon />}
+          {foregroundAppConfig.name}
+        </Typography>
+      )}
+    </div>
+  )
+})
 
 export default connect((state) => ({
     foregroundAppId: getForegroundAppId(state),
