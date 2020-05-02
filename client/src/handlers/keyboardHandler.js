@@ -2,33 +2,42 @@ import React, { Fragment, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { handleKeyboardEvent } from "../redux/actions"
 
+const VELOCITY_MAX = 127
+const VELOCITY_MID = 64
+
 // initalize keyboard mapping to notes - validKeys order will be by octave order
 const validKeys = Array.from('q2w3er5t6y7uzsxdcvgbhnjm')
 const midiBindingsPerKey = validKeys.map((x, index) => new Uint8Array([144, 60+index, 0]))
 const keyboardTriggers = {}
 validKeys.forEach((x,i) => keyboardTriggers[x] = midiBindingsPerKey[i])
+const currentMap = {}
+let prevEventTime = null
 
 function KeyboardHandler({handleKeyboardEvent}) { 
   useEffect(() => {	 	
-	
 	// handle key stroke
 	const handleKeyStroke = ({key, type, shiftKey, timeStamp}) => {
-		
 		const lowerKey = key.toLowerCase()
-		if (!keyboardTriggers[lowerKey]){ return }
-		let prevTime = null
-		const deltaTime = prevTime === null ? 0 : timeStamp - prevTime           	
+		if (!keyboardTriggers[lowerKey]) { 
+      return
+    }
+
+    // send one keydown for each key
+	  if (type === 'keydown' && currentMap[lowerKey]) {
+      return
+    }
+    currentMap[lowerKey] = type === 'keydown'
+
+		const deltaTime = prevEventTime === null ? 0 : timeStamp - prevEventTime
 		
-		// on key down set velocity to 70, on shift + key down set velocity 127
+    const msg = [...keyboardTriggers[lowerKey]]
 		if (type === 'keydown') {
-			const noteon = [...keyboardTriggers[lowerKey]]
-			shiftKey ? noteon[2] = 127 : noteon[2] = 70
-			handleKeyboardEvent(deltaTime, noteon)
+      // on key down set velocity to MAX, on shift + key down set velocity to MID
+			msg[2] = shiftKey ? VELOCITY_MAX : VELOCITY_MID
 		}
-		else {
-			handleKeyboardEvent(deltaTime, keyboardTriggers[lowerKey])
-		}
-		prevTime = timeStamp
+    handleKeyboardEvent(deltaTime, msg)
+
+		prevEventTime = timeStamp
 	}	
 
 	  // add event listeners
