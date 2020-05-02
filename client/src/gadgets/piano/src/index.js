@@ -133,12 +133,9 @@ export default function Piano({classNames={}, styles={}, singleOctave, startNote
                 className={classNames[n]} 
                 style={styles[n]}
                 getClass={getClass}
+                NoteEffectComponent={NoteEffectComponent}
+                NoteEffectProps={NoteEffectProps[n]}
               >
-                {NoteEffectComponent && 
-                  <NoteEffectComponent 
-                    note={n}
-                    {...(NoteEffectProps[n] || {})}
-                  />
                 }
               </PianoKey>
             )}
@@ -149,7 +146,8 @@ export default function Piano({classNames={}, styles={}, singleOctave, startNote
   )
 }
 
-const PianoKey = React.memo(({note, className, style, getClass, children}) => { 
+const PianoKey = React.memo(({note, className, style, getClass, children,
+  NoteEffectComponent, NoteEffectProps}) => { 
   const type = Note.accidentals(Note.simplify(note)).length ? "black" : "white"
 
   return (
@@ -164,8 +162,18 @@ const PianoKey = React.memo(({note, className, style, getClass, children}) => {
     >
       <div className={getClass('noteBody')}>
         <div className={getClass('noteRender')} style={style} />
-        {children}
+          {NoteEffectComponent && 
+            <NoteEffectComponent 
+              note={note}
+              {...(NoteEffectProps || {})}
+            />
+          }
       </div>
     </li>
   )
+}, (prevProps, nextProps) => {
+  // only compare visuals that might change
+  return prevProps.className === nextProps.className
+    && JSON.stringify(prevProps.styles) === JSON.stringify(nextProps.styles)
+    && JSON.stringify(prevProps.NoteEffectProps) === JSON.stringify(nextProps.NoteEffectProps)
 })
