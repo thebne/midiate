@@ -1,18 +1,17 @@
-.note {
-  text-shadow: 1px 1px #ffffffbb;
+.root {
+  height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-.noteName {
-  font-size: 1em;
+.noteRender {  
+  transition: .5s ease-out;
 }
 
-.noteScale {
-  font-size: .5em;
-}
-
-.note.noteon {
-  color: #4f4;
-}
-.note.noteoff {
-  color: #f55;
+.pianoBody {
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
