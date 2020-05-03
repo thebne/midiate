@@ -5,62 +5,77 @@ import { zip } from './utils'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
 const ANIMATION_DURATION_S = 15
-const MATRIX_REGEX = new RegExp(/matrix\((.+?)\)/)
 
 const useStyles = makeStyles(theme => ({
 
   transform: {
     position: "absolute",
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flexEnd',
     width: "100%",
     left: 0,
     top: '-.5vh',
     zIndex: 100,
   },
 
-  body: {
+  flex: {
     position: 'absolute',
-    top: 0,
-    left: 0,
     width: '100%',
+    height: '100em',
+    top: '-100em',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+  },
+
+  body: {
+    width: '100%',
+    height: '100em',
     minHeight: '.6em',
+    maxHeight: '100em',
     backgroundColor: "#d10",
     border: '1px solid #222',
     borderRadius: '.2vw',
-    transition: `height ${ANIMATION_DURATION_S}s linear, top ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
-    willChange: "height, top, background-color",
+    willChange: "height, background-color",
   },
 
   "animation-enter": {
     "& $body": {
       height: 0,
-      top: 0,
       backgroundColor: '#392',
+    },
+    "& $flex": {
+      transform: 'translateY(0)',
     },
   },
   "animation-enter-active": {
     "& $body": {
+      transition: `height ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
       backgroundColor: '#3f2',
       height: '100em',
-      top: '-100em',
     },
   },
   "animation-exit":{
     "& $body": {
       height: '100em',
-      top: '-100em',
       backgroundColor: '#3f2',
-    }
+      transition: `height ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
+    },
+    "& $flex": {
+      transform: 'translateY(-100em)',
+      transition: `transform ${ANIMATION_DURATION_S}s linear`,
+      willChange: 'transform',
+    },
   },
   "animation-exit-active": {
     "& $body": {
       height: '100em',
-      top: '-100em',
       backgroundColor: '#d10',
-      transition: `height ${ANIMATION_DURATION_S}s linear, top ${ANIMATION_DURATION_S}s linear, background-color ${ANIMATION_DURATION_S / 2}s linear`,
-    }
+      transition: `height ${ANIMATION_DURATION_S}s linear, background-color ${ANIMATION_DURATION_S / 2}s linear`,
+    },
+    "& $flex": {
+      transform: 'translateY(-100em)',
+      transition: `transform ${ANIMATION_DURATION_S}s linear`,
+      willChange: 'transform',
+    },
   },
 }))
 
@@ -119,13 +134,16 @@ const NoteAnimation = React.memo(({pressed}) => {
           classNames={{
             enter: classes['animation-enter'],
             enterActive: classes['animation-enter-active'],
+            enterDone: classes['animation-enter-active'],
             exit: classes['animation-exit'],
             exitActive: classes['animation-exit-active'],
           }}
           onExit={applyFixedTransform}
         >
           <div className={classes.transform}> 
-            <div className={classes.body} />
+            <div className={classes.flex}>
+              <div className={classes.body} />
+            </div>
           </div>
         </CSSTransition>
       }
