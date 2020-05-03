@@ -136,7 +136,9 @@ const MidiInputs = connect(
   return (
     <List subheader={<ListSubheader>MIDI Inputs</ListSubheader>}>
       {midiInputs.map(input => (
-        <ListItem key={input.name}>
+        <ListItem key={input.id} button
+          onChange={e => toggleMidiInput(input.id, !input.active)}
+        >
           <ListItemIcon>
             <UsbIcon />
           </ListItemIcon>
@@ -144,7 +146,7 @@ const MidiInputs = connect(
           <ListItemSecondaryAction>
             <Switch
               edge="end"
-              onChange={e => toggleMidiInput(input.name, e.target.checked)}
+              onChange={e => toggleMidiInput(input.id, e.target.checked)}
               checked={input.active}
         />
           </ListItemSecondaryAction>

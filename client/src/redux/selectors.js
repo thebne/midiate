@@ -48,7 +48,7 @@ export const isMidiInputActive = createSelector(
 export const getMidiInputs = createSelector(
   [getUiState, isMidiInputActive],
   (ui, isActive) => (ui.midiInputs || []).map(i => {
-    i.active = isActive(i.name)
+    i.active = isActive(i.id)
     return i
   })
 )

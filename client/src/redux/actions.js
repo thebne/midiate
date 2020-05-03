@@ -1,8 +1,7 @@
 import { 
   SWITCH_APP, 
   ADD_APP, 
-  HANDLE_MIDI_EVENT, 
-  HANDLE_KEYBOARD_EVENT, 
+  HANDLE_MIDI_BUFFER, 
   DETECT_STRICT_NOTES,
   TOGGLE_MIDI_INPUT,
   SET_MIDI_DEVICES,
@@ -22,14 +21,24 @@ export const addApp = (appId, config) => ({
   payload: {appId, config},
 })
 
-export const handleMidiEvent  = (deltaTime, msg) => ({
-  type: HANDLE_MIDI_EVENT, 
-  payload: {deltaTime, msg},
+export const sendMidiEvent  = (deltaTime, msg, id, name) => ({
+  type: HANDLE_MIDI_BUFFER, 
+  payload: {deltaTime, msg, source: {type: 'midi', id, name}},
 })
 
-export const handleKeyboardEvent  = (deltaTime, msg) => ({
-  type: HANDLE_KEYBOARD_EVENT, 
-  payload: {deltaTime, msg},
+export const sendKeyboardEvent  = (deltaTime, msg) => ({
+  type: HANDLE_MIDI_BUFFER, 
+  payload: {deltaTime, msg, source: {type: 'keyboard'}},
+})
+
+export const sendServerEvent = (deltaTime, msg, host) => ({
+  type: HANDLE_MIDI_BUFFER, 
+  payload: {deltaTime, msg, source: {type: 'server', host}},
+})
+
+export const sendCustomEvent = (deltaTime, msg, id) => ({
+  type: HANDLE_MIDI_BUFFER, 
+  payload: {deltaTime, msg, source: {type: 'custom', id}},
 })
 
 export const detectStrictNotes = notes => ({

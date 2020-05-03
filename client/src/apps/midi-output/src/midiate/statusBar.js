@@ -19,10 +19,15 @@ const StatusBar = connect(
       return
     }
 
+    console.log(lastEvent, midiOutputs)
+
     const data = [...lastEvent._data]
-    console.log(data[1])
     data[1] = Math.max(0, Math.min(127, data[1] + transpose * 2))
-    midiOutputs.filter(p => outputs.indexOf(p.id) !== -1)
+    midiOutputs
+      .filter(p => outputs.indexOf(p.id) !== -1)
+      .filter(p => lastEvent.source.type !== 'midi' 
+        // compare by name because ID isn't the same for inputs and outputs
+        || lastEvent.source.name !== p.name)
       .forEach(o => o.send(data))
   }, [lastEvent, outputs])
   
