@@ -51,10 +51,10 @@ export default function LastNote(props) {
 		// set animation height per key
 		heights[note] = {height: calculateHeight(x,0,max)}
 	}	
-    return <Container maxWidth="xl">
+    return <Container maxWidth="xl" className={styles.root}>
 			<Button onClick={function(){setToggle(!toggle)}}>Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}</Button>
 			<Button style={{float: 'right'}} onClick={function(){setPressed({}); setMax(1)}}>Clear</Button>			
-			<Piano startNote="A0" endNote="C8" styles={toggle? colors : heights} overrideClasses={styles} />
+			<Piano startNote="A0" endNote="C8" styles={toggle? colors : heights} />
       </Container>
   }
 
