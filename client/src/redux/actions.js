@@ -2,7 +2,6 @@ import {
   SWITCH_APP, 
   ADD_APP, 
   HANDLE_MIDI_BUFFER, 
-  DETECT_STRICT_NOTES,
   TOGGLE_MIDI_INPUT,
   SET_MIDI_DEVICES,
   SET_MIDI_SERVER_HOST,
@@ -39,11 +38,6 @@ export const sendServerEvent = (deltaTime, msg, host) => ({
 export const sendCustomEvent = (deltaTime, msg, id) => ({
   type: HANDLE_MIDI_BUFFER, 
   payload: {deltaTime, msg, source: {type: 'custom', id}},
-})
-
-export const detectStrictNotes = notes => ({
-  type: DETECT_STRICT_NOTES, 
-  payload: notes,
 })
 
 export const toggleMidiInput = (input, isActive) => ({

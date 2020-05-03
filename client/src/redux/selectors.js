@@ -67,14 +67,38 @@ export const getMidiServerConnectionStatus = createSelector(
   ui => ui.midiServerConnectionStatus
 )
 
-export const getNotes = createSelector(
+export const makeGetNotes = (config={}) => {
+  const {mode="loose", data="simple"} = config
+  const noteSelector = (() => {
+    switch (mode) {
+      case 'loose':
+        return getLooseNotes
+      case 'smart':
+        return getSmartNotes
+      default:
+        throw new Error(`unknown mode ${mode}`)
+    }})()
+
+  return createSelector(
+    [noteSelector],
+    notes => {
+      if (mode === 'smart')
+        notes = notes.events
+      switch (data) {
+        case 'simple':
+          return notes.map(e => e.note)
+        case 'extended':
+          return notes
+        default:
+          throw new Error(`unknown data type ${data}`)
+      }
+    }
+  )
+}
+
+const getLooseNotes = createSelector(
   [getEventsState],
   events => events.notes || []
-)
-
-const getStrictNotes = createSelector(
-  [getEventsState],
-  events => events.strictNotes
 )
 
 const getSmartNotes = createSelector(
@@ -83,36 +107,30 @@ const getSmartNotes = createSelector(
 )
 
 const filterNotes = (notes, [start, end]) => {
-  const filtered = notes.notes.filter(n => {
-    const midi = Midi.toMidi(n)
-    return (start === null || midi >= start) && (end === null || midi <= end)
+  const filtered = notes.events.filter(e => {
+    return (start === null || e.key >= start) && (end === null || e.key <= end)
   })
-  return {...notes, notes: filtered, detection: detect(filtered)}
+  return {...notes, notes: filtered, detection: detect(filtered.map(e => e.note))}
 }
 
 const getLooseChords = createSelector(
-  [getNotes, getChordDetectionRange],
-  (notes, [start, end]) => filterNotes({notes, id: -1}, [start, end])
-)
-const getStrictChords = createSelector(
-  [getStrictNotes, getChordDetectionRange],
-  filterNotes
+  [getLooseNotes, getChordDetectionRange],
+  (events, [start, end]) => filterNotes({events, id: -1}, [start, end])
 )
 const getSmartChords = createSelector(
   [getSmartNotes, getChordDetectionRange],
   filterNotes
 )
 
-export const getChords = (store, config = {mode: "smart"}) => {
-  switch (config.mode) {
+export const getChords = (store, config={}) => {
+  const {mode="smart"} = config
+  switch (mode) {
     case 'loose':
       return getLooseChords(store)
-    case 'strict':
-      return getStrictChords(store)
     case 'smart':
       return getSmartChords(store)
     default:
-      throw new Error(`unknown mode ${config.mode}`)
+      throw new Error(`unknown mode ${mode}`)
   }
 }
 

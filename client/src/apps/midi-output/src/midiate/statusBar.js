@@ -3,7 +3,6 @@ import Tooltip from '@material-ui/core/Tooltip'
 import SlowMotionVideoIcon from '@material-ui/icons/SlowMotionVideo'
 import Badge from '@material-ui/core/Badge'
 import { green, red } from '@material-ui/core/colors'
-import { makeStyles } from '@material-ui/core/styles'
 import { connect, Provider } from 'react-redux'
 import store from '../redux'
 
@@ -18,8 +17,6 @@ const StatusBar = connect(
     if (!lastEvent || !outputs) {
       return
     }
-
-    console.log(lastEvent, midiOutputs)
 
     const data = [...lastEvent._data]
     data[1] = Math.max(0, Math.min(127, data[1] + transpose * 2))
