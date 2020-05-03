@@ -1,15 +1,19 @@
-:global(.pianoGadgetRoot) {
-  height: 50vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.root {
+  height: 100%;
 }
 
-:global(.noteRender) {  
+.root :global(.piano-gadget-root) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.root :global(.piano-gadget-noteRender) {  
   transition: .5s ease-out;
 }
 
-:global(.pianoBody) {
+.root :global(.piano-gadget-pianoBody) {
   border: none;
   border-radius: 0;
   background: none;
