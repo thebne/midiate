@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles(theme => ({
   root: {
-    height: "80vh",
+    height: "100%",
     display: "flex",
     flexDirection: "column",
     justifyContent: "flex-end",
@@ -95,9 +95,9 @@ const MIDI_END_NOTE = 127
 
 // if singleOctave is a note name, create only a single octave starting from this name
 export default function Piano({classNames={}, styles={}, singleOctave, startNote, endNote,
-  NoteEffectComponent, NoteEffectProps={}, overrideClasses={}}) {
+  NoteEffectComponent, NoteEffectProps={}}) {
   const classes = useStyles()
-  const getClass = name => `${classes[name] || ''} ${overrideClasses[name] || ''}`
+  const getClass = name => `${classes[name] || ''} piano-gadget-${name}`
   let notes
 
   if (singleOctave) {
