@@ -5,7 +5,6 @@ import { zip } from './utils'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
 const ANIMATION_DURATION_S = 15
-const MATRIX_REGEX = new RegExp(/matrix\((.+?)\)/)
 
 const useStyles = makeStyles(theme => ({
 
@@ -13,50 +12,70 @@ const useStyles = makeStyles(theme => ({
     position: "absolute",
     width: "100%",
     left: 0,
-    top: '-1.8vh',
-    height: "1em",
-    minHeight: ".2em",
-    transformOrigin: 'bottom center',
+    top: '-.5vh',
     zIndex: 100,
   },
 
-  body: {
-    borderRight: "3px solid #00000033",
+  flex: {
+    position: 'absolute',
     width: '100%',
-    height: '100%',
+    height: '100em',
+    top: '-100em',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+  },
+
+  body: {
+    width: '100%',
+    height: '100em',
+    minHeight: '.6em',
+    maxHeight: '100em',
     backgroundColor: "#d10",
-    transition: `background-color ${ANIMATION_DURATION_S / 2}s`,
-    willChange: "background-color",
+    border: '1px solid #222',
+    borderRadius: '.2vw',
+    willChange: "height, background-color",
   },
 
   "animation-enter": {
-    transform: 'scaleY(0)',
-    transition: 'none',
     "& $body": {
+      height: 0,
       backgroundColor: '#392',
+    },
+    "& $flex": {
+      transform: 'translateY(0)',
     },
   },
   "animation-enter-active": {
     "& $body": {
+      transition: `height ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
       backgroundColor: '#3f2',
-      transition: 'background-color 500ms',
+      height: '100em',
     },
-  },
-  "animation-in-scene": {
-    transform: 'scaleY(100)',
-    transition: `transform ${ANIMATION_DURATION_S}s linear`,
-    willChange: "transform",
   },
   "animation-exit":{
     "& $body": {
-      transform: 'translateY(0)',
+      height: '100em',
       backgroundColor: '#3f2',
-    }
+      transition: `height ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
+    },
+    "& $flex": {
+      transform: 'translateY(-100em)',
+      transition: `transform ${ANIMATION_DURATION_S}s linear`,
+      willChange: 'transform',
+    },
   },
   "animation-exit-active": {
     "& $body": {
+      height: '100em',
       backgroundColor: '#d10',
-    }
+      transition: `height ${ANIMATION_DURATION_S}s linear, background-color ${ANIMATION_DURATION_S / 2}s linear`,
+    },
+    "& $flex": {
+      transform: 'translateY(-100em)',
+      transition: `transform ${ANIMATION_DURATION_S}s linear`,
+      willChange: 'transform',
+    },
   },
 }))
 
@@ -100,20 +119,9 @@ const NoteAnimation = React.memo(({pressed}) => {
   }, [pressed])
 
   const applyFixedTransform = node => {
-    const transform = window.getComputedStyle(node).getPropertyValue('transform')
-    const matched = MATRIX_REGEX.exec(transform)
-    if (matched && matched[1]) {
-      const matrix = matched[1].split(',').map(parseFloat)
-      // matrix[3] is scaleY
-      let scaleY = matrix[3]
-      if (scaleY !== 0) {
-        node.style.transform = `translateY(-100em) scaleY(${scaleY})`
-        return
-      }
-    }
-    // sometimes getComputedStyle isn't quick enough
-    // FIXME solve it in a better way. if translate is applied separately it doesn't happen
-    setTimeout(() => applyFixedTransform(node), 100)
+    const body = node.getElementsByClassName(classes.body)[0]
+    const {height} = window.getComputedStyle(body)
+    body.style.maxHeight = `${height}`
   }
 
 
@@ -122,19 +130,20 @@ const NoteAnimation = React.memo(({pressed}) => {
       {animationTime !== null &&
         <CSSTransition
           key={animationTime}
-          timeout={ANIMATION_DURATION_S * 1000}
+          timeout={ANIMATION_DURATION_S * 1000 / 2}
           classNames={{
             enter: classes['animation-enter'],
             enterActive: classes['animation-enter-active'],
+            enterDone: classes['animation-enter-active'],
             exit: classes['animation-exit'],
             exitActive: classes['animation-exit-active'],
           }}
-          onEntering={node => 
-            node.className += ' ' + classes['animation-in-scene']}
           onExit={applyFixedTransform}
         >
           <div className={classes.transform}> 
-            <div className={classes.body} />
+            <div className={classes.flex}>
+              <div className={classes.body} />
+            </div>
           </div>
         </CSSTransition>
       }

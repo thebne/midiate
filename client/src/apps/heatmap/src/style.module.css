@@ -1,5 +1,5 @@
 .root {
-  height: 50vh;
+  height: 50vh!important;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
