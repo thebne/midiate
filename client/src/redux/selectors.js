@@ -82,10 +82,14 @@ export const makeGetNotes = (config={}) => {
   return createSelector(
     [noteSelector],
     notes => {
-      if (mode === 'smart')
-        notes = notes.events
       switch (data) {
         case 'simple':
+          if (mode === 'smart') {
+            return {
+              ...notes,
+              events: notes.events.map(e => e.note)
+            }
+          }
           return notes.map(e => e.note)
         case 'extended':
           return notes
