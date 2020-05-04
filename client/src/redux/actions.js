@@ -1,11 +1,9 @@
 import { 
   SWITCH_APP, 
   ADD_APP, 
-  HANDLE_MIDI_EVENT, 
-  HANDLE_KEYBOARD_EVENT, 
-  DETECT_STRICT_NOTES,
+  HANDLE_MIDI_BUFFER, 
   TOGGLE_MIDI_INPUT,
-  SET_MIDI_INPUTS,
+  SET_MIDI_DEVICES,
   SET_MIDI_SERVER_HOST,
   SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_THEME_ID,
@@ -22,19 +20,24 @@ export const addApp = (appId, config) => ({
   payload: {appId, config},
 })
 
-export const handleMidiEvent  = (deltaTime, msg) => ({
-  type: HANDLE_MIDI_EVENT, 
-  payload: {deltaTime, msg},
+export const sendMidiEvent  = (deltaTime, msg, id, name) => ({
+  type: HANDLE_MIDI_BUFFER, 
+  payload: {deltaTime, msg, source: {type: 'midi', id, name}},
 })
 
-export const handleKeyboardEvent  = (deltaTime, msg) => ({
-  type: HANDLE_KEYBOARD_EVENT, 
-  payload: {deltaTime, msg},
+export const sendKeyboardEvent  = (deltaTime, msg) => ({
+  type: HANDLE_MIDI_BUFFER, 
+  payload: {deltaTime, msg, source: {type: 'keyboard'}},
 })
 
-export const detectStrictNotes = notes => ({
-  type: DETECT_STRICT_NOTES, 
-  payload: notes,
+export const sendServerEvent = (deltaTime, msg, host) => ({
+  type: HANDLE_MIDI_BUFFER, 
+  payload: {deltaTime, msg, source: {type: 'server', host}},
+})
+
+export const sendCustomEvent = (deltaTime, msg, id) => ({
+  type: HANDLE_MIDI_BUFFER, 
+  payload: {deltaTime, msg, source: {type: 'custom', id}},
 })
 
 export const toggleMidiInput = (input, isActive) => ({
@@ -42,9 +45,9 @@ export const toggleMidiInput = (input, isActive) => ({
   payload: {input, isActive},
 })
 
-export const setMidiInputs = inputs => ({
-  type: SET_MIDI_INPUTS, 
-  payload: inputs,
+export const setMidiDevices = (inputs, outputs) => ({
+  type: SET_MIDI_DEVICES, 
+  payload: {inputs, outputs},
 })
 
 export const setMidiServerHost = host => ({

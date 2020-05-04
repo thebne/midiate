@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { handleKeyboardEvent } from "../redux/actions"
+import { sendKeyboardEvent } from "../redux/actions"
 
 const VELOCITY_MAX = 127
 const VELOCITY_MID = 64
@@ -13,7 +13,7 @@ validKeys.forEach((x,i) => keyboardTriggers[x] = midiBindingsPerKey[i])
 const currentMap = {}
 let prevEventTime = null
 
-function KeyboardHandler({handleKeyboardEvent}) { 
+function KeyboardHandler({sendKeyboardEvent}) { 
   useEffect(() => {	 	
 	// handle key stroke
 	const handleKeyStroke = ({key, type, shiftKey, timeStamp}) => {
@@ -35,7 +35,7 @@ function KeyboardHandler({handleKeyboardEvent}) {
       // on key down set velocity to MAX, on shift + key down set velocity to MID
 			msg[2] = shiftKey ? VELOCITY_MAX : VELOCITY_MID
 		}
-    handleKeyboardEvent(deltaTime, msg)
+    sendKeyboardEvent(deltaTime, msg)
 
 		prevEventTime = timeStamp
 	}	
@@ -45,12 +45,12 @@ function KeyboardHandler({handleKeyboardEvent}) {
 	  window.addEventListener('keyup', (e)=>{handleKeyStroke(e)});			 
   }, [
     // redux
-    handleKeyboardEvent
+    sendKeyboardEvent
   ])
 
   return <Fragment />
 }
 
 export default connect(null,
-  { handleKeyboardEvent }
+  { sendKeyboardEvent }
 )(KeyboardHandler)

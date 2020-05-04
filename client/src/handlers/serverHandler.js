@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import { getMidiServerHost } from '../redux/selectors'
 import { 
-  handleMidiEvent, setMidiServerConnectionStatus 
+  sendServerEvent, setMidiServerConnectionStatus 
 } from "../redux/actions"
 
 let connection = {
@@ -10,7 +10,7 @@ let connection = {
   socket: null,
 }
 
-function ServerHandler({midiServerHost, handleMidiEvent,
+function ServerHandler({midiServerHost, sendServerEvent,
   setMidiServerConnectionStatus}) {
   const [tick, setTick] = useState(null)
 
@@ -40,7 +40,7 @@ function ServerHandler({midiServerHost, handleMidiEvent,
         const view = new DataView(buffer)
         const deltaTime = view.getFloat64(0)
         const msg = new Uint8Array(buffer, 8)
-        handleMidiEvent(deltaTime, msg)
+        sendServerEvent(deltaTime, msg, midiServerHost)
       }
 
       connection.socket.onopen = () => {
@@ -55,7 +55,7 @@ function ServerHandler({midiServerHost, handleMidiEvent,
 
   }, [midiServerHost, tick, 
     // redux
-    handleMidiEvent, setMidiServerConnectionStatus])
+    sendServerEvent, setMidiServerConnectionStatus])
 
   return <Fragment />
 }
@@ -64,5 +64,5 @@ export default connect(
   (state) => ({
     midiServerHost: getMidiServerHost(state),
   }),
-  { handleMidiEvent, setMidiServerConnectionStatus }
+  { sendServerEvent, setMidiServerConnectionStatus }
 )(ServerHandler)
