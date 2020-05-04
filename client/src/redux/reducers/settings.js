@@ -2,7 +2,6 @@ import {
   TOGGLE_MIDI_INPUT, 
   SET_MIDI_SERVER_HOST,
   SET_THEME_ID,
-  SET_CHORD_DETECTION_RANGE,
 } from "../actionTypes"
 
 const initialState = {
@@ -10,7 +9,6 @@ const initialState = {
   midiInputsActive: {},
   midiServerHost: "",
   themeId: 0,
-  chordDetectionRange: [null, null],
 }
 
 const settings = (state = initialState, action) => {
@@ -35,12 +33,6 @@ const settings = (state = initialState, action) => {
       return {
         ...state,
         themeId: action.payload
-      }
-    }
-    case SET_CHORD_DETECTION_RANGE: {
-      return {
-        ...state,
-        chordDetectionRange: [action.payload.start, action.payload.end],
       }
     }
     default: {

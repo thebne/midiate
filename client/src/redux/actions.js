@@ -64,8 +64,3 @@ export const setThemeId = id => ({
   type: SET_THEME_ID, 
   payload: id,
 })
-
-export const setChordDetectionRange = (start, end) => ({
-  type: SET_CHORD_DETECTION_RANGE, 
-  payload: {start, end},
-})
