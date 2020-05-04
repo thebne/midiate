@@ -1,8 +1,5 @@
 import { Midi, Chord } from "@tonaljs/tonal"
 
-// is a subset of b
-const isSubset = (a, b) => a.every(val => b.includes(val))
-
 export const arePropsEqual = (prevProps, nextProps) => {
   // compare to avoid re-rendering
   const prevNotes = prevProps.notes.events.map(e => e.key)

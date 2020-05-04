@@ -7,7 +7,6 @@ import {
   SET_MIDI_SERVER_HOST,
   SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_THEME_ID,
-  SET_CHORD_DETECTION_RANGE,
 } from './actionTypes'
 
 export const switchForegroundApp = appId => ({
