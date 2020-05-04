@@ -1,12 +1,41 @@
-import React, { Fragment, useLayoutEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
+import { Provider } from 'react-redux'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
+import Dialog from '@material-ui/core/Dialog'
+import Container from '@material-ui/core/Container'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogActions from '@material-ui/core/DialogActions'
+import BottomNavigation from '@material-ui/core/BottomNavigation'
+import BottomNavigationAction from '@material-ui/core/BottomNavigationAction'
+import Select from '@material-ui/core/Select'
+import MenuItem from '@material-ui/core/MenuItem'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemText from '@material-ui/core/ListItemText'
+import TextField from '@material-ui/core/TextField'
+import Button from '@material-ui/core/Button'
+import EditIcon from '@material-ui/icons/Edit'
+import StarIcon from '@material-ui/icons/Star'
+import SettingsIcon from '@material-ui/icons/Settings'
 import { makeStyles } from '@material-ui/core/styles'
-import { arePropsEqual } from './utils.js'
+import { Scale, Midi } from '@tonaljs/tonal'
+import store, { connectApp } from './redux'
 
 const ColorHash = require('color-hash')
 const colorHash = new ColorHash({lightness: .5})
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    height: '100%',
+    display: "flex",
+    flexDirection: "column",
+  },
+  page: {
+    flexGrow: 1,
+    position: 'relative',
+  },
   detection: {
     fontFamily: "'Baloo Tamma 2', cursive",
     transform: "translate(50%, 60%) scale(1)",
@@ -60,43 +89,50 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default React.memo(function ChordRecognizer({chords}) {
-  const [animations, setAnimations] = useState([])
+function App() {
+  const classes = useStyles()
+  const [page, setPage] = useState('front')
 
-  // add or remove animation objects
-  useLayoutEffect(() => {
-    setAnimations(entries => {
-      entries = [...entries]
-      let prev = entries[entries.length - 1]
+	return (
+    <div className={classes.root}>
+      <Container className={classes.page}>
+        {page === 'front' &&
+          <FrontPage />}
+        {page === 'settings' &&
+          <SettingsPage />}
+      </Container>
+      <BottomNavigation
+        value={page}
+        onChange={(event, newValue) => {
+              setPage(newValue)
+            }}
+        showLabels
+      >
+        <BottomNavigationAction label="Main" value="front" 
+          icon={<StarIcon />} />
+        <BottomNavigationAction label="Settings" value="settings" 
+          icon={<SettingsIcon />} />
+      </BottomNavigation>
+    </div>
+	)
+}
 
-      // check if there's an existing detection. if so, remove it
-      if (prev && chords.id !== prev.id) {
-        setAnimations((entries) => {
-          entries = [...entries]
-          entries.splice(entries.indexOf(prev), 1)
-          return entries 
-        })
-      }
-      // add new detections
-      if ((!prev || prev.id !== chords.id) && chords.detection.length) {
-        entries.push({...chords, time: new Date().getTime()})
-      }
-      // update existing detection
-      else if (prev && prev.id === chords.id && chords.detection.length) {
-        prev.detection = chords.detection
-	  }
-	  
-      return entries
-    })
-  }, [chords])
+export default function (props) {
+  return (
+    <Provider store={store}>
+        <App {...props} />
+    </Provider>
+  )
+}
 
+const FrontPage = React.memo(connectApp(function ({detections}) {
 	return (
     <Fragment>
       <Welcome />
-      <Animations>{animations}</Animations>
+      <Animations>{Object.values(detections)}</Animations>
     </Fragment>
 	)
-}, arePropsEqual)
+}))
 
 function Welcome() {
   const classes = useStyles()
@@ -167,7 +203,7 @@ function Animations({children}) {
                     dominantBaseline: "hanging",
                     textAnchor: "middle",
                   }} >
-                    {secondary.length === main.length ? secondary : ''}
+                  {secondary}
                 </text>)
                 )}
             </g>
@@ -178,6 +214,125 @@ function Animations({children}) {
   </TransitionGroup>
   )
 }
+
+const SettingsPage = connectApp(function (
+  {chordDetectionRange, setChordDetectionRange,
+  relativeScale, setRelativeScale}) {
+  const [showRangeDialog, setShowRangeDialog] = useState(false)
+  const [relativeOpen, setRelativeOpen] = useState(false)
+  const [start, end] = chordDetectionRange
+
+  let rangeString
+  if (typeof start === 'number' && typeof end === 'number') {
+    rangeString = `${Midi.midiToNoteName(start)} to ${Midi.midiToNoteName(end)}`
+  } else if (typeof start === 'number') {
+    rangeString = `starting at ${Midi.midiToNoteName(start)}`
+  } else if (typeof end === 'number') {
+    rangeString = `ending at ${Midi.midiToNoteName(end)}`
+  } else {
+    rangeString = `not defined`
+  }
+
+  return (
+    <Fragment>
+      <List>
+        <ListItem button onClick={() => setShowRangeDialog(true)}>
+          <ListItemIcon>
+            <EditIcon />
+          </ListItemIcon>
+          <ListItemText primary='Detection note range'
+            secondary={rangeString} />
+        </ListItem>
+        <ListItem button onClick={() => setRelativeOpen(!relativeOpen)}>
+          <ListItemIcon>
+            <EditIcon />
+          </ListItemIcon>
+          <ListItemText primary='Detection root' />
+						<Select
+							open={relativeOpen}
+              onOpen={() => setRelativeOpen(true)}
+              onClose={() => setRelativeOpen(false)}
+							value={relativeScale}
+							onChange={e => setRelativeScale(e.target.value)}
+						>
+							<MenuItem value={false}>Absolute</MenuItem>
+							{Scale.get('a chromatic').notes.map(n => (
+								<MenuItem key={n} value={n}>{n}</MenuItem>
+							))}
+						</Select>
+        </ListItem>
+      </List>
+      <ChordDetectionRangeDialog
+        showRangeDialog={showRangeDialog}
+        setShowRangeDialog={setShowRangeDialog}
+        setChordDetectionRange={setChordDetectionRange}
+        initialValue={chordDetectionRange}
+      />
+    </Fragment>
+  )
+})
+
+const ChordDetectionRangeDialog = connectApp(function (
+  {showRangeDialog, setShowRangeDialog,
+  setChordDetectionRange, initialValue}) {
+  const classes = useStyles()
+  const [initialStart, initialEnd] = initialValue
+  const [start, setStart] = useState(initialStart ? Midi.midiToNoteName(initialStart) : '')
+  const [end, setEnd] = useState(initialEnd ? Midi.midiToNoteName(initialEnd) : '')
+
+  useEffect(() => {
+    let newStart, newEnd
+    if (start.length) {
+      newStart = Midi.toMidi(start)
+      if (newStart === null) 
+        return
+    } else {
+      newStart = null
+    }
+    if (end.length) {
+      newEnd = Midi.toMidi(end)
+      if (newEnd === null) 
+        return
+    } else {
+      newEnd = null
+    }
+    setChordDetectionRange(newStart, newEnd)
+  }, [start, end,
+    // redux
+    setChordDetectionRange])
+
+  return (
+      <Dialog open={showRangeDialog} 
+        onClose={() => setShowRangeDialog(false)}
+      >
+        <DialogTitle>Note range for chord detection</DialogTitle>
+        <DialogContent className={classes.dialogRoot}>
+          <TextField
+                className={classes.inputRow}
+                label="start note"
+                placeholder='e.g. A1, blank for none'
+                value={start || ''}
+                onChange={e => setStart(e.target.value)}
+                error={!!(start.length && Midi.toMidi(start) === null)}
+                helperText={start.length && Midi.toMidi(start) === null ? "Invalid note name" : ' '}
+              />
+          <TextField
+                className={classes.inputRow}
+                label="end note"
+                placeholder='e.g. B3, blank for none'
+                value={end || ''}
+                onChange={e => setEnd(e.target.value)}
+                error={!!(end.length && Midi.toMidi(end) === null)}
+                helperText={end.length && Midi.toMidi(end) === null ? "Invalid note name" : ' '}
+              />
+        </DialogContent>
+        <DialogActions>
+          <Button size="small" onClick={() => {setStart(''); setEnd('')}}>Reset</Button>
+          <Button size="small" onClick={() => setShowRangeDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+  )
+})
 
 // midiate support
 export { default as config } from './midiate/config'

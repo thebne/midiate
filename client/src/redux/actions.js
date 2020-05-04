@@ -7,7 +7,6 @@ import {
   SET_MIDI_SERVER_HOST,
   SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_THEME_ID,
-  SET_CHORD_DETECTION_RANGE,
 } from './actionTypes'
 
 export const switchForegroundApp = appId => ({
@@ -63,9 +62,4 @@ export const setMidiServerConnectionStatus = status => ({
 export const setThemeId = id => ({
   type: SET_THEME_ID, 
   payload: id,
-})
-
-export const setChordDetectionRange = (start, end) => ({
-  type: SET_CHORD_DETECTION_RANGE, 
-  payload: {start, end},
 })

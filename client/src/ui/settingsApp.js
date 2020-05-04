@@ -1,6 +1,5 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { Fragment, useState } from 'react'
 import { connect } from 'react-redux'
-import { Midi } from '@tonaljs/tonal'
 import Button from '@material-ui/core/Button'
 import Fade from '@material-ui/core/Fade'
 import Chip from '@material-ui/core/Chip'
@@ -21,7 +20,6 @@ import TextField from '@material-ui/core/TextField'
 import DoneIcon from '@material-ui/icons/Done'
 import ErrorIcon from '@material-ui/icons/Error'
 import UsbIcon from '@material-ui/icons/Usb'
-import EditIcon from '@material-ui/icons/Edit'
 import PublicIcon from '@material-ui/icons/Public'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import { makeStyles } from '@material-ui/core/styles'
@@ -29,14 +27,13 @@ import { SETTINGS_APP_ID } from '../constants'
 import themes from './themes'
 import { 
   toggleMidiInput, setMidiServerHost,
-  setThemeId, setChordDetectionRange
+  setThemeId, 
 } from '../redux/actions'
 import { 
   getMidiInputs, 
   getMidiServerHost, 
   getMidiServerConnectionStatus,
   getThemeId,
-  getChordDetectionRange,
 } from '../redux/selectors'
 
 const useStyles = makeStyles(theme => ({
@@ -184,114 +181,13 @@ const ThemeSelector = connect(
   )
 })
 
-const DetectionSettings = connect(
-  state => ({
-    chordDetectionRange: getChordDetectionRange(state),
-  }),
-  { setChordDetectionRange }
-)(({chordDetectionRange, setChordDetectionRange}) => {
-  const [showRangeDialog, setShowRangeDialog] = useState(false)
-  const [start, end] = chordDetectionRange
 
-  let rangeString
-  if (typeof start === 'number' && typeof end === 'number') {
-    rangeString = `${Midi.midiToNoteName(start)} to ${Midi.midiToNoteName(end)}`
-  } else if (typeof start === 'number') {
-    rangeString = `starting at ${Midi.midiToNoteName(start)}`
-  } else if (typeof end === 'number') {
-    rangeString = `ending at ${Midi.midiToNoteName(end)}`
-  } else {
-    rangeString = `not defined`
-  }
-
-  return (
-    <Fragment>
-      <List subheader={<ListSubheader>Chord Detection</ListSubheader>}>
-        <ListItem button onClick={() => setShowRangeDialog(true)}>
-          <ListItemIcon>
-            <EditIcon />
-          </ListItemIcon>
-          <ListItemText primary='Chord detection note range'
-            secondary={rangeString} />
-        </ListItem>
-      </List>
-      <ChordDetectionRangeDialog
-        showRangeDialog={showRangeDialog}
-        setShowRangeDialog={setShowRangeDialog}
-        setChordDetectionRange={setChordDetectionRange}
-        initialValue={chordDetectionRange}
-      />
-    </Fragment>
-  )
-})
-
-function ChordDetectionRangeDialog({showRangeDialog, setShowRangeDialog,
-  setChordDetectionRange, initialValue}) {
-  const classes = useStyles()
-  const [initialStart, initialEnd] = initialValue
-  const [start, setStart] = useState(initialStart ? Midi.midiToNoteName(initialStart) : '')
-  const [end, setEnd] = useState(initialEnd ? Midi.midiToNoteName(initialEnd) : '')
-
-  useEffect(() => {
-    let newStart, newEnd
-    if (start.length) {
-      newStart = Midi.toMidi(start)
-      if (newStart === null) 
-        return
-    } else {
-      newStart = null
-    }
-    if (end.length) {
-      newEnd = Midi.toMidi(end)
-      if (newEnd === null) 
-        return
-    } else {
-      newEnd = null
-    }
-    setChordDetectionRange(newStart, newEnd)
-  }, [start, end,
-    // redux
-    setChordDetectionRange])
-
-  return (
-      <Dialog open={showRangeDialog} 
-        onClose={() => setShowRangeDialog(false)}
-      >
-        <DialogTitle>Note range for chord detection</DialogTitle>
-        <DialogContent className={classes.dialogRoot}>
-          <TextField
-                className={classes.inputRow}
-                label="start note"
-                placeholder='e.g. A1, blank for none'
-                value={start || ''}
-                onChange={e => setStart(e.target.value)}
-                error={!!(start.length && Midi.toMidi(start) === null)}
-                helperText={start.length && Midi.toMidi(start) === null ? "Invalid note name" : ' '}
-              />
-          <TextField
-                className={classes.inputRow}
-                label="end note"
-                placeholder='e.g. B3, blank for none'
-                value={end || ''}
-                onChange={e => setEnd(e.target.value)}
-                error={!!(end.length && Midi.toMidi(end) === null)}
-                helperText={end.length && Midi.toMidi(end) === null ? "Invalid note name" : ' '}
-              />
-        </DialogContent>
-        <DialogActions>
-          <Button size="small" onClick={() => {setStart(''); setEnd('')}}>Reset</Button>
-          <Button size="small" onClick={() => setShowRangeDialog(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-  )
-}
 
 function SettingsApp() {
   return (
     <Container>
       <MidiInputs />
       <ThemeSelector />
-      <DetectionSettings />
     </Container>
   )
 }

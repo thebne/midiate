@@ -1,6 +1,4 @@
 import { createSelector } from 'reselect'
-import { Midi } from '@tonaljs/tonal'
-import { detect } from '../utils/chords'
 
 export const getUiState = store => store.ui
 export const getSettingsState = store => store.settings
@@ -25,11 +23,6 @@ export const getAppConfig = (store, appId) =>
 export const getThemeId = createSelector(
   [getSettingsState],
   settings => settings.themeId || 0
-)
-
-export const getChordDetectionRange = createSelector(
-  [getSettingsState],
-  settings => settings.chordDetectionRange || [null, null]
 )
 
 export const getMidiServerHost = createSelector(
@@ -109,34 +102,6 @@ const getSmartNotes = createSelector(
   [getEventsState],
   events => events.smartNotes
 )
-
-const filterNotes = (notes, [start, end]) => {
-  const filtered = notes.events.filter(e => {
-    return (start === null || e.key >= start) && (end === null || e.key <= end)
-  })
-  return {...notes, notes: filtered, detection: detect(filtered.map(e => e.note))}
-}
-
-const getLooseChords = createSelector(
-  [getLooseNotes, getChordDetectionRange],
-  (events, [start, end]) => filterNotes({events, id: -1}, [start, end])
-)
-const getSmartChords = createSelector(
-  [getSmartNotes, getChordDetectionRange],
-  filterNotes
-)
-
-export const getChords = (store, config={}) => {
-  const {mode="smart"} = config
-  switch (mode) {
-    case 'loose':
-      return getLooseChords(store)
-    case 'smart':
-      return getSmartChords(store)
-    default:
-      throw new Error(`unknown mode ${mode}`)
-  }
-}
 
 export const getLastEvent = createSelector(
   [getEventsState],

@@ -1,3 +1,6 @@
 export default (selectors, state) => ({
-   chords: selectors.getChords(state),
-  })
+  notes: selectors.makeGetNotes({
+    mode: 'smart',
+    data: 'extended',
+  })(state),
+})
