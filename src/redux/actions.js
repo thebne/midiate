@@ -7,6 +7,7 @@ import {
   SET_MIDI_SERVER_HOST,
   SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_THEME_ID,
+  SET_APP_SPECIFIC_VALUE,
 } from './actionTypes'
 
 export const switchForegroundApp = appId => ({
@@ -36,7 +37,7 @@ export const sendServerEvent = (deltaTime, msg, host) => ({
 
 export const sendCustomEvent = (deltaTime, msg, id) => ({
   type: HANDLE_MIDI_BUFFER, 
-  payload: {deltaTime, msg, source: {type: 'custom', id}},
+  payload: {deltaTime, msg, source: {type: 'app', id}},
 })
 
 export const toggleMidiInput = (input, isActive) => ({
@@ -62,4 +63,9 @@ export const setMidiServerConnectionStatus = status => ({
 export const setThemeId = id => ({
   type: SET_THEME_ID, 
   payload: id,
+})
+
+export const setAppSpecificValue = (appId, key, value) => ({
+  type: SET_APP_SPECIFIC_VALUE, 
+  payload: {appId, key, value},
 })

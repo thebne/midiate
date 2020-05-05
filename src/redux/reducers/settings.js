@@ -2,6 +2,7 @@ import {
   TOGGLE_MIDI_INPUT, 
   SET_MIDI_SERVER_HOST,
   SET_THEME_ID,
+  SET_APP_SPECIFIC_VALUE,
 } from "../actionTypes"
 
 const initialState = {
@@ -9,6 +10,7 @@ const initialState = {
   midiInputsActive: {},
   midiServerHost: "",
   themeId: 0,
+  appSpecific: {},
 }
 
 const settings = (state = initialState, action) => {
@@ -33,6 +35,18 @@ const settings = (state = initialState, action) => {
       return {
         ...state,
         themeId: action.payload
+      }
+    }
+    case SET_APP_SPECIFIC_VALUE: {
+      return {
+        ...state,
+        appSpecific: {
+          ...state.appSpecific,
+          [action.payload.appId]: {
+            ...state.appSpecific[action.payload.appId],
+            [action.payload.key]: action.payload.value,
+          }
+        },
       }
     }
     default: {

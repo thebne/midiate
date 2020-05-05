@@ -1,5 +1,4 @@
 import React, { Fragment, useEffect, useState } from 'react'
-import { Provider } from 'react-redux'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 import Dialog from '@material-ui/core/Dialog'
 import Container from '@material-ui/core/Container'
@@ -21,7 +20,8 @@ import StarIcon from '@material-ui/icons/Star'
 import SettingsIcon from '@material-ui/icons/Settings'
 import { makeStyles } from '@material-ui/core/styles'
 import { Scale, Midi } from '@tonaljs/tonal'
-import store, { connectApp } from './redux'
+import { useChords } from './utils'
+import { useSetting } from '../../api/settings'
 
 const ColorHash = require('color-hash')
 const colorHash = new ColorHash({lightness: .5})
@@ -89,7 +89,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-function App() {
+export default function App() {
   const classes = useStyles()
   const [page, setPage] = useState('front')
 
@@ -117,22 +117,14 @@ function App() {
 	)
 }
 
-export default function (props) {
-  return (
-    <Provider store={store}>
-        <App {...props} />
-    </Provider>
-  )
-}
-
-const FrontPage = React.memo(connectApp(function ({detections}) {
+function FrontPage() {
 	return (
     <Fragment>
       <Welcome />
-      <Animations>{Object.values(detections)}</Animations>
+      <Animations />
     </Fragment>
 	)
-}))
+}
 
 function Welcome() {
   const classes = useStyles()
@@ -155,17 +147,19 @@ function Welcome() {
   )
 }
 
-function Animations({children}) {
+const Animations = React.memo(function() {
   const classes = useStyles()
+  const [chords, id] = useChords()
+
+  const [main, ...rest] = chords 
+
   return (
     <TransitionGroup enter component={null}>
-    {children.map((animation) => {
-      const [main, ...rest] = animation.detection
+    {chords.length && 
       // render SVG for each object because react-transition-group renders the elements in reverse order,
       // which doesn't allow to create zIndex-like new-chord-first hierarchy
-      return (
         <CSSTransition
-          key={animation.id}
+          key={id}
           timeout={4000}
           classNames={{
             enter: classes['animation-enter'],
@@ -178,7 +172,7 @@ function Animations({children}) {
             viewBox="0 0 100 100" 
             className={classes.svg}
             style={{
-              zIndex: 100 + animation.id,
+              zIndex: 100 + id,
               }} >
             <g 
               className={classes.detection}>
@@ -208,16 +202,17 @@ function Animations({children}) {
                 )}
             </g>
           </svg>
-        </CSSTransition>
-      )
-    })}
+        </CSSTransition>}
   </TransitionGroup>
   )
-}
+})
 
-const SettingsPage = connectApp(function (
-  {chordDetectionRange, setChordDetectionRange,
-  relativeScale, setRelativeScale}) {
+function SettingsPage() {
+  const [chordDetectionRange, setChordDetectionRange] 
+    = useSetting('chordDetectionRange', [null, null])
+  const [relativeScale, setRelativeScale] 
+    = useSetting('relativeScale', false)
+
   const [showRangeDialog, setShowRangeDialog] = useState(false)
   const [relativeOpen, setRelativeOpen] = useState(false)
   const [start, end] = chordDetectionRange
@@ -270,9 +265,9 @@ const SettingsPage = connectApp(function (
       />
     </Fragment>
   )
-})
+}
 
-const ChordDetectionRangeDialog = connectApp(function (
+const ChordDetectionRangeDialog = function (
   {showRangeDialog, setShowRangeDialog,
   setChordDetectionRange, initialValue}) {
   const classes = useStyles()
@@ -296,7 +291,7 @@ const ChordDetectionRangeDialog = connectApp(function (
     } else {
       newEnd = null
     }
-    setChordDetectionRange(newStart, newEnd)
+    setChordDetectionRange([newStart, newEnd])
   }, [start, end,
     // redux
     setChordDetectionRange])
@@ -332,9 +327,8 @@ const ChordDetectionRangeDialog = connectApp(function (
         </DialogActions>
       </Dialog>
   )
-})
+}
 
 // midiate support
 export { default as config } from './midiate/config'
 export { default as StatusBar } from './midiate/statusBar'
-export { default as createSelectors } from './midiate/selectors'

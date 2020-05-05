@@ -17,7 +17,7 @@ import {
 import ServerHandler from '../handlers/serverHandler'
 import KeyboardHandler from '../handlers/keyboardHandler'
 import WebHandler from '../handlers/webHandler'
-
+import { wrapContext } from '../api/context'
 import StatusBar from './statusBar'
 import LoadingScreen from './loadingScreen'
 import themes from './themes'
@@ -96,8 +96,12 @@ class Client extends React.Component {
 
       // add app to store - positive indices (0, 1, ...)
       const appId = i + 1
+      const appConfig = {
+        ...app.config,
+        appId,
+      }
 
-      this.props.addApp(appId, app.config)
+      this.props.addApp(appId, appConfig)
       // assign selectors as props to app if requested
 			const appSelectors = app.createSelectors ? 
         ((state, ownProps) => app.createSelectors(storeSelectors, state, ownProps)) : null
@@ -109,9 +113,9 @@ class Client extends React.Component {
 
       // save apps on state
       if (app.default)
-        apps[appId] = connectFn(app.default)
+        apps[appId] = wrapContext(connectFn(app.default), appConfig)
       if (app.StatusBar)
-        statusBar[appId] = connectFn(app.StatusBar)
+        statusBar[appId] = wrapContext(connectFn(app.StatusBar), appConfig)
     })
 
     this.setState({apps, statusBar})

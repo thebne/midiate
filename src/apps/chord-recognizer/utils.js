@@ -1,4 +1,7 @@
+import React, { useCallback } from 'react'
 import { Midi, Chord } from "@tonaljs/tonal"
+import { useRelativeChords } from '../../api/chords'
+import { useSetting } from '../../api/settings'
 
 export const arePropsEqual = (prevProps, nextProps) => {
   // compare to avoid re-rendering
@@ -10,8 +13,15 @@ export const arePropsEqual = (prevProps, nextProps) => {
     && prevNotes.every(v => nextNotes.includes(v))
 }
 
-export function detect(notes, relative) {
-  const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
-  // clean capital M for major chords
-  return Chord.detect(current).map(c => c.replace("M", "")).sort(function(a, b){ return a.length - b.length; })
+export function useChords() {
+    const [chordDetectionRange, _] = useSetting('chordDetectionRange', [null, null])
+    const [relativeScale, __] = useSetting('relativeScale', false)
+
+  const filter = useCallback((notes) => {
+    const [start, end] = chordDetectionRange
+    return notes.events.filter(e => {
+      return (start === null || e.key >= start) && (end === null || e.key <= end)
+    }).map(e => e.note)
+  }, [chordDetectionRange])
+  return useRelativeChords(relativeScale, filter)
 }

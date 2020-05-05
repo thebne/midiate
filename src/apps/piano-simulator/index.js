@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react'
-import Piano from '../../gadgets/piano/src'
+import Piano from '../../gadgets/piano'
 import { makeStyles } from '@material-ui/core/styles'
 import { zip } from './utils'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
