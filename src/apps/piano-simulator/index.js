@@ -3,6 +3,7 @@ import Piano from '../../gadgets/piano'
 import { makeStyles } from '@material-ui/core/styles'
 import { zip } from './utils'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
+import { useNotes } from '../../api/notes'
 
 const ANIMATION_DURATION_S = 15
 
@@ -79,7 +80,9 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function PianoSimulator ({ notes }) {
+export default function PianoSimulator () {
+  const notes = useNotes()
+
   // create an Object of {note: "pressed", note: "pressed", ...} for each pressed note
   const pressedClasses = Object.fromEntries(zip([notes, Array(notes.length).fill("pressed")]))
   // create an Object of {note: {pressed: true}, note: {pressed: true}, ...} for each pressed note
@@ -155,4 +158,3 @@ const NoteAnimation = React.memo(({pressed}) => {
 // midiate support
 export { default as config } from './midiate/config'
 export { default as StatusBar } from './midiate/statusBar'
-export { default as createSelectors } from './midiate/selectors'

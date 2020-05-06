@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Midi, Chord, Progression } from "@tonaljs/tonal"
-import { useNotes } from './notes'
+import { useSmartNotes } from './notes'
 
 
 export function detect(notes, relative) {
@@ -11,7 +11,7 @@ export function detect(notes, relative) {
 }
 
 export const useChords = (filterFn=(x)=>x.note) => {
-  const notes = useNotes({mode: 'smart', data: 'extended'})
+  const notes = useSmartNotes({data: 'extended'})
   const [detections, setDetections] = useState([])
   const [id, setId] = useState(null)
 

@@ -2,27 +2,29 @@ import React, { useLayoutEffect, useState } from 'react'
 import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import { Note } from "@tonaljs/tonal"
+import { useLastEvent } from '../../api/events'
 import Piano from '../../gadgets/piano'
 import styles from './style.module.css'
 
-export default function LastNote(props) {
-  const[pressed, setPressed] = useState({})
-  const[toggle, setToggle] = useState(false)
-  const[max, setMax] = useState(1)
+export default function Heatmap() {
+  const lastEvent = useLastEvent()
+  const [pressed, setPressed] = useState({})
+  const [toggle, setToggle] = useState(false)
+  const [max, setMax] = useState(1)
 
   let heights = {}
   let colors = {}
   
   useLayoutEffect(() => {	 
 	 // show animation only for note press
-	 if (!props.lastEvent || props.lastEvent.messageType !== 'noteon') {
+	 if (!lastEvent || lastEvent.messageType !== 'noteon') {
 		return 
 	 }
 
    setPressed(pressed => {
      let newPressed = {...pressed}
      // update note frequency dict
-     let n = props.lastEvent.note	
+     let n = lastEvent.note	
      if (newPressed[n]) {
        newPressed[n] += 15	
      }
@@ -31,7 +33,7 @@ export default function LastNote(props) {
      }
      return newPressed
    })
-  }, [props.lastEvent])  		
+  }, [lastEvent])  		
 
 	for (const [note, x] of Object.entries(pressed)) {			
 		
@@ -81,4 +83,3 @@ function calculateHeight(x, min, max) {
   
 // midiate support
 export { default as config } from './midiate/config'
-export { default as createSelectors } from './midiate/selectors'

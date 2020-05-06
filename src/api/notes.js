@@ -1,48 +1,98 @@
+import { useState, useEffect, useRef } from 'react'
 import { createSelector } from 'reselect'
 import { useSelector } from 'react-redux'
-import { getEventsState } from './events'
+import { useLastEvent } from './events'
 
-const makeGetNotes = (config={}) => {
-  const {mode="loose", data="simple"} = config
-  const noteSelector = (() => {
-    switch (mode) {
-      case 'loose':
-        return getLooseNotes
-      case 'smart':
-        return getSmartNotes
-      default:
-        throw new Error(`unknown mode ${mode}`)
-    }})()
+export const useNotes = (config={}) => {
+  const {data='simple'} = config
+  const lastEvent = useLastEvent()
+  const [notes, setNotes] = useState([])
 
-  return createSelector(
-    [noteSelector],
-    notes => {
-      switch (data) {
-        case 'simple':
-          if (mode === 'smart') {
-            return {
-              ...notes,
-              events: notes.events.map(e => e.note)
-            }
-          }
-          return notes.map(e => e.note)
-        case 'extended':
-          return notes
-        default:
-          throw new Error(`unknown data type ${data}`)
-      }
+  useEffect(() => {
+    if (!lastEvent) {
+      return 
     }
-  )
+    setNotes(notes => {
+      const newNotes = [...notes]
+      switch (lastEvent.messageType) {
+        case 'noteon': 
+          return newNotes.concat({...lastEvent})
+        
+        case 'noteoff': 
+          return newNotes.filter(n => n.key !== lastEvent.key)
+      }
+      return notes 
+    })
+  }, [lastEvent])
+
+  switch (data) {
+    case 'simple':
+      return notes.map(n => n.note)
+    case 'extended':
+      return notes
+    default:
+      throw new Error(`unknown data mode ${data}`)
+  }
 }
 
-const getLooseNotes = createSelector(
-  [getEventsState],
-  events => events.notes || []
-)
+export const useSmartNotes = (config={}) => {
+  const {data='simple'} = config
+  const lastEvent = useLastEvent()
+  const notes = useNotes({data: 'extended'})
+  const prevNotes = usePrevious(notes)
+  const [smartNotes, setSmartNotes] = useState({id: 0, events: []})
 
-const getSmartNotes = createSelector(
-  [getEventsState],
-  events => events.smartNotes
-)
+  useEffect(() => {
+    if (!lastEvent) {
+      return
+    }
+    setSmartNotes(smartNotes => {
+      switch (lastEvent.messageType) {
+        case 'noteon': 
+        case 'noteoff': 
+          const prevId = smartNotes.id
+          const prevKeys = prevNotes.map(e => e.key)
+          const nextKeys = notes.map(e => e.key)
 
-export const useNotes = cfg => useSelector(makeGetNotes(cfg))
+          // handle alteration of current notes
+          if (smartNotes.events.length) {
+            if (nextKeys.length === 0) {
+            // all notes removed
+              return {
+                events: [],
+                id: prevId + 1,
+              }
+            }
+            else if (isSubset(nextKeys, prevKeys)) {
+              // notes were removed, but not all - not a new detection
+              return smartNotes
+            } else {
+              return {
+                events: [...notes],
+                id: prevId, 
+              }
+            }
+          }
+
+          return {
+            events: [...notes],
+            id: prevId + 1,
+          }
+        default:
+          return smartNotes
+      }
+    })
+  }, [notes, prevNotes, lastEvent])
+  return smartNotes
+}
+
+// is a subset of b
+const isSubset = (a, b) => a.every(val => b.includes(val))
+
+function usePrevious(value) {
+  const ref = useRef()
+  useEffect(() => {
+    ref.current = value
+  })
+  return ref.current
+}

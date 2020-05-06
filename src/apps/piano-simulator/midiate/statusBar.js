@@ -1,9 +1,10 @@
 import React, { Fragment } from 'react'
 import { Note } from '@tonaljs/tonal'
-
+import { useLastEvent } from '../../../api/events'
 import styles from '../style.module.css'
 
-export default ({lastEvent}) => {
+export default () => {
+  const lastEvent = useLastEvent()
   let name, scale, class_ 
   if (lastEvent && lastEvent.note) {
     name = Note.pitchClass(lastEvent.note)
