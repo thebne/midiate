@@ -6,13 +6,13 @@ import Paper from '@material-ui/core/Paper'
 import AppDefaultIcon from '@material-ui/icons/MusicVideo'
 import { makeStyles } from '@material-ui/core/styles'
 
-import { DEFAULT_APP_ID } from '../constants'
+import { DEFAULT_APP_ID } from '../../../constants'
 import { 
   switchForegroundApp,
-} from '../redux/actions'
+} from '../../../redux/actions'
 import { 
   getApps,
-} from '../redux/selectors'
+} from '../../../redux/selectors'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-function AppButton({switchForegroundApp, appId, config}) {
+function AppButton({switchForegroundApp, config}) {
   const classes = useStyles()
 
   if (config.showInMenu === false)
@@ -55,7 +55,7 @@ function AppButton({switchForegroundApp, appId, config}) {
 
   return (
     <Paper className={classes.paper}
-      onClick={() => switchForegroundApp(appId)}>
+      onClick={() => switchForegroundApp(config.id)}>
       {config.icon || <AppDefaultIcon />}
       <Typography variant="button">{config.name}</Typography>
     </Paper>
@@ -69,7 +69,7 @@ function DefaultApp({apps, switchForegroundApp}) {
   return (
     <Container maxWidth={null} className={classes.container}>
       {Object.values(apps).map(app => (
-        <AppButton {...app} key={app.appId}
+        <AppButton config={app} key={app.id}
           switchForegroundApp={switchForegroundApp} />
       ))}
     </Container>

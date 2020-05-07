@@ -20,7 +20,7 @@ import StarIcon from '@material-ui/icons/Star'
 import SettingsIcon from '@material-ui/icons/Settings'
 import { makeStyles } from '@material-ui/core/styles'
 import { Scale, Midi } from '@tonaljs/tonal'
-import { useChords } from './utils'
+import { useChords, arePropsEqual } from './utils'
 import { useSetting } from '../../api/settings'
 
 const ColorHash = require('color-hash')
@@ -118,10 +118,11 @@ export default function App() {
 }
 
 function FrontPage() {
+  const [chords, id] = useChords()
 	return (
     <Fragment>
       <Welcome />
-      <Animations />
+      <Animations chords={chords} id={id} />
     </Fragment>
 	)
 }
@@ -147,10 +148,8 @@ function Welcome() {
   )
 }
 
-const Animations = React.memo(function() {
+const Animations = React.memo(function({chords, id}) {
   const classes = useStyles()
-  const [chords, id] = useChords()
-
   const [main, ...rest] = chords 
 
   return (
@@ -205,7 +204,7 @@ const Animations = React.memo(function() {
         </CSSTransition>}
   </TransitionGroup>
   )
-})
+}, arePropsEqual)
 
 function SettingsPage() {
   const [chordDetectionRange, setChordDetectionRange] 

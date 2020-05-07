@@ -12,10 +12,10 @@ export const getLastEvent = createSelector(
 
 export const useLastEvent = () => useSelector(getLastEvent)
 export const useSendEvent = () => {
-  const {appId} = useAppContext()
+  const appId = useAppContext().id
   const dispatch = useDispatch()
   return useCallback(
     (deltaTime, msg) => dispatch(sendCustomEvent(deltaTime, msg, appId)),
-    [dispatch]
+    [dispatch, appId]
   )
 }

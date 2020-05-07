@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 import Piano from '../../gadgets/piano'
 import { makeStyles } from '@material-ui/core/styles'
 import { zip } from './utils'
@@ -88,51 +88,29 @@ export default function PianoSimulator () {
   // create an Object of {note: {pressed: true}, note: {pressed: true}, ...} for each pressed note
   const pressedProps = Object.fromEntries(zip([notes, Array(notes.length).fill({pressed: true})]))
   return (
-    <Fragment>
-      <Piano 
-        NoteEffectComponent={NoteAnimation} 
-        NoteEffectProps={pressedProps}
-        classNames={pressedClasses} 
-        startNote="A0" endNote="C8"
-      />
-    </Fragment>
+    <Piano 
+      NoteEffectComponent={NoteAnimation} 
+      NoteEffectProps={pressedProps}
+      classNames={pressedClasses} 
+      startNote="A0" endNote="C8"
+    />
   )
 }
 
 const NoteAnimation = React.memo(({pressed}) => {
   const classes = useStyles()
-  const [animationTime, setAnimationTime] = useState(null)
   
-  useEffect(() => {
-    setAnimationTime(time => {
-      if (pressed) {
-        if (time == null) {
-          // new note-on event
-          return new Date().getTime()
-        }
-        return time
-      }
-      if (time === null) {
-        // note-off, but it's already off
-        return time
-      }
-      // note-off with current animation active
-      return null
-    })
-  }, [pressed])
-
-  const applyFixedTransform = node => {
+  const applyFixedTransform = useCallback(node => {
     const body = node.getElementsByClassName(classes.body)[0]
     const {height} = window.getComputedStyle(body)
     body.style.maxHeight = `${height}`
-  }
-
+  }, [classes])
 
   return (
     <TransitionGroup component={null}>
-      {animationTime !== null &&
+      {pressed &&
         <CSSTransition
-          key={animationTime}
+          key={new Date().getTime()}
           timeout={ANIMATION_DURATION_S * 1000 / 2}
           classNames={{
             enter: classes['animation-enter'],
@@ -154,7 +132,5 @@ const NoteAnimation = React.memo(({pressed}) => {
   )
 })
 
-
-// midiate support
 export { default as config } from './midiate/config'
 export { default as StatusBar } from './midiate/statusBar'

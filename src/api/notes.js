@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { createSelector } from 'reselect'
-import { useSelector } from 'react-redux'
 import { useLastEvent } from './events'
 
 export const useNotes = (config={}) => {
@@ -20,8 +18,9 @@ export const useNotes = (config={}) => {
         
         case 'noteoff': 
           return newNotes.filter(n => n.key !== lastEvent.key)
+        default:
+          return notes
       }
-      return notes 
     })
   }, [lastEvent])
 
@@ -51,7 +50,7 @@ export const useSmartNotes = (config={}) => {
         case 'noteon': 
         case 'noteoff': 
           const prevId = smartNotes.id
-          const prevKeys = prevNotes.map(e => e.key)
+          const prevKeys = (prevNotes || []).map(e => e.key)
           const nextKeys = notes.map(e => e.key)
 
           // handle alteration of current notes
@@ -83,7 +82,15 @@ export const useSmartNotes = (config={}) => {
       }
     })
   }, [notes, prevNotes, lastEvent])
-  return smartNotes
+
+  switch (data) {
+    case 'simple':
+      return smartNotes.map(n => n.note)
+    case 'extended':
+      return smartNotes
+    default:
+      throw new Error(`unknown data mode ${data}`)
+  }
 }
 
 // is a subset of b

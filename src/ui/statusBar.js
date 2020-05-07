@@ -15,7 +15,7 @@ import { PROGRAM_NAME, DEFAULT_APP_ID } from '../constants'
 import { ReactComponent as Logo } from '../logo.svg'
 import { 
   getForegroundAppId,
-  getAppConfig,
+  getApp
 } from '../redux/selectors'
 import { 
   switchForegroundApp, 
@@ -92,8 +92,9 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
               {statusBar.map(item => item != null ? 
                 <IconButton 
                   color="inherit" 
-                  key={item.props.appId}
-                  onClick={() => switchForegroundApp(item.props.appId)} 
+                  key={item.props.config.id}
+                  onClick={() => switchForegroundApp(
+                    item.props.config.statusBarAction || item.props.config.id)} 
                   className={classes.statusBarItem}
                 >
                   {item}
@@ -140,7 +141,7 @@ const AppTitle = React.memo(
 
 export default connect((state) => ({
     foregroundAppId: getForegroundAppId(state),
-    foregroundAppConfig: getAppConfig(state, getForegroundAppId(state)),
+    foregroundAppConfig: getApp(state, getForegroundAppId(state)),
 }), {
   switchForegroundApp
 })(StatusBar)

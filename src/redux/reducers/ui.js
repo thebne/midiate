@@ -25,7 +25,7 @@ const ui = (state = initialState, action) => {
         ...state,
         appIdToConfig: {
           ...state.appIdToConfig,
-          [action.payload.appId]: action.payload
+          [action.payload.appId]: action.payload.config
         }
       }
     }

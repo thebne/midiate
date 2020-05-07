@@ -1,8 +1,12 @@
 import React from 'react'
-import { useChords } from '../utils'
+import { useChords, arePropsEqual } from '../utils'
 
-export default React.memo(function () {
-  const [chords, id] = useChords()
+const Detection = React.memo(function ({chords}) {
   const detection = chords.length ? chords[0] : <i style={{color: '#ccc'}}>chord</i>
   return <span>{detection}</span>
-})
+}, arePropsEqual)
+
+export default function StatusBar() {
+  const [chords, id] = useChords()
+  return <Detection chords={chords} id={id} />
+}

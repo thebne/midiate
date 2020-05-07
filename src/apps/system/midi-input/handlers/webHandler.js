@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { sendMidiEvent, setMidiDevices } from "../redux/actions"
-import { isMidiInputActive } from "../redux/selectors"
+import { sendMidiEvent, setMidiDevices } from "../../../../redux/actions"
+import { isMidiInputActive } from "../../../../redux/selectors"
 
 // uses WebMIDI
 function WebHandler({isMidiInputActive, sendMidiEvent, setMidiDevices}) {

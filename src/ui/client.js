@@ -10,22 +10,15 @@ import { addApp, switchForegroundApp } from '../redux/actions'
 import { 
   getForegroundAppId, 
   getIsAnyMidiInputActive,
-  getAppConfig,
+  getApp,
   getThemeId,
 } from '../redux/selectors'
 
-import ServerHandler from '../handlers/serverHandler'
-import KeyboardHandler from '../handlers/keyboardHandler'
-import WebHandler from '../handlers/webHandler'
 import { wrapContext } from '../api/context'
 import StatusBar from './statusBar'
 import LoadingScreen from './loadingScreen'
 import themes from './themes'
 import { SETTINGS_APP_ID } from '../constants'
-
-// passing this reference to apps later on
-import * as storeSelectors from '../redux/selectors'
-import * as storeActions from '../redux/actions'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -66,24 +59,22 @@ class Client extends React.Component {
     this.state = {
       statusBar: {}, 
       apps: {},
+      backgroundTasks: {},
     }
   }
 
   componentDidMount() {
-    let statusBar = {}, apps = {}
+    let statusBar = {}, apps = {}, backgroundTasks = {}
 
-    // load system apps
-    const systemApps = [
-      require('./defaultApp'), 
-      require('./settingsApp'), 
-    ]
-    systemApps.forEach(app => {
+    const allAppsToLoad = []
+    // load system apps from config file 
+    const systemAppsFromConfig = require('../apps/system')
+    systemAppsFromConfig.default.forEach(app => {
       if (!app.config || typeof app.config.id !== "string") {
         throw new Error(`system app does not define valid id`)
       }
-      
-      this.props.addApp(app.config.id, app.config)
-      apps[app.config.id] = app.default
+
+      allAppsToLoad.push([app, app.config])
     })
 
     // load apps from config file 
@@ -95,46 +86,48 @@ class Client extends React.Component {
       }
 
       // add app to store - positive indices (0, 1, ...)
-      const appId = i + 1
       const appConfig = {
         ...app.config,
-        appId,
+        id: i + 1,
       }
+      allAppsToLoad.push([app, appConfig])
 
+
+
+    })
+    for (const [app, appConfig] of allAppsToLoad) {
+      const appId = appConfig.id
       this.props.addApp(appId, appConfig)
-      // assign selectors as props to app if requested
-			const appSelectors = app.createSelectors ? 
-        ((state, ownProps) => app.createSelectors(storeSelectors, state, ownProps)) : null
-      // assign dispatchers as props to app if requested
-			const appDispatchers = app.createDispatchers ? 
-        ((dispatch, ownProps) => app.createDispatchers(storeActions, dispatch, ownProps)) : null
-      // finally, connect app to requested apis using redux
-			let connectFn = connect(appSelectors, appDispatchers)
-
       // save apps on state
       if (app.default)
-        apps[appId] = wrapContext(connectFn(app.default), appConfig)
+        apps[appId] = wrapContext(app.default, appConfig)
       if (app.StatusBar)
-        statusBar[appId] = wrapContext(connectFn(app.StatusBar), appConfig)
-    })
+        statusBar[appId] = wrapContext(app.StatusBar, appConfig)
+      if (app.BackgroundTask)
+        backgroundTasks[appId] = wrapContext(app.BackgroundTask, appConfig)
+    }
 
-    this.setState({apps, statusBar})
+    this.setState({apps, statusBar, backgroundTasks})
   }
 
   render() {
-    const {apps, statusBar} = this.state
-    const {foregroundAppId, getAppConfig} = this.props
+    const {apps, statusBar, backgroundTasks} = this.state
+    const {foregroundAppId, getApp} = this.props
 
     let app
     if (apps[foregroundAppId]) {
-      app = React.createElement(apps[foregroundAppId], {appId: foregroundAppId, config: getAppConfig(foregroundAppId)})
+      app = React.createElement(apps[foregroundAppId], {config: getApp(foregroundAppId)})
     }
     const bars = Object.entries(statusBar).map(([id, s]) => 
-      React.createElement(s, {appId: id, config: getAppConfig(id)}))
+      React.createElement(s, {config: getApp(id)}))
+
+    const tasks = Object.entries(backgroundTasks).map(([id, s]) => 
+      React.createElement(s, {config: getApp(id), key: id}))
 
     // render with all the other UI elements
 		return (
       <Content {...this.props} statusBar={bars}>
+        {tasks}
         {app}
       </Content>
     )
@@ -145,10 +138,6 @@ class Client extends React.Component {
 function Content(props) {
   return (
     <ThemeProvider theme={props.theme}> 
-      {/* handles */}
-      <KeyboardHandler />
-      <WebHandler />		
-      <ServerHandler />
       {/* css */}
       <CssBaseline />
       {/* content */}
@@ -194,7 +183,7 @@ function AppLayout(props) {
 export default connect(
   (state, ownProps) => ({
     foregroundAppId: getForegroundAppId(state),
-    getAppConfig: id => getAppConfig(state, id),
+    getApp: id => getApp(state, id),
     isAnyMidiInputActive: getIsAnyMidiInputActive(state),
     theme: themes[getThemeId(state)].theme,
   }),

@@ -17,9 +17,6 @@ export const getForegroundAppId = createSelector(
 export const getApp = (store, appId) => 
   getApps(store)[appId] || {}
 
-export const getAppConfig = (store, appId) => 
-  getApp(store, appId).config || {}
-
 export const getThemeId = createSelector(
   [getSettingsState],
   settings => settings.themeId || 0
@@ -58,52 +55,4 @@ export const getIsAnyMidiInputActive = createSelector(
 export const getMidiServerConnectionStatus = createSelector(
   [getUiState],
   ui => ui.midiServerConnectionStatus
-)
-
-export const makeGetNotes = (config={}) => {
-  const {mode="loose", data="simple"} = config
-  const noteSelector = (() => {
-    switch (mode) {
-      case 'loose':
-        return getLooseNotes
-      case 'smart':
-        return getSmartNotes
-      default:
-        throw new Error(`unknown mode ${mode}`)
-    }})()
-
-  return createSelector(
-    [noteSelector],
-    notes => {
-      switch (data) {
-        case 'simple':
-          if (mode === 'smart') {
-            return {
-              ...notes,
-              events: notes.events.map(e => e.note)
-            }
-          }
-          return notes.map(e => e.note)
-        case 'extended':
-          return notes
-        default:
-          throw new Error(`unknown data type ${data}`)
-      }
-    }
-  )
-}
-
-const getLooseNotes = createSelector(
-  [getEventsState],
-  events => events.notes || []
-)
-
-const getSmartNotes = createSelector(
-  [getEventsState],
-  events => events.smartNotes
-)
-
-export const getLastEvent = createSelector(
-  [getEventsState],
-  events => events.lastEvent
 )

@@ -3,8 +3,6 @@ import { connect } from 'react-redux'
 import Button from '@material-ui/core/Button'
 import Fade from '@material-ui/core/Fade'
 import Chip from '@material-ui/core/Chip'
-import Container from '@material-ui/core/Container'
-import Radio from '@material-ui/core/Radio'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import DialogContent from '@material-ui/core/DialogContent'
@@ -21,20 +19,15 @@ import DoneIcon from '@material-ui/icons/Done'
 import ErrorIcon from '@material-ui/icons/Error'
 import UsbIcon from '@material-ui/icons/Usb'
 import PublicIcon from '@material-ui/icons/Public'
-import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import { makeStyles } from '@material-ui/core/styles'
-import { SETTINGS_APP_ID } from '../constants'
-import themes from './themes'
 import { 
   toggleMidiInput, setMidiServerHost,
-  setThemeId, 
-} from '../redux/actions'
+} from '../../../redux/actions'
 import { 
   getMidiInputs, 
   getMidiServerHost, 
   getMidiServerConnectionStatus,
-  getThemeId,
-} from '../redux/selectors'
+} from '../../../redux/selectors'
 
 const useStyles = makeStyles(theme => ({
   dialogRoot: {
@@ -121,14 +114,7 @@ function ConnectToServerListItem({midiServerHost, midiServerConnectionStatus,
   )
 }
 
-const MidiInputs = connect(
-  state => ({
-    midiInputs: getMidiInputs(state),
-    midiServerHost: getMidiServerHost(state),
-    midiServerConnectionStatus: getMidiServerConnectionStatus(state),
-  }),
-  { toggleMidiInput, setMidiServerHost }
-)(({midiInputs, toggleMidiInput, 
+const MidiInputs = (({midiInputs, toggleMidiInput, 
   midiServerHost, setMidiServerHost, midiServerConnectionStatus}) => {
   return (
     <List subheader={<ListSubheader>MIDI Inputs</ListSubheader>}>
@@ -158,44 +144,11 @@ const MidiInputs = connect(
   )
 })
 
-const ThemeSelector = connect(
+export default connect(
   state => ({
-    themeId: getThemeId(state),
+    midiInputs: getMidiInputs(state),
+    midiServerHost: getMidiServerHost(state),
+    midiServerConnectionStatus: getMidiServerConnectionStatus(state),
   }),
-  { setThemeId }
-)(({themeId, setThemeId}) => {
-  return (
-    <List subheader={<ListSubheader>Theme</ListSubheader>}>
-      {themes.map(({name, description}, id) => (
-        <ListItem button onClick={() => setThemeId(id)} key={id}>
-          <ListItemIcon>
-            <Radio
-              edge="start"
-              checked={id === themeId}
-              />
-          </ListItemIcon>
-          <ListItemText primary={name} secondary={description} />
-        </ListItem>
-      ))}
-    </List>
-  )
-})
-
-
-
-function SettingsApp() {
-  return (
-    <Container>
-      <MidiInputs />
-      <ThemeSelector />
-    </Container>
-  )
-}
-
-export const config = {
-  id: SETTINGS_APP_ID,
-  name: 'Settings',
-  icon: <SettingsApplicationsIcon />,
-}
-
-export default SettingsApp
+  { toggleMidiInput, setMidiServerHost }
+)(MidiInputs)

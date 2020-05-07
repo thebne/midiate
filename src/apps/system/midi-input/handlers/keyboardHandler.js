@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { sendKeyboardEvent } from "../redux/actions"
+import { sendKeyboardEvent } from "../../../../redux/actions"
 
 const VELOCITY_MAX = 127
 const VELOCITY_MID = 64

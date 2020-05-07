@@ -1,9 +1,9 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { connect } from 'react-redux'
-import { getMidiServerHost } from '../redux/selectors'
+import { getMidiServerHost } from '../../../../redux/selectors'
 import { 
   sendServerEvent, setMidiServerConnectionStatus 
-} from "../redux/actions"
+} from "../../../../redux/actions"
 
 let connection = {
   host: '',

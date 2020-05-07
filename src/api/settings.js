@@ -18,19 +18,29 @@ const makeGetAppSpecificValue = (appId, key) => {
 
 export const useSetting = (key, defaultValue) => {
   const dispatch = useDispatch()
-  const {appId} = useAppContext()
+  const appId = useAppContext().id
   const selector = useMemo(() => makeGetAppSpecificValue(appId, key),
     [appId, key])
-  const val = useSelector(selector)
+  const value = useSelector(selector)
   const setValue = useCallback(
-    v => dispatch(setAppSpecificValue(appId, key, v))
-  , [dispatch])
+    v => {
+      if (typeof v === 'function') {
+        v = v(value)
+        if (v === value)
+          return
+      }
+      return dispatch(setAppSpecificValue(appId, key, v))
+    }
+  , [dispatch, appId, key/*, value - causes infinite loop FIXME */])
   // set for first time
   useEffect(() => {
-    if (val === undefined && defaultValue !== undefined) {
-      setValue(defaultValue)
-    }
-  }, [])
+    setValue(oldValue => {
+      if (oldValue === undefined && defaultValue !== undefined) {
+        return defaultValue
+      }
+      return oldValue
+    })
+  }, [setValue, defaultValue])
 
-  return [val, setValue]
+  return [value === undefined ? defaultValue : value, setValue]
 }

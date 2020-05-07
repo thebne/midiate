@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { Note } from "@tonaljs/tonal"
-import { getIsActive, setIsActive } from '../active'
-import { register, unregister, focusByNote, clickByNote } from '../mutator'
-import styles from '../style.module.css'
+import { useLastEvent } from '../../../api/events'
+import { getIsActive, setIsActive } from './active'
+import { register, unregister, focusByNote, clickByNote } from './mutator'
+import styles from './style.module.css'
 
 // TODO move to settings
 const MAGIC_NOTE = 'A1'
 const MAGIC_NOTE_DELAY_MS = 2000
 
-export default ({lastEvent}) => {
+export default () => {
   const [readyToToggle, setReadyToToggle] = useState(false)
   const [magicNoteTimer, setMagicNoteTimer] = useState(null)
+  const lastEvent = useLastEvent()
 
   // register on load
   useEffect(() => {

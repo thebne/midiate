@@ -2,15 +2,16 @@ import React, { useState, useLayoutEffect } from 'react'
 import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
+import { useLastEvent } from '../../../api/events'
 
 import './style.module.css'
 import { getIsActive, setIsActive } from './active'
 
 export * from './mutator'
   
-// midiate support
-export default ({lastEvent}) => {
+export default () => {
   const [stateActive, setStateActive] = useState(false)
+  const lastEvent = useLastEvent()
 
   const toggle = () => {
     setIsActive(!getIsActive())
@@ -29,6 +30,11 @@ export default ({lastEvent}) => {
     </Container>
   )
 }
-export { default as config } from './midiate/config'
-export { default as StatusBar } from './midiate/statusBar'
-export { default as createSelectors } from './midiate/selectors'
+export const config = {
+  id: "SHORTCUTS",
+  showInMenu: false,
+}
+
+export { default as StatusBar } from './statusBar'
+export { default as BackgroundTask } from './backgroundTask'
+
