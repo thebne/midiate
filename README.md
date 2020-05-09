@@ -130,7 +130,7 @@ import { useNotes } from '../../api/notes'
 import { useChords } from '../../api/chords'
 import { useSessionValue } from '../../api/settings'
 ```
-### Define session values
+#### Define session values
 ```js
 // it's recommended to put settings in a common place
 const useNotesHistory = () => 
