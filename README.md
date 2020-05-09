@@ -3,7 +3,7 @@ MIDIate
 ========
 
 MIDIate is a platform of MIDI-based apps, designed to be easily extensible (via React).
-**Visit midiate.now.sh** to see the latest version.
+### **[Visit midiate.now.sh](https://midiate.now.sh)** to see the latest version.
 
 Features
 --------
