@@ -10,6 +10,7 @@ function WebHandler({isMidiInputActive, sendMidiEvent, setMidiDevices}) {
       const createOnMidiMessage = (inputId, inputName) => {
         let prevTime = null
         return message => {
+          console.log('midi event')
           if (!isMidiInputActive(inputId))
             return
 
@@ -53,7 +54,10 @@ function WebHandler({isMidiInputActive, sendMidiEvent, setMidiDevices}) {
     })
   }, [
     // redux
-    sendMidiEvent, isMidiInputActive, setMidiDevices])
+    sendMidiEvent, setMidiDevices,
+    // FIXME isMidiInputActive() causes this to re-register every time
+    //isMidiInputActive,
+  ])
 
   return <Fragment />
 }

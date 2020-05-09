@@ -33,16 +33,12 @@ const makeUseValue = (makeSelectorFn, actionFn) =>
   (key, defaultValue) => {
     const dispatch = useDispatch()
     const appId = useAppContext().id
-    const selector = useMemo(() => makeSelectorFn(appId, key),
-      [appId, key])
-    const value = useSelector(selector)
+    const value = useSelector(makeSelectorFn(appId, key))
     const setValue = useCallback(
       v =>  dispatch(actionFn(appId, key, v))
     , [dispatch, appId, key])
 
-    return useMemo(() =>
-      [value === undefined ? defaultValue : value, setValue],
-      [value, defaultValue, setValue])
+    return [value === undefined ? defaultValue : value, setValue]
   }
 
 export const useSetting = makeUseValue(
