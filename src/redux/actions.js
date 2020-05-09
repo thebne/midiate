@@ -7,7 +7,8 @@ import {
   SET_MIDI_SERVER_HOST,
   SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_THEME_ID,
-  SET_APP_SPECIFIC_VALUE,
+  SET_APP_SPECIFIC_PERSISTENT_VALUE,
+  SET_APP_SPECIFIC_SESSION_VALUE,
 } from './actionTypes'
 
 export const switchForegroundApp = appId => ({
@@ -65,7 +66,11 @@ export const setThemeId = id => ({
   payload: id,
 })
 
-export const setAppSpecificValue = (appId, key, value) => ({
-  type: SET_APP_SPECIFIC_VALUE, 
+export const setAppSpecificPersistentValue = (appId, key, value) => ({
+  type: SET_APP_SPECIFIC_PERSISTENT_VALUE, 
+  payload: {appId, key, value},
+})
+export const setAppSpecificSessionValue = (appId, key, value) => ({
+  type: SET_APP_SPECIFIC_SESSION_VALUE, 
   payload: {appId, key, value},
 })

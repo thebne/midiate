@@ -1,5 +1,9 @@
-import { SET_MIDI_DEVICES, SWITCH_APP, ADD_APP,
-  SET_MIDI_SERVER_CONNECTION_STATUS
+import { 
+  SET_MIDI_DEVICES, 
+  SWITCH_APP, 
+  ADD_APP,
+  SET_MIDI_SERVER_CONNECTION_STATUS,
+  SET_APP_SPECIFIC_SESSION_VALUE,
 } from "../actionTypes"
 
 import { DEFAULT_APP_ID } from '../../constants'
@@ -10,6 +14,7 @@ const initialState = {
   midiServerConnectionStatus: false,
   foregroundApp: DEFAULT_APP_ID,
   appIdToConfig: {},
+  appSpecific: {},
 }
 
 const ui = (state = initialState, action) => {
@@ -42,7 +47,18 @@ const ui = (state = initialState, action) => {
         midiServerConnectionStatus: action.payload,
       }
     }
-
+    case SET_APP_SPECIFIC_SESSION_VALUE: {
+      return {
+        ...state,
+        appSpecific: {
+          ...state.appSpecific,
+          [action.payload.appId]: {
+            ...state.appSpecific[action.payload.appId],
+            [action.payload.key]: action.payload.value,
+          }
+        },
+      }
+    }
     default: {
       return state
     }

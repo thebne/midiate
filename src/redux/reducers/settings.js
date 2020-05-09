@@ -2,7 +2,7 @@ import {
   TOGGLE_MIDI_INPUT, 
   SET_MIDI_SERVER_HOST,
   SET_THEME_ID,
-  SET_APP_SPECIFIC_VALUE,
+  SET_APP_SPECIFIC_PERSISTENT_VALUE,
 } from "../actionTypes"
 
 const initialState = {
@@ -37,7 +37,7 @@ const settings = (state = initialState, action) => {
         themeId: action.payload
       }
     }
-    case SET_APP_SPECIFIC_VALUE: {
+    case SET_APP_SPECIFIC_PERSISTENT_VALUE: {
       return {
         ...state,
         appSpecific: {

@@ -3,13 +3,13 @@ import Tooltip from '@material-ui/core/Tooltip'
 import SlowMotionVideoIcon from '@material-ui/icons/SlowMotionVideo'
 import Badge from '@material-ui/core/Badge'
 import { green, red } from '@material-ui/core/colors'
-import { useSetting } from '../../../api/settings'
 import { useMidiOutputs } from '../../../api/midi'
+import { useTranspose, useActiveOutputs } from './settings'
 
 export default function StatusBar () {
   const midiOutputs = useMidiOutputs()
-  const [activeOutputs] = useSetting('activeOutputs', [])
-  const [transpose] = useSetting('transpose', 0)
+  const [activeOutputs] = useActiveOutputs()
+  const [transpose] = useTranspose()
   
   const activeDevices = midiOutputs.filter(p => activeOutputs.indexOf(p.id) !== -1).length
   let outputsRepr

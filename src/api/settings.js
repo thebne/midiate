@@ -1,32 +1,51 @@
-import { useMemo, useEffect, useCallback } from 'react'
+import { useMemo, useCallback } from 'react'
 import { createSelector } from 'reselect'
 import { useSelector, useDispatch } from 'react-redux'
-import { setAppSpecificValue } from '../redux/actions'
+import { setAppSpecificSessionValue,
+  setAppSpecificPersistentValue } from '../redux/actions'
 import { useAppContext } from './context'
 
 const getSettingsState = store => store.settings
-const getAppSpecificSettings = createSelector(
+const getAppSpecificPersistent = createSelector(
   [getSettingsState],
   settings => settings.appSpecific || {}
 )
-const makeGetAppSpecificValue = (appId, key) => {
+const makeGetAppSpecificPersistentValue = (appId, key) => {
   return createSelector(
-    [getAppSpecificSettings],
+    [getAppSpecificPersistent],
     appSpecific => (appSpecific[appId] || {})[key]
   )
 }
 
-export const useSetting = (key, defaultValue) => {
-  const dispatch = useDispatch()
-  const appId = useAppContext().id
-  const selector = useMemo(() => makeGetAppSpecificValue(appId, key),
-    [appId, key])
-  const value = useSelector(selector)
-  const setValue = useCallback(
-    v =>  dispatch(setAppSpecificValue(appId, key, v))
-  , [dispatch, appId, key])
-
-  return useMemo(() =>
-    [value === undefined ? defaultValue : value, setValue],
-    [value, defaultValue, setValue])
+const getUiState = store => store.ui
+const getAppSpecificSession = createSelector(
+  [getUiState],
+  ui => ui.appSpecific || {}
+)
+const makeGetAppSpecificSessionValue = (appId, key) => {
+  return createSelector(
+    [getAppSpecificSession],
+    appSpecific => (appSpecific[appId] || {})[key]
+  )
 }
+
+const makeUseValue = (makeSelectorFn, actionFn) => 
+  (key, defaultValue) => {
+    const dispatch = useDispatch()
+    const appId = useAppContext().id
+    const selector = useMemo(() => makeSelectorFn(appId, key),
+      [appId, key])
+    const value = useSelector(selector)
+    const setValue = useCallback(
+      v =>  dispatch(actionFn(appId, key, v))
+    , [dispatch, appId, key])
+
+    return useMemo(() =>
+      [value === undefined ? defaultValue : value, setValue],
+      [value, defaultValue, setValue])
+  }
+
+export const useSetting = makeUseValue(
+  makeGetAppSpecificPersistentValue, setAppSpecificPersistentValue)
+export const useSessionValue = makeUseValue(
+  makeGetAppSpecificSessionValue, setAppSpecificSessionValue)

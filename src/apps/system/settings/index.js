@@ -48,12 +48,13 @@ export default function SettingsApp() {
   return (
     <Container>
       <ThemeSelector />
-      {systemApps.map(app =>
-        app.settings && 
-          <React.Fragment key={app.config.id}>
-            {React.createElement(wrapContext(app.settings, app.config))}
-          </React.Fragment>
-      )}
+      {systemApps.map(app => {
+        if (!app.settings)
+          return null
+        
+        const Wrapped = wrapContext(app.settings, app.config)
+        return <Wrapped key={app.config.id} />
+      })}
     </Container>
   )
 }

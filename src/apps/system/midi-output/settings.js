@@ -13,7 +13,7 @@ import { useMidiOutputs } from '../../../api/midi'
 
 export default React.memo(function MidiOutput() {
   const midiOutputs = useMidiOutputs()
-  const [activeOutputs, setActiveOutputs] = useSetting('activeOutputs', [])
+  const [activeOutputs, setActiveOutputs] = useActiveOutputs()
 
   const toggleMidiOutput = useCallback((output) => {
     const newOutputs = [...activeOutputs]
@@ -23,7 +23,7 @@ export default React.memo(function MidiOutput() {
       newOutputs.push(output.id)
     }
     setActiveOutputs(newOutputs)
-  }, [activeOutputs])
+  }, [activeOutputs, setActiveOutputs])
 
 	return (
     <React.Fragment>
@@ -55,7 +55,7 @@ export default React.memo(function MidiOutput() {
 })
 
 const TransposeControl = React.memo(function () {
-  const [transpose, setTranspose] = useSetting('transpose', 0)
+  const [transpose, setTranspose] = useTranspose()
   const [interTranspose, setInterTranspose] = useState(transpose)
   const onTransposeChange = useCallback(
     (e, v) => setInterTranspose(v),
@@ -82,3 +82,8 @@ const TransposeControl = React.memo(function () {
     </React.Fragment>
   )
 })
+
+export const useTranspose = () => 
+  useSetting('transpose', 0)
+export const useActiveOutputs = () => 
+  useSetting('activeOutputs', [])

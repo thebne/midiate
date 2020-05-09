@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { sendKeyboardEvent } from "../../../../redux/actions"
 
@@ -14,41 +14,39 @@ const currentMap = {}
 let prevEventTime = null
 
 function KeyboardHandler({sendKeyboardEvent}) { 
-  useEffect(() => {	 	
-	// handle key stroke
-	const handleKeyStroke = ({key, type, shiftKey, timeStamp}) => {
-		const lowerKey = key.toLowerCase()
-		if (!keyboardTriggers[lowerKey]) { 
-      return
-    }
+  const handleKeyStroke = useCallback(
+    ({key, type, shiftKey, timeStamp}) => {
+      const lowerKey = key.toLowerCase()
+      if (!keyboardTriggers[lowerKey]) { 
+        return true
+      }
 
-    // send one keydown for each key
-	  if (type === 'keydown' && currentMap[lowerKey]) {
-      return
-    }
-    currentMap[lowerKey] = type === 'keydown'
+      // send one keydown for each key
+      if (type === 'keydown' && currentMap[lowerKey]) {
+        return true
+      }
+      currentMap[lowerKey] = type === 'keydown'
 
-		const deltaTime = prevEventTime === null ? 0 : timeStamp - prevEventTime
-		
-    const msg = [...keyboardTriggers[lowerKey]]
-		if (type === 'keydown') {
-      // on key down set velocity to MAX, on shift + key down set velocity to MID
-			msg[2] = shiftKey ? VELOCITY_MAX : VELOCITY_MID
-		}
-    sendKeyboardEvent(deltaTime, msg)
+      const deltaTime = prevEventTime === null ? 0 : timeStamp - prevEventTime
+      
+      const msg = [...keyboardTriggers[lowerKey]]
+      if (type === 'keydown') {
+        // on key down set velocity to MAX, on shift + key down set velocity to MID
+        msg[2] = shiftKey ? VELOCITY_MAX : VELOCITY_MID
+      }
+      sendKeyboardEvent(deltaTime, msg)
 
-		prevEventTime = timeStamp
-	}	
+      prevEventTime = timeStamp
+      return true
+    }, [sendKeyboardEvent])	
 
-	  // add event listeners
-	  window.addEventListener('keydown', (e)=>{handleKeyStroke(e)});
-	  window.addEventListener('keyup', (e)=>{handleKeyStroke(e)});			 
-  }, [
-    // redux
-    sendKeyboardEvent
-  ])
+  useEffect(() => {
+    // add event listeners
+	  window.addEventListener('keydown', handleKeyStroke)
+	  window.addEventListener('keyup', handleKeyStroke) 
+  }, [handleKeyStroke])
 
-  return <Fragment />
+  return null 
 }
 
 export default connect(null,

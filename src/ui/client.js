@@ -33,6 +33,7 @@ const useStyles = makeStyles(theme => ({
     overflow: 'auto',
     display: 'flex',
     flexDirection: 'column',
+    contain: 'strict',
   },
   container: {
     flexGrow: 1,

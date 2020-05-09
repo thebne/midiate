@@ -15,6 +15,7 @@ const useStyles = makeStyles(theme => ({
     left: 0,
     top: '-.5vh',
     zIndex: 100,
+    contain: 'layout',
   },
 
   flex: {
@@ -25,6 +26,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-end',
+    contain: 'strict',
   },
 
   body: {
