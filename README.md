@@ -18,7 +18,7 @@ APIs
 There are several concepts in MIDIate:
 - The **UI** consists of two parts: the **app view** and a **status bar**.
 - **Apps** are JS libraries that export React components. 
-  Apps get control in three different ways -  as a `backgroundTask`, in the `statusBar` or as a full app (`default` export).
+  Apps get control in three different ways -  as a `BackgroundTask`, in the `StatusBar` or as a full app (`default` export).
   - **System apps** are special apps that have broad effects on the system. 
 - **Hooks** are used as the default APIs of MIDIate. They use [React Hooks](https://reactjs.org/docs/hooks-intro.html) in order to provide the relevant arguments.
   All hooks exist under `/src/api`.
@@ -31,7 +31,7 @@ As we described, apps are the breathing core of MIDIate. They can access all the
 Each app has to follow a specific structure:
 
 1. Provide an export to a `config` object (see "app config" below for details and options)
-2. Provide an export to `default` (main view), `statusBar` (cross-app status bar), `backgroundTask` (invisible background processing unit), or a combination of these. 
+2. Provide an export to `default` (main view), `StatusBar` (cross-app status bar), `BackgroundTask` (invisible background processing unit), or a combination of these. 
  The exported should be valid React elements.
 
 ### App hooks
@@ -58,6 +58,154 @@ We use [@tonaljs/chord-detect](https://github.com/tonaljs/tonal/tree/master/pack
 - `useChords(filterFunction?)->[chords,id]` - returns a tuple of possible chord detections (`[chord1, chord2, ...]`) and a detection ID that changes when the player completely lets go of the piano.
   - Optional `filterFunction` receives a list of events and returns note names (`C4`, `Ab6` etc.)
 - `useRelativeChords(relativeScale, filterFunction?)->[chords,id]` - returns a tuple similar to `useChords()`, but normalized to roman notation if present (`Em6` is `IIIm6` when `C` is the relative scale).
+#### api/settings.js
+Convenience wrappers for app configurations and inter-process communication between the app components.
+
+Let's say you want to load a resource in your background task and show this on the status bar. You would possibly configure a _redux store_ in order to send pieces of data between them. Also, you might want to serialize the user-selected resource to `localStorage`, allowing it to survive a page refresh.
+This is exactly the functionality the settings APIs provide.
+- `useSetting(name, defaultValue)->[value,setValue]` - behaves a lot like `useState()` but automatically serializes the written value to `localStorage`. Allows cross-component settings (for instance, a setting set in the main view can be read using the same `name` in the status bar or the background task). 
+- `useSessionValue(name, defaultValue)->[value,setValue]` - similar to `useSetting()` but only stores the data for until the refresh. Useful for volatile states (loading a resource, timed states etc.)
+#### api/context.js
+Lets apps use their configuration.
+- `useAppContext()->{...}` returns a `config` object for the current app.
+  Can be used in a `BackgroundTask`, in the `StatusBar` and in the `default` export.
+#### api/midi.js
+Gives apps access to the raw WebMIDI APIs.
+- `useMidiOutputs()->[outputs...]` - returns a list of WebMIDI outputs.
+
+### App configuration
+Most apps can just export a simple `config` with a name and an icon.
+The full `config` format is:
+```js
+{
+  // app name (required when shows in menu)
+  name: "Example App", 
+  // custom app icon for app menu (optional)
+  icon: <ReactComponent />,
+  // should app show in app menu? (optional)
+  showInMenu: bool, // = true 
+  // override default status bar onClick action (optional, defaults to this app page)
+  statusBarAction: string, //. e.g. SETTINGS_APP_ID or DEFAULT_APP_ID (from /src/constants.js) 
+}
+```
+### Events
+MIDI events have the following structure:
+```js
+{
+  // time between last message and this message in ms
+  deltaTime:  float,
+  // frequency of MIDI note
+  freq:  float,
+  // key of MIDI note [0-127]
+  key:  int,
+  // parsed message type ("noteon", "noteoff", "programchange", "controlchange", etc.)
+  messageType:  string,
+  // parsed note name ("C5", "G#3", etc.)
+  note:  string,
+  // source of midi message
+  source:  {
+	// source type ("midi", "keyboard", "server", "app")
+	type: string,
+	// ...extra per-source data (id and name for "midi", host for "server", id for "app"
+  },
+  // ...extra per-message data (velocity, program, pressure, etc.)
+
+  // raw message data
+  _data:  Uint8Array(3) [144,  72,  0]
+  // parsed MIDI message code
+  _messageCode:  144
+}
+```
+Events are first parsed with [MIDIMessage](https://github.com/notthetup/midimessage) and then enriched with [@tonaljs](https://github.com/tonaljs/tonal) and some custom logic. 
+
+### Basic app example
+Here's a quick guide of how to write a simple app using the most common hooks.
+In this example we assume the app is located in `/src/apps/<app-name>`.
+#### Import APIs and other libraries
+```js
+import React, { useCallback, useEffect } from 'react'
+import MusicNoteIcon from '@material-ui/icons/MusicNote'
+import { useLastEvent } from '../../api/events'
+import { useNotes } from '../../api/notes'
+import { useChords } from '../../api/chords'
+import { useSessionValue } from '../../api/settings'
+```
+### Define session values
+```js
+// it's recommended to put settings in a common place
+const useNotesHistory = () => 
+  useSessionValue('notesHistory', [])
+```
+#### Export main view (with more detailed information)
+```js
+/* show played notes and chords */
+export default function () {
+  const notes = useNotes()
+  const [chords,] = useChords()  // don't need the ID
+  const [notesHistory,] = useNotesHistory()  // don't need to set
+
+  return (
+    <div>
+      <b>chords:</b> 
+      <ul>
+        {chords.map(chord => <li>{chord}</li>)}
+      </ul>
+      <b>notes:</b>
+      <ul>
+        {notes.map(note => <li>{note}</li>)}
+      </ul>
+      <b>history:</b>
+      <ul>
+        {notesHistory.map(note => <li>{note}</li>)}
+      </ul>
+    </div>
+  )
+}
+```
+#### Export a background task to collect notes in the background
+```js
+/* collect notes even when not on main app view */
+export function BackgroundTask() {
+  const lastEvent = useLastEvent()
+  const [notesHistory, setNotesHistory] = useNotesHistory()
+
+  // memoize an adder function
+  const addToHistory = useCallback(note => {
+    const newHistory = [...notesHistory]
+    setNotesHistory(newHistory.concat(note))
+  }, [notesHistory, setNotesHistory])
+
+  // add note to history whenever a new note is played
+  useEffect(() => {
+    // lastEvent is null on the first run
+    if (!lastEvent)
+      return
+
+    if (lastEvent.messageType === 'noteon')
+      addToHistory(lastEvent.note) 
+  }, [lastEvent])
+
+  // always render nothing from background tasks
+  return null
+}
+```
+#### Export a status bar component with some aggregated data 
+```js
+/* shows history count on status bar */
+export function StatusBar() {
+  const [notesHistory,] = useNotesHistory()  // don't need to set
+
+  return notesHistory.length
+}
+```
+#### Lastly, export `config`
+```js
+// make app accessible with a friendly name
+export const config = {
+  name: "Notes Viewer",
+  icon: <MusicNoteIcon />,
+}
+```
  
 ### Apps vs. System apps
 The two are actually very similar. The main difference is the logical association (system apps provide cross-app/core functionality, while regular apps let users experience a specific narrative).
