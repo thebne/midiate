@@ -3,22 +3,25 @@ import { Midi, Chord, Progression } from "@tonaljs/tonal"
 import { useSmartNotes } from './notes'
 
 
+const defaultFilter = notes => notes.events.map(e => e.note)
 export function detect(notes, relative) {
   const current = notes.sort((n1, n2) => Midi.toMidi(n1) - Midi.toMidi(n2))
   // clean capital M for major chords
   return Chord.detect(current).map(c => c.replace("M", "")).sort(function(a, b){ return a.length - b.length; })
 }
 
-export const useChords = (filterFn=(x)=>x.note) => {
+export const useChords = (filterFunction=defaultFilter) => {
   const notes = useSmartNotes({data: 'extended'})
-  const detection = useMemo(() => detect(filterFn(notes)),
-    [notes, filterFn])
+  const detection = useMemo(() => detect(filterFunction(notes)),
+    [notes, filterFunction])
 
   return [detection, notes.id]
 }
 
-export const useRelativeChords = (relativeScale, filterFn=(x)=>x.note) => {
-  const [chords, id] = useChords(filterFn)
+
+export const useRelativeChords = (relativeScale, 
+  filterFunction=defaultFilter) => {
+  const [chords, id] = useChords(filterFunction)
   const roman = useMemo(() => {
     if (!relativeScale) {
       if (!chords.length) {

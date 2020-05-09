@@ -23,24 +23,10 @@ export const useSetting = (key, defaultValue) => {
     [appId, key])
   const value = useSelector(selector)
   const setValue = useCallback(
-    v => {
-      if (typeof v === 'function') {
-        v = v(value)
-        if (v === value)
-          return
-      }
-      return dispatch(setAppSpecificValue(appId, key, v))
-    }
-  , [dispatch, appId, key/*, value - causes infinite loop FIXME */])
-  // set for first time
-  useEffect(() => {
-    setValue(oldValue => {
-      if (oldValue === undefined && defaultValue !== undefined) {
-        return defaultValue
-      }
-      return oldValue
-    })
-  }, [setValue, defaultValue])
+    v =>  dispatch(setAppSpecificValue(appId, key, v))
+  , [dispatch, appId, key])
 
-  return [value === undefined ? defaultValue : value, setValue]
+  return useMemo(() =>
+    [value === undefined ? defaultValue : value, setValue],
+    [value, defaultValue, setValue])
 }

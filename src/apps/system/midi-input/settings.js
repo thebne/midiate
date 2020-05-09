@@ -120,7 +120,7 @@ const MidiInputs = (({midiInputs, toggleMidiInput,
     <List subheader={<ListSubheader>MIDI Inputs</ListSubheader>}>
       {midiInputs.map(input => (
         <ListItem key={input.id} button
-          onChange={e => toggleMidiInput(input.id, !input.active)}
+          onClick={e => toggleMidiInput(input.id, !input.active)}
         >
           <ListItemIcon>
             <UsbIcon />

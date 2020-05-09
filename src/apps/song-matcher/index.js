@@ -1,37 +1,37 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useRef, useEffect, useState, Fragment } from "react";
 import Button from '@material-ui/core/Button'
 import "./style.module.css"
+import { useChords } from '../../api/chords'
 
-export default function Chordify({ currentChords }) {
+export default function Chordify() {
+  const [chords, id] = useChords()
   const [searchString, setSearchString] = useState('');
   const [isLoaded, setLoaded] = useState(false);
-  const [lastId, setLastId] = useState(-1);
   const [data, setData] = useState('');
+  const prevChord = usePrevious(chords)
+  const prevId = usePrevious(id)
 
   // Issue a REST API query per new chord entered
   useEffect(() => {
-	let chord = currentChords.detection;
-    if (chord && chord[0] && (currentChords.id !== lastId)) {
-	  setLastId(currentChords.id);
-      setLoaded(false);
-	  
-	  // Choose shortest representation - TODO: move this logic to @tonaljs
-	  chord = chord[1] && (chord[1].length < chord[0].length) ? chord[1] : chord[0]	  
-	  
-      let newString = searchString + "," + chord;
-      setSearchString(newString);
-
-      // TODO: Make only first query to fetch from DB and cache it
-      fetch("http://localhost:5000/api?chords=" + newString.slice(1))
-        .then((response) => {
-          return response.json();
-        })
-        .then((data) => {
-          setLoaded(true);
-          setData(data);
-        });
+    if (id === prevId || chords.length || prevChord == null || !prevChord.length) {
+      return
     }
-  }, [currentChords.detection]);
+    const chord = prevChord[0]
+    setLoaded(false)
+	  
+    let newString = searchString + "," + chord;
+    setSearchString(newString);
+
+    // TODO: Make only first query to fetch from DB and cache it
+    fetch("http://localhost:5000/api?chords=" + newString.slice(1))
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        setLoaded(true);
+        setData(data);
+      });
+  }, [chords, prevChord, id]);
 
   return (
     <Fragment>
@@ -93,7 +93,14 @@ const RenderRow = (props) => {
     return <td key={props.data[key]}>{props.data[key]}</td>;
   });
 };
+
+function usePrevious(value) {
+  const ref = useRef()
+  useEffect(() => {
+    ref.current = value
+  })
+  return ref.current
+}
  
 // midiate support
 export { default as config } from './midiate/config'
-export { default as createSelectors } from './midiate/selectors'

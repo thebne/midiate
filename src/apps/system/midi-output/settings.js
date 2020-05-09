@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import Slider from '@material-ui/core/Slider'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
@@ -14,19 +14,16 @@ import { useMidiOutputs } from '../../../api/midi'
 export default React.memo(function MidiOutput() {
   const midiOutputs = useMidiOutputs()
   const [activeOutputs, setActiveOutputs] = useSetting('activeOutputs', [])
-  const [transpose, setTranspose] = useSetting('transpose', 0)
 
-  const toggleMidiOutput = (output) => {
-    setActiveOutputs(activeOutputs => {
-      const newOutputs = [...activeOutputs]
-      if (newOutputs.indexOf(output.id) !== -1) {
-        newOutputs.splice(output.id, 1)
-      } else {
-        newOutputs.push(output.id)
-      }
-      return newOutputs
-    })
-  }
+  const toggleMidiOutput = useCallback((output) => {
+    const newOutputs = [...activeOutputs]
+    if (newOutputs.indexOf(output.id) !== -1) {
+      newOutputs.splice(output.id, 1)
+    } else {
+      newOutputs.push(output.id)
+    }
+    setActiveOutputs(newOutputs)
+  }, [activeOutputs])
 
 	return (
     <React.Fragment>
@@ -51,19 +48,37 @@ export default React.memo(function MidiOutput() {
             </ListItemSecondaryAction>
           </ListItem>
         ))}
-        <ListSubheader>Transpose MIDI Outputs</ListSubheader>
-        <ListItem>
-          <Slider
-            value={transpose}
-            step={0.5}
-            marks
-            min={-3}
-            max={3}
-            valueLabelDisplay="auto"
-            onChange={(e, v) => setTranspose(v)}
-          />
-        </ListItem>
+      <TransposeControl />
       </List>
     </React.Fragment>
 	)
+})
+
+const TransposeControl = React.memo(function () {
+  const [transpose, setTranspose] = useSetting('transpose', 0)
+  const [interTranspose, setInterTranspose] = useState(transpose)
+  const onTransposeChange = useCallback(
+    (e, v) => setInterTranspose(v),
+    [setInterTranspose])
+  const onTransposeChangeCommit = useCallback(
+    (e, v) => setTranspose(interTranspose),
+    [setTranspose, interTranspose])
+
+  return (
+    <React.Fragment>
+      <ListSubheader>Transpose MIDI Outputs</ListSubheader>
+      <ListItem>
+        <Slider
+          value={interTranspose}
+          step={0.5}
+          marks
+          min={-3}
+          max={3}
+          valueLabelDisplay="auto"
+          onChange={onTransposeChange}
+          onChangeCommitted={onTransposeChangeCommit}
+        />
+      </ListItem>
+    </React.Fragment>
+  )
 })
