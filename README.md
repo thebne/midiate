@@ -14,6 +14,96 @@ Features
 
 APIs
 ----------
+### Basic app example
+Here's a quick guide of how to write a simple app using the most common hooks.
+In this example we assume the app is located in `/src/apps/<app-name>`.
+#### Import APIs and other libraries
+```js
+import React, { useCallback, useEffect } from 'react'
+import MusicNoteIcon from '@material-ui/icons/MusicNote'
+import { useLastEvent } from '../../api/events'
+import { useNotes } from '../../api/notes'
+import { useChords } from '../../api/chords'
+import { useSessionValue } from '../../api/settings'
+```
+#### Define session values
+```js
+// it's recommended to put settings in a common place
+const useNotesHistory = () => 
+  useSessionValue('notesHistory', [])
+```
+#### Export main view (with more detailed information)
+```js
+/* show played notes and chords */
+export default function () {
+  const notes = useNotes()
+  const [chords,] = useChords()  // don't need the ID
+  const [notesHistory,] = useNotesHistory()  // don't need to set
+
+  return (
+    <div>
+      <b>chords:</b> 
+      <ul>
+        {chords.map(chord => <li>{chord}</li>)}
+      </ul>
+      <b>notes:</b>
+      <ul>
+        {notes.map(note => <li>{note}</li>)}
+      </ul>
+      <b>history:</b>
+      <ul>
+        {notesHistory.map(note => <li>{note}</li>)}
+      </ul>
+    </div>
+  )
+}
+```
+#### Export a background task to collect notes in the background
+```js
+/* collect notes even when not on main app view */
+export function BackgroundTask() {
+  const lastEvent = useLastEvent()
+  const [notesHistory, setNotesHistory] = useNotesHistory()
+
+  // memoize an adder function
+  const addToHistory = useCallback(note => {
+    const newHistory = [...notesHistory]
+    setNotesHistory(newHistory.concat(note))
+  }, [notesHistory, setNotesHistory])
+
+  // add note to history whenever a new note is played
+  useEffect(() => {
+    // lastEvent is null on the first run
+    if (!lastEvent)
+      return
+
+    if (lastEvent.messageType === 'noteon')
+      addToHistory(lastEvent.note) 
+  }, [lastEvent])
+
+  // always render nothing from background tasks
+  return null
+}
+```
+#### Export a status bar component with some aggregated data 
+```js
+/* shows history count on status bar */
+export function StatusBar() {
+  const [notesHistory,] = useNotesHistory()  // don't need to set
+
+  return notesHistory.length
+}
+```
+#### Lastly, export `config`
+```js
+// make app accessible with a friendly name
+export const config = {
+  name: "Notes Viewer",
+  icon: <MusicNoteIcon />,
+}
+```
+Using this as a reference, let's go through the APIs.
+
 ### Semantics
 There are several concepts in MIDIate:
 - The **UI** consists of two parts: the **app view** and a **status bar**.
@@ -117,95 +207,6 @@ MIDI events have the following structure:
 }
 ```
 Events are first parsed with [MIDIMessage](https://github.com/notthetup/midimessage) and then enriched with [@tonaljs](https://github.com/tonaljs/tonal) and some custom logic. 
-
-### Basic app example
-Here's a quick guide of how to write a simple app using the most common hooks.
-In this example we assume the app is located in `/src/apps/<app-name>`.
-#### Import APIs and other libraries
-```js
-import React, { useCallback, useEffect } from 'react'
-import MusicNoteIcon from '@material-ui/icons/MusicNote'
-import { useLastEvent } from '../../api/events'
-import { useNotes } from '../../api/notes'
-import { useChords } from '../../api/chords'
-import { useSessionValue } from '../../api/settings'
-```
-#### Define session values
-```js
-// it's recommended to put settings in a common place
-const useNotesHistory = () => 
-  useSessionValue('notesHistory', [])
-```
-#### Export main view (with more detailed information)
-```js
-/* show played notes and chords */
-export default function () {
-  const notes = useNotes()
-  const [chords,] = useChords()  // don't need the ID
-  const [notesHistory,] = useNotesHistory()  // don't need to set
-
-  return (
-    <div>
-      <b>chords:</b> 
-      <ul>
-        {chords.map(chord => <li>{chord}</li>)}
-      </ul>
-      <b>notes:</b>
-      <ul>
-        {notes.map(note => <li>{note}</li>)}
-      </ul>
-      <b>history:</b>
-      <ul>
-        {notesHistory.map(note => <li>{note}</li>)}
-      </ul>
-    </div>
-  )
-}
-```
-#### Export a background task to collect notes in the background
-```js
-/* collect notes even when not on main app view */
-export function BackgroundTask() {
-  const lastEvent = useLastEvent()
-  const [notesHistory, setNotesHistory] = useNotesHistory()
-
-  // memoize an adder function
-  const addToHistory = useCallback(note => {
-    const newHistory = [...notesHistory]
-    setNotesHistory(newHistory.concat(note))
-  }, [notesHistory, setNotesHistory])
-
-  // add note to history whenever a new note is played
-  useEffect(() => {
-    // lastEvent is null on the first run
-    if (!lastEvent)
-      return
-
-    if (lastEvent.messageType === 'noteon')
-      addToHistory(lastEvent.note) 
-  }, [lastEvent])
-
-  // always render nothing from background tasks
-  return null
-}
-```
-#### Export a status bar component with some aggregated data 
-```js
-/* shows history count on status bar */
-export function StatusBar() {
-  const [notesHistory,] = useNotesHistory()  // don't need to set
-
-  return notesHistory.length
-}
-```
-#### Lastly, export `config`
-```js
-// make app accessible with a friendly name
-export const config = {
-  name: "Notes Viewer",
-  icon: <MusicNoteIcon />,
-}
-```
  
 ### Apps vs. System apps
 The two are actually very similar. The main difference is the logical association (system apps provide cross-app/core functionality, while regular apps let users experience a specific narrative).
