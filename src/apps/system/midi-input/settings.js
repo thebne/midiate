@@ -24,10 +24,10 @@ import {
   toggleMidiInput, setMidiServerHost,
 } from '../../../redux/actions'
 import { 
-  getMidiInputs, 
   getMidiServerHost, 
   getMidiServerConnectionStatus,
 } from '../../../redux/selectors'
+import { useMidiInputs } from '../../../api/midi'
 
 const useStyles = makeStyles(theme => ({
   dialogRoot: {
@@ -114,8 +114,9 @@ function ConnectToServerListItem({midiServerHost, midiServerConnectionStatus,
   )
 }
 
-const MidiInputs = (({midiInputs, toggleMidiInput, 
+const MidiInputs = (({toggleMidiInput, 
   midiServerHost, setMidiServerHost, midiServerConnectionStatus}) => {
+  const midiInputs = useMidiInputs()
   return (
     <List subheader={<ListSubheader>MIDI Inputs</ListSubheader>}>
       {midiInputs.map(input => (
@@ -146,7 +147,6 @@ const MidiInputs = (({midiInputs, toggleMidiInput,
 
 export default connect(
   state => ({
-    midiInputs: getMidiInputs(state),
     midiServerHost: getMidiServerHost(state),
     midiServerConnectionStatus: getMidiServerConnectionStatus(state),
   }),

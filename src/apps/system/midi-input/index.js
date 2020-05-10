@@ -1,5 +1,5 @@
 export const config = {
-  id: "MIDI_INPUTS",
+  id: "MIDI_INPUT",
   showInMenu: false,
 }
 

@@ -1,70 +1,73 @@
-import React, { Fragment, useEffect } from 'react'
+import React, { useMemo, useState, Fragment, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { sendMidiEvent, setMidiDevices } from "../../../../redux/actions"
-import { isMidiInputActive } from "../../../../redux/selectors"
+import { useMidiInput } from "../../../../api/midi"
 
 // uses WebMIDI
-function WebHandler({isMidiInputActive, sendMidiEvent, setMidiDevices}) {
+function WebHandler({sendMidiEvent, setMidiDevices}) {
+  const [inputs, setInputs] = useState([])
+
   useEffect(() => {	  
 		navigator.requestMIDIAccess().then(function(access) {
-      const createOnMidiMessage = (inputId, inputName) => {
-        let prevTime = null
-        return message => {
-          console.log('midi event')
-          if (!isMidiInputActive(inputId))
-            return
+      const refresh = e => {
+        const inputs = Array.from(access.inputs.values())
+        const outputs = Array.from(access.outputs.values())
 
-          const deltaTime = prevTime === null ? 0 : message.timeStamp - prevTime 
-		  
-          // TODO: move to forked @midimessage or to handleMessage
-          if (message.data[0] === 254) {
-            return
-          }
-  
-          sendMidiEvent(deltaTime, message.data, inputId, inputName)
-          prevTime = message.timeStamp
-        }
-      }
-
-      // update store with inputs
-      setMidiDevices(
-        Array.from(access.inputs.values()),
-        Array.from(access.outputs.values()),
-      )
-
-      // for now, just connect all the MIDI inputs
-      for (const input of access.inputs.values()) {
-        input.onmidimessage = createOnMidiMessage(input.id, input.name)
-      }
-
-      access.onstatechange = e => {
         // update store with inputs
-        setMidiDevices(
-          Array.from(access.inputs.values()),
-          Array.from(access.outputs.values()),
-        )
-
-        if (e.port.state !== 'connected') { 
-          return
-        }
-
-        // reconnect callback
-        e.port.onmidimessage = createOnMidiMessage(e.port.id, e.port.name)
+        setMidiDevices(inputs, outputs)
+        
+        // update inputs components
+        setInputs(inputs)
       }
-    })
-  }, [
-    // redux
-    sendMidiEvent, setMidiDevices,
-    // FIXME isMidiInputActive() causes this to re-register every time
-    //isMidiInputActive,
-  ])
 
-  return <Fragment />
+      access.onstatechange = refresh
+      refresh()
+    })
+  }, [setMidiDevices, setInputs])
+
+  return (
+    <Fragment>
+      {inputs.map(p => 
+        <MidiInput key={p.id} name={p.name} sendMidiEvent={sendMidiEvent} />)}
+    </Fragment>
+  )
+}
+
+function MidiInput({name, sendMidiEvent}) {
+  const port = useMidiInput(name)
+
+  const onMidiMessage = useMemo(() => {
+    let prevTime = null
+    return message => {
+      if (!port.active)
+        return
+
+      const deltaTime = prevTime === null ? 0 : message.timeStamp - prevTime 
+  
+      // TODO: move to forked @midimessage or to handleMessage
+      if (message.data[0] === 254) {
+        return
+      }
+
+      sendMidiEvent(deltaTime, message.data, port.id, port.name)
+      prevTime = message.timeStamp
+    }
+  }, [port])
+
+  useEffect(() =>  {
+    if (!port || port.state !== 'connected') { 
+      return
+    }
+
+    // reconnect callback
+    port.onmidimessage = onMidiMessage
+  }, [port, onMidiMessage])
+
+  return null
 }
 
 export default connect(
   (state) => ({
-    isMidiInputActive: isMidiInputActive(state),
   }),
   { sendMidiEvent, setMidiDevices }
 )(WebHandler)
