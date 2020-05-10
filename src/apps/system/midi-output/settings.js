@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import Slider from '@material-ui/core/Slider'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'

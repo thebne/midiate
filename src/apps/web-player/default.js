@@ -8,7 +8,7 @@ import PlayCircleFilledIcon from '@material-ui/icons/PlayCircleFilled'
 import TextField from '@material-ui/core/TextField'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { makeStyles } from '@material-ui/core/styles'
-import { useLoading, useInstrumentType } from './settings'
+import { useInstrumentType } from './settings'
 
 import allInstrumentTypes from './instruments'
 

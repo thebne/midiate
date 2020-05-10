@@ -14,7 +14,7 @@ const getMidiInputs = createSelector(
   [getUiState, getSettingsState],
   (ui, settings) => (ui.midiInputs || []).map(i => {
     i.active = settings.midiInputsActive[i.id] !== undefined 
-      ? settings.midiInputsActive[i.id] : false
+      ? settings.midiInputsActive[i.id] : true
     return i
   })
 )

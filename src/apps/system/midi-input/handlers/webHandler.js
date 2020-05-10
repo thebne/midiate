@@ -61,7 +61,7 @@ const MidiInput = React.memo(function ({name, sendMidiEvent}) {
 
     // reconnect callback
     port.onmidimessage = onMidiMessage
-  }, [port, onMidiMessage])
+  }, [port, onMidiMessage, sendMidiEvent])
 
   return null
 })
