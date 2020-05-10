@@ -183,7 +183,7 @@ The full `config` format is:
   // app name (required when shows in menu)
   name: "Example App", 
   // custom app icon for app menu (optional)
-  icon: <ReactComponent />,
+  icon: ReactComponent,
   // should app show in app menu? (optional)
   showInMenu: bool, // = true 
   // override default status bar onClick action (optional, defaults to this app page)
