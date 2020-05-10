@@ -200,9 +200,9 @@ MIDI events have the following structure:
   // ...extra per-message data (velocity, program, pressure, etc.)
 
   // raw message data
-  _data:  Uint8Array(3) [144,  72,  0]
-  // parsed MIDI message code
-  _messageCode:  144
+  _data:  Uint8Array(3),
+  // parsed MIDI message code [0-255]
+  _messageCode:  int,
 }
 ```
 Events are first parsed with [MIDIMessage](https://github.com/notthetup/midimessage) and then enriched with [@tonaljs](https://github.com/tonaljs/tonal) and some custom logic. 
