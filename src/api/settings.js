@@ -1,6 +1,6 @@
-import { useMemo, useCallback } from 'react'
+import { useMemo, useRef, useCallback } from 'react'
 import { createSelector } from 'reselect'
-import { useSelector, useDispatch } from 'react-redux'
+import { useStore, useSelector } from 'react-redux'
 import { setAppSpecificSessionValue,
   setAppSpecificPersistentValue } from '../redux/actions'
 import { useAppContext } from './context'
@@ -31,13 +31,28 @@ const makeGetAppSpecificSessionValue = (appId, key) => {
 
 const makeUseValue = (makeSelectorFn, actionFn) => 
   (key, defaultValue) => {
-    const dispatch = useDispatch()
+    // needed for saving value in store
     const appId = useAppContext().id
-    const value = useSelector(makeSelectorFn(appId, key))
-    const setValue = useCallback(
-      v =>  dispatch(actionFn(appId, key, v))
-    , [dispatch, appId, key])
+    // cached selector
+    const selector = useMemo(() => makeSelectorFn(appId, key),
+      [appId, key])
+    // direct access to store is needed to avoid loops in memoizing setValue
+    const store = useStore()
+    // get current value from store
+    const value = useSelector(selector)
+    // hack. useCallback compares by reference, but defaultValue shouldn't change
+    const defaultRef = useRef(defaultValue)
+    // memoize setValue to avoid re-renders 
+    const setValue = useCallback(v => {
+      // support running callbacks with most recent value
+      if (typeof v === 'function') {
+        const fresh = selector(store.getState())
+        v = v(fresh === undefined ? defaultRef.current : fresh)
+      }
+      return store.dispatch(actionFn(appId, key, v))
+    }, [selector, store, appId, key, defaultRef])
 
+    // return [value,setValue] like useState
     return [value === undefined ? defaultValue : value, setValue]
   }
 

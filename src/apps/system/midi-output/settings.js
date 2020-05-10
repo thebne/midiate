@@ -16,14 +16,16 @@ export default React.memo(function MidiOutput() {
   const [activeOutputs, setActiveOutputs] = useActiveOutputs()
 
   const toggleMidiOutput = useCallback((output) => {
-    const newOutputs = [...activeOutputs]
-    if (newOutputs.indexOf(output.id) !== -1) {
-      newOutputs.splice(output.id, 1)
-    } else {
-      newOutputs.push(output.id)
-    }
-    setActiveOutputs(newOutputs)
-  }, [activeOutputs, setActiveOutputs])
+    setActiveOutputs(activeOutputs => {
+      const newOutputs = [...activeOutputs]
+      if (newOutputs.indexOf(output.id) !== -1) {
+        newOutputs.splice(output.id, 1)
+      } else {
+        newOutputs.push(output.id)
+      }
+      return newOutputs
+    })
+  }, [setActiveOutputs])
 
 	return (
     <React.Fragment>
@@ -56,27 +58,22 @@ export default React.memo(function MidiOutput() {
 
 const TransposeControl = React.memo(function () {
   const [transpose, setTranspose] = useTranspose()
-  const [interTranspose, setInterTranspose] = useState(transpose)
   const onTransposeChange = useCallback(
-    (e, v) => setInterTranspose(v),
-    [setInterTranspose])
-  const onTransposeChangeCommit = useCallback(
-    (e, v) => setTranspose(interTranspose),
-    [setTranspose, interTranspose])
+    (e, v) => setTranspose(v),
+    [setTranspose])
 
   return (
     <React.Fragment>
       <ListSubheader>Transpose MIDI Outputs</ListSubheader>
       <ListItem>
         <Slider
-          value={interTranspose}
+          value={transpose}
           step={0.5}
           marks
           min={-3}
           max={3}
           valueLabelDisplay="auto"
           onChange={onTransposeChange}
-          onChangeCommitted={onTransposeChangeCommit}
         />
       </ListItem>
     </React.Fragment>

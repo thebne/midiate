@@ -56,7 +56,7 @@ export default function () {
     } else if (lastEvent.messageType === 'noteoff') {
       stopSound(lastEvent)
     }
-  }, [lastEvent])
+  }, [lastEvent, playSound, stopSound])
   
   return null
 }
