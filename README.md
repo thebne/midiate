@@ -107,12 +107,13 @@ Using this as a reference, let's go through the APIs.
 There are several concepts in MIDIate:
 - The **UI** consists of two parts: the **app view** and a **status bar**.
 - **Apps** are JS libraries that export React components. 
+
   Apps get control in three different ways -  as a `BackgroundTask`, in the `StatusBar` or as a full app (`default` export).
   - **System apps** are special apps that have broad effects on the system. 
 - **Hooks** are used as the default APIs of MIDIate. They use [React Hooks](https://reactjs.org/docs/hooks-intro.html) in order to provide the relevant arguments.
+
   All hooks exist under `/src/api`.
   - **useLastEvent**, **useNotes** and **useChords** are examples of (the most popular) hooks.
-- **Handlers** are components that stream data from a MIDI source to all the apps.
 
 ### Writing an app
 As we described, apps are the breathing core of MIDIate. They can access all the events in the system and show processed data to the user in several ways.
@@ -126,24 +127,32 @@ Each app has to follow a specific structure:
 ### App hooks
 All the hooks are under `/src/api`, separated to logical libraries. 
 #### api/events.js
-Hooks to receive and send MIDI events. 
+Receive and send MIDI events.
+
 Events are the bare elements of MIDIate and are the base for the rest of the musical data.
+
 - `useLastEvent()->{...}`  - returns the last event received from any input (see "events" below for details).
 - `useSendEvent()` - returns a function with the signature `sendCustomEvent(deltaTime, msg, appId)` to send ("dispatch") curated MIDI messages from apps. 
 #### api/notes.js
 Notes are smarter version of events. 
+
 They track _note_on_ and _note_off_ events to provide a coherent list of currently-played notes.
 The hooks also provide a convenient heuristic regarding the possible notes the player intended to play (mostly useful for chord-based scenarios).
 - `useNotes(config?)->[notes...]` - returns a list of currently-played notes. 
-Optional config can be provided with `{data: "simple" | "extended"}` as an argument. While `"simple"` mode only returns the played notes, `"extended"` mode returns the events that triggered those notes.
+
+  Optional config can be provided with `{data: "simple" | "extended"}` as an argument. While `"simple"` mode only returns the played notes, `"extended"` mode returns the events that triggered those notes.
 - `useSmartNotes(config?)->{events,id}` - returns a list of played notes with an associated "detection ID". Written with chord recognition in mind. `config` has same behavior as `useNotes()`.
-The return value respects some assumptions:
+
+  The return value respects some assumptions:
   -   `events` only change when notes are added or change - not when they are removed (unless all notes are removed)
   - `id` only changes when all notes change
 #### api/chords.js
 Chords are detected sequences of notes.
+
 They use `useSmartNotes()` and return information about the currently-played chords.
+
 We use [@tonaljs/chord-detect](https://github.com/tonaljs/tonal/tree/master/packages/chord-detect) (with minor alterations) as our detector.
+
 - `useChords(filterFunction?)->[chords,id]` - returns a tuple of possible chord detections (`[chord1, chord2, ...]`) and a detection ID that changes when the player completely lets go of the piano.
   - Optional `filterFunction` receives a list of events and returns note names (`C4`, `Ab6` etc.)
 - `useRelativeChords(relativeScale, filterFunction?)->[chords,id]` - returns a tuple similar to `useChords()`, but normalized to roman notation if present (`Em6` is `IIIm6` when `C` is the relative scale).
@@ -151,15 +160,19 @@ We use [@tonaljs/chord-detect](https://github.com/tonaljs/tonal/tree/master/pack
 Convenience wrappers for app configurations and inter-process communication between the app components.
 
 Let's say you want to load a resource in your background task and show this on the status bar. You would possibly configure a _redux store_ in order to send pieces of data between them. Also, you might want to serialize the user-selected resource to `localStorage`, allowing it to survive a page refresh.
+
 This is exactly the functionality the settings APIs provide.
 - `useSetting(name, defaultValue)->[value,setValue]` - behaves a lot like `useState()` but automatically serializes the written value to `localStorage`. Allows cross-component settings (for instance, a setting set in the main view can be read using the same `name` in the status bar or the background task). 
 - `useSessionValue(name, defaultValue)->[value,setValue]` - similar to `useSetting()` but only stores the data for until the refresh. Useful for volatile states (loading a resource, timed states etc.)
 #### api/context.js
 Lets apps use their configuration.
+
 - `useAppContext()->{...}` returns a `config` object for the current app.
+
   Can be used in a `BackgroundTask`, in the `StatusBar` and in the `default` export.
 #### api/midi.js
 Gives apps access to the raw WebMIDI APIs.
+
 - `useMidiOutputs()->[outputs...]` - returns a list of WebMIDI outputs.
 
 ### App configuration
@@ -228,7 +241,10 @@ MIDIate is based on `create-react-app`.
 Frequently Asked
 ---------
 - **Can I use MIDIate as an external package?**
-It's currently not possible to easily use MIDIate APIs as a library/npm package, but future versions may support a `@midiate/api` import that makes it easier.
+
+  It's currently not possible to easily use MIDIate APIs as a library/npm package, but future versions may support a `@midiate/api` import that makes it easier.
 - **Is it possible to connect to MIDIate remotely?**
- The package currently supports WebSockets as an external MIDI source. It means it's easy mostly within the LAN. 
-Check out [midiate-utils](https://github.com/thebne/midiate-utils) for compatible streaming servers (depending on your operating system, they may require system libraries).
+
+  The package currently supports WebSockets as an external MIDI source. It means it's easy mostly within the LAN. 
+ 
+  Check out [midiate-utils](https://github.com/thebne/midiate-utils) for compatible streaming servers (depending on your operating system, they may require system libraries).
