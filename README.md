@@ -16,15 +16,16 @@ APIs
 ----------
 ### Basic app example
 Here's a quick guide of how to write a simple app using the most common hooks.
-In this example we assume the app is located in `/src/apps/<app-name>`.
+
+In this example we assume the app is located in `/src/apps/<app-name>.js`.
 #### Import APIs and other libraries
 ```js
 import React, { useCallback, useEffect } from 'react'
 import MusicNoteIcon from '@material-ui/icons/MusicNote'
-import { useLastEvent } from '../../api/events'
-import { useNotes } from '../../api/notes'
-import { useChords } from '../../api/chords'
-import { useSessionValue } from '../../api/settings'
+import { useLastEvent } from '../api/events'
+import { useNotes } from '../api/notes'
+import { useChords } from '../api/chords'
+import { useSessionValue } from '../api/settings'
 ```
 #### Define session values
 ```js
@@ -37,8 +38,8 @@ const useNotesHistory = () =>
 /* show played notes and chords */
 export default function () {
   const notes = useNotes()
-  const [chords,] = useChords()  // don't need the ID
-  const [notesHistory,] = useNotesHistory()  // don't need to set
+  const [chords,] = useChords()
+  const [notesHistory,] = useNotesHistory()
 
   return (
     <div>
@@ -63,13 +64,7 @@ export default function () {
 /* collect notes even when not on main app view */
 export function BackgroundTask() {
   const lastEvent = useLastEvent()
-  const [notesHistory, setNotesHistory] = useNotesHistory()
-
-  // memoize an adder function
-  const addToHistory = useCallback(note => {
-    const newHistory = [...notesHistory]
-    setNotesHistory(newHistory.concat(note))
-  }, [notesHistory, setNotesHistory])
+  const [, setNotesHistory] = useNotesHistory()
 
   // add note to history whenever a new note is played
   useEffect(() => {
@@ -77,9 +72,13 @@ export function BackgroundTask() {
     if (!lastEvent)
       return
 
-    if (lastEvent.messageType === 'noteon')
-      addToHistory(lastEvent.note) 
-  }, [lastEvent])
+    if (lastEvent.messageType === 'noteon') { 
+      setNotesHistory(notesHistory => {
+        const newHistory = [...notesHistory]
+        return newHistory.concat(lastEvent.note)
+      })
+    }
+  }, [lastEvent, setNotesHistory])
 
   // always render nothing from background tasks
   return null
