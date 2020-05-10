@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import Soundfont from 'soundfont-player'
-import { useLastEvent } from '../../../api/events'
+import { useLastEvent } from '../../api/events'
 import { useInstrumentType, useLoading } from './settings'
 
 export default function () {
