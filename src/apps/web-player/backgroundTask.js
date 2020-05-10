@@ -16,7 +16,10 @@ export default function () {
 
     setPlaying(playing => ({
       ...playing,
-      [lastEvent.note]: instrument.play(lastEvent.note),
+      [lastEvent.note]: instrument.start(lastEvent.note, null, {
+        loop: true,
+        gain: lastEvent.velocity / 127
+      }),
     }))
   }, [loading, instrument, setPlaying, type])
 
