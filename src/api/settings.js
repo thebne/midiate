@@ -41,6 +41,7 @@ const makeUseValue = (makeSelectorFn, actionFn) =>
     // get current value from store
     const value = useSelector(selector)
     // hack. useCallback compares by reference, but defaultValue shouldn't change
+    //. see https://github.com/facebook/react/issues/14476
     const defaultRef = useRef(defaultValue)
     // memoize setValue to avoid re-renders 
     const setValue = useCallback(v => {
