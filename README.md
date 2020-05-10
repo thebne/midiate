@@ -98,7 +98,7 @@ export function StatusBar() {
 // make app accessible with a friendly name
 export const config = {
   name: "Notes Viewer",
-  icon: <MusicNoteIcon />,
+  icon: MusicNoteIcon,
 }
 ```
 Using this as a reference, let's go through the APIs.
