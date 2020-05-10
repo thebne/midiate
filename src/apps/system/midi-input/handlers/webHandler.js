@@ -33,7 +33,7 @@ function WebHandler({sendMidiEvent, setMidiDevices}) {
   )
 }
 
-function MidiInput({name, sendMidiEvent}) {
+const MidiInput = React.memo(function ({name, sendMidiEvent}) {
   const port = useMidiInput(name)
 
   const onMidiMessage = useMemo(() => {
@@ -64,7 +64,7 @@ function MidiInput({name, sendMidiEvent}) {
   }, [port, onMidiMessage])
 
   return null
-}
+})
 
 export default connect(
   (state) => ({
