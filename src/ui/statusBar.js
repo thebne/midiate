@@ -131,7 +131,7 @@ const AppTitle = React.memo(
       </Typography>
       {foregroundAppConfig.name && (
         <Typography variant="subtitle1" color="inherit" noWrap className={classes.titleSecondaryText}>
-          {foregroundAppConfig.icon || <AppDefaultIcon />}
+          {foregroundAppConfig.icon ? React.createElement(foregroundAppConfig.icon) : <AppDefaultIcon />}
           {foregroundAppConfig.name}
         </Typography>
       )}

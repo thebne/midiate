@@ -62,6 +62,6 @@ export default function SettingsApp() {
 export const config = {
   id: SETTINGS_APP_ID,
   name: 'Settings',
-  icon: <SettingsApplicationsIcon />,
+  icon: SettingsApplicationsIcon,
 }
 

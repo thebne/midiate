@@ -56,7 +56,7 @@ function AppButton({switchForegroundApp, config}) {
   return (
     <Paper className={classes.paper}
       onClick={() => switchForegroundApp(config.id)}>
-      {config.icon || <AppDefaultIcon />}
+      {config.icon ? React.createElement(config.icon) : <AppDefaultIcon />}
       <Typography variant="button">{config.name}</Typography>
     </Paper>
   )
