@@ -26,6 +26,7 @@
     "@testing-library/user-event": "^7.1.2",
     "@tonaljs/chord-detect": "^3.5.1",
     "@tonaljs/tonal": "^3.5.1",
+    "midi-file": "^1.1.2",
     "midimessage": "^1.0.5",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",

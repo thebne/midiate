@@ -3,5 +3,6 @@ export default [
   require('../apps/piano-simulator'),
   require('../apps/heatmap'),
   require('../apps/web-player'),
+  require('../apps/recorder'),
   // require('../apps/song-matcher'),
 ]
