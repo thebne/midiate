@@ -1,21 +1,22 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import { Note } from "@tonaljs/tonal"
 import { useLastEvent } from '../../api/events'
+import { useSetting, useSessionValue } from '../../api/settings'
 import Piano from '../../gadgets/piano'
 import styles from './style.module.css'
 
-export default function Heatmap() {
-  const lastEvent = useLastEvent()
-  const [pressed, setPressed] = useState({})
-  const [toggle, setToggle] = useState(false)
-  const [max, setMax] = useState(1)
+export const usePressed = () => 
+  useSessionValue('pressed', {})
+export const useToggle = () => 
+  useSetting('toggle', false)
 
-  let heights = {}
-  let colors = {}
-  
-  useLayoutEffect(() => {	 
+export function BackgroundTask() {
+  const lastEvent = useLastEvent()
+  const [,setPressed] = usePressed()
+
+  useEffect(() => {	 
 	 // show animation only for note press
 	 if (!lastEvent || lastEvent.messageType !== 'noteon') {
 		return 
@@ -33,15 +34,19 @@ export default function Heatmap() {
      }
      return newPressed
    })
-  }, [lastEvent])  		
+  }, [lastEvent, setPressed])
+
+  return null
+}
+
+export default function Heatmap() {
+  const [pressed,setPressed] = usePressed()
+  const [toggle, setToggle] = useToggle()
+
+  const heights = {}, colors = {}
+  const max = Math.max(...Object.values(pressed))
 
 	for (const [note, x] of Object.entries(pressed)) {			
-		
-		// update maximum click count O(1)
-		if (x > max) {
-			setMax(x)
-		}
-		
 		// set color styling per key type (black/white)
 		if (Note.accidentals(Note.simplify(note)).length) {
 			colors[note] = {background: colorBlackKeys(x,0,max),  border: colorBlackKeys(x,0,max)}
@@ -53,11 +58,18 @@ export default function Heatmap() {
 		// set animation height per key
 		heights[note] = {height: calculateHeight(x,0,max)}
 	}	
-    return <Container maxWidth="xl" className={styles.root}>
-			<Button onClick={function(){setToggle(!toggle)}}>Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}</Button>
-			<Button style={{float: 'right'}} onClick={function(){setPressed({}); setMax(1)}}>Clear</Button>			
-			<Piano startNote="A0" endNote="C8" styles={toggle? colors : heights} />
+    return (
+      <Container maxWidth="xl" className={styles.root}>
+        <Button onClick={() => setToggle(t => !t)}>
+          Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}
+        </Button>
+        <Button style={{float: 'right'}} onClick={() => setPressed({})}>
+          Clear
+        </Button>			
+
+        <Piano startNote="A0" endNote="C8" styles={toggle ? colors : heights} />
       </Container>
+    )
   }
 
 // css styling per key stroke
