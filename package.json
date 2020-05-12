@@ -3,11 +3,12 @@
   "description": "Web platform for MIDI-based apps",
   "version": "2.0.0",
   "author": "Omer Perry",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "respository": {
     "type": "git",
     "url": "https://github.com/thebne/midiate"
   },
+  "homepage": "https://github.com/thebne/midiate#readme",
   "keywords": [
     "midi",
     "piano",
