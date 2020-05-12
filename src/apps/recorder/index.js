@@ -73,7 +73,7 @@ export default function () {
     const name = `${formatDate(startTime)}_${formatDate(new Date())}_${eventHistory.length}.mid`
     saveByteArray(name, new Uint8Array(output))
 
-  }, [eventHistory])
+  }, [eventHistory, startTime])
 
   // refresh every second
   const [,setTick] = useState({})
@@ -133,7 +133,7 @@ export function BackgroundTask() {
       const newHistory = [...eventHistory]
       return newHistory.concat(lastEvent)
     })
-  }, [lastEvent, setEventHistory])
+  }, [lastEvent, setEventHistory, shouldRecord])
 
   return null
 }
@@ -156,6 +156,7 @@ export function StatusBar() {
 }
 
 export const config = {
+  id: "RECORDER",
   name: "Recorder",
   icon: MicIcon,
 }

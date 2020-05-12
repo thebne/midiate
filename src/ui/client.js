@@ -67,37 +67,23 @@ class Client extends React.Component {
   componentDidMount() {
     let statusBar = {}, apps = {}, backgroundTasks = {}
 
-    const allAppsToLoad = []
-    // load system apps from config file 
-    const systemAppsFromConfig = require('../apps/system')
-    systemAppsFromConfig.default.forEach(app => {
-      if (!app.config || typeof app.config.id !== "string") {
-        throw new Error(`system app does not define valid id`)
-      }
-
-      allAppsToLoad.push([app, app.config])
-    })
-
     // load apps from config file 
-    const appsFromConfig = require('../config/apps')
+    const appsFromConfig = require('../config/apps').default
+    // load system apps from config file 
+    const systemAppsFromConfig = require('../apps/system').default
 
-    appsFromConfig.default.forEach((app, i) => {
-      if (app.config && typeof app.config.id === "string") {
-        throw new Error(`apps should not define id ${app.config.name}`)
+    for (const app of appsFromConfig.concat(systemAppsFromConfig)) {
+      const appConfig = app.config
+      if (!appConfig) {
+        throw new Error('all apps must provide config')
       }
 
-      // add app to store - positive indices (0, 1, ...)
-      const appConfig = {
-        ...app.config,
-        id: i + 1,
-      }
-      allAppsToLoad.push([app, appConfig])
-
-
-
-    })
-    for (const [app, appConfig] of allAppsToLoad) {
       const appId = appConfig.id
+      if (appId === undefined) {
+        console.error('no ID', appConfig)
+        throw new Error('all apps must define ID')
+      }
+
       this.props.addApp(appId, appConfig)
       // save apps on state
       if (app.default)

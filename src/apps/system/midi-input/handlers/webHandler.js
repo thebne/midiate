@@ -52,7 +52,7 @@ const MidiInput = React.memo(function ({name, sendMidiEvent}) {
       sendMidiEvent(deltaTime, message.data, port.id, port.name)
       prevTime = message.timeStamp
     }
-  }, [port])
+  }, [port, sendMidiEvent])
 
   useEffect(() =>  {
     if (!port || port.state !== 'connected') { 
