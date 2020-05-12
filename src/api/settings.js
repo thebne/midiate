@@ -3,7 +3,7 @@ import { createSelector } from 'reselect'
 import { useStore, useSelector } from 'react-redux'
 import { setAppSpecificSessionValue,
   setAppSpecificPersistentValue } from '../redux/actions'
-import { useAppContext } from './context'
+import { useConfig } from './context'
 
 const getSettingsState = store => store.settings
 const getAppSpecificPersistent = createSelector(
@@ -32,7 +32,7 @@ const makeGetAppSpecificSessionValue = (appId, key) => {
 const makeUseValue = (makeSelectorFn, actionFn) => 
   (key, defaultValue) => {
     // needed for saving value in store
-    const appId = useAppContext().id
+    const appId = useConfig().id
     // cached selector
     const selector = useMemo(() => makeSelectorFn(appId, key),
       [appId, key])

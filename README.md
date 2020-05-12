@@ -97,6 +97,7 @@ export function StatusBar() {
 ```js
 // make app accessible with a friendly name
 export const config = {
+  id: "NOTES_VIEWER",
   name: "Notes Viewer",
   icon: MusicNoteIcon,
 }
@@ -167,7 +168,7 @@ This is exactly the functionality the settings APIs provide.
 #### api/context.js
 Lets apps use their configuration.
 
-- `useAppContext()->{...}` returns a `config` object for the current app.
+- `useConfig()->{...}` returns a `config` object for the current app.
 
   Can be used in a `BackgroundTask`, in the `StatusBar` and in the `default` export.
 #### api/midi.js
@@ -180,6 +181,8 @@ Most apps can just export a simple `config` with a name and an icon.
 The full `config` format is:
 ```js
 {
+  // app id (required and should be unique)
+  id: "EXAMPLE",
   // app name (required when shows in menu)
   name: "Example App", 
   // custom app icon for app menu (optional)

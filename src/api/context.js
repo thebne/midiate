@@ -11,4 +11,4 @@ export const wrapContext = (component, config) => {
   ))
 }
 
-export const useAppContext = () => useContext(AppContext)
+export const useConfig = () => useContext(AppContext)
