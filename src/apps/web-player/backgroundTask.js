@@ -28,9 +28,12 @@ export default function () {
       return
 
     setPlaying(playing => {
-      const node = playing[lastEvent.note]
-      if (!node)
-        return playing
+      let node = playing[lastEvent.note]
+      if (!node) {
+        // can't find any specific note, stop everything
+        instrument.stop()
+        return {}
+      }
       node.stop()
       const newPlaying = {...playing}
       delete newPlaying[lastEvent.note]
