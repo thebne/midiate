@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import Snackbar from '@material-ui/core/Snackbar'
 import Button from '@material-ui/core/Button'
@@ -138,6 +138,7 @@ function Content(props) {
 
 function AppLayout(props) {
 	const classes = useStyles()
+  const [hideWarning, setHideWarning] = useState(false)
   const {isAnyMidiInputActive, foregroundAppId,
     switchForegroundApp, children} = props
 
@@ -155,13 +156,20 @@ function AppLayout(props) {
 				</main>
           <Snackbar
             open={!isAnyMidiInputActive 
-              && foregroundAppId !== SETTINGS_APP_ID}
+              && foregroundAppId !== SETTINGS_APP_ID
+              && !hideWarning}
             message="No active MIDI inputs"
-          action={
-            <Button color="inherit" 
-              onClick={() => switchForegroundApp(SETTINGS_APP_ID)}>
-              Choose
-            </Button>
+            action={
+              <React.Fragment>
+                <Button color="inherit" 
+                  onClick={() => switchForegroundApp(SETTINGS_APP_ID)}>
+                  Choose
+                </Button>
+                <Button color="inherit" 
+                  onClick={() => setHideWarning(true)}>
+                  Dismiss 
+                </Button>
+              </React.Fragment>
           }
         />
 			</div>

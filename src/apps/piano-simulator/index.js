@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import { Note, Scale, Midi } from '@tonaljs/tonal'
 import Piano from '../../gadgets/piano'
 import { useNotes } from '../../api/notes'
+import { useSendEvent } from '../../api/events'
 import { useScale } from './settings'
 
 const ANIMATION_DURATION_S = 15
@@ -109,13 +110,15 @@ const useStyles = makeStyles(theme => ({
     '& .piano-gadget-noteRender': {
       background: '#ffffaa',
     },
-    '&.pressed .piano-gadget-noteRender': {
-      background: '#ffffcc',
-      boxShadow: "0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 4px #FFDD1B, 0 0 7px #FFDD1B, 0 0 10px #FFDD1B, 0 0 15px #FFDD1B, 0 0 20px #FFDD1B",
+    '&.pressed, &:active': {
+      '& .piano-gadget-noteRender': {
+        background: '#ffffcc',
+        boxShadow: "0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 4px #FFDD1B, 0 0 7px #FFDD1B, 0 0 10px #FFDD1B, 0 0 15px #FFDD1B, 0 0 20px #FFDD1B",
+      },
     },
   },
   wrong: {
-    '&, &.pressed': {
+    '&, &.pressed, &:active': {
       '& .piano-gadget-noteRender': {
         background: '#ee8888',
         boxShadow: "0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 4px #FF1177, 0 0 7px #FF1177, 0 0 10px #FF1177, 0 0 15px #FF1177, 0 0 20px #FF1177",
@@ -126,8 +129,11 @@ const useStyles = makeStyles(theme => ({
 
 export default function PianoSimulator () {
   const classes = useStyles()
+  const sendEvent = useSendEvent()
   const notes = useNotes()
   const [scale,] = useScale()
+
+  // mark highlighted notes if scale is selected
   const highlightClasses = useMemo(() => {
     if (!scale.name || !scale.pitchClass) {
       return {}
@@ -157,6 +163,14 @@ export default function PianoSimulator () {
     return clss
   }, [notes])
 
+  // send events when piano is pressed
+  const onPress = useCallback((n) => 
+    sendEvent(new Uint8Array([144, Midi.toMidi(n), 64]))
+    , [sendEvent])
+  const onRelease = useCallback((n) => 
+    sendEvent(new Uint8Array([144, Midi.toMidi(n), 0]))
+    , [sendEvent])
+
   return (
     <React.Fragment> 
       <ScaleSelect />
@@ -165,6 +179,8 @@ export default function PianoSimulator () {
         NoteEffectProps={pressedProps}
         classNames={{...pressedClasses, ...highlightClasses}} 
         startNote="A0" endNote="C8"
+        onPress={onPress}
+        onRelease={onRelease}
       />
     </React.Fragment>
   )

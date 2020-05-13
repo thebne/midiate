@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useMemo } from 'react'
 import { createSelector } from 'reselect'
 import { useSelector, useDispatch } from 'react-redux'
 import { sendCustomEvent } from '../redux/actions'
@@ -14,8 +14,12 @@ export const useLastEvent = () => useSelector(getLastEvent)
 export const useSendEvent = () => {
   const appId = useConfig().id
   const dispatch = useDispatch()
-  return useCallback(
-    (deltaTime, msg) => dispatch(sendCustomEvent(deltaTime, msg, appId)),
-    [dispatch, appId]
-  )
+  return useMemo(() => {
+    let lastTime = new Date().getTime()
+    return (msg) => {
+      const now = new Date().getTime()
+      dispatch(sendCustomEvent(now - lastTime, msg, appId))
+      lastTime = now
+    }
+  }, [dispatch, appId])
 }

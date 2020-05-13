@@ -97,7 +97,8 @@ const MIDI_START_NOTE = 0
 const MIDI_END_NOTE = 127
 
 // if singleOctave is a note name, create only a single octave starting from this name
-export default function Piano({classNames={}, styles={}, singleOctave, startNote, endNote,
+export default function Piano({classNames={}, styles={}, singleOctave, 
+  startNote, endNote, onPress=null, onRelease=null,
   NoteEffectComponent, NoteEffectProps={}}) {
   const classes = useStyles()
   const getClass = name => `${classes[name] || ''} piano-gadget-${name}`
@@ -138,6 +139,8 @@ export default function Piano({classNames={}, styles={}, singleOctave, startNote
                 getClass={getClass}
                 NoteEffectComponent={NoteEffectComponent}
                 NoteEffectProps={NoteEffectProps[n]}
+                onPress={onPress}
+                onRelease={onRelease}
               >
                 }
               </PianoKey>
@@ -150,18 +153,20 @@ export default function Piano({classNames={}, styles={}, singleOctave, startNote
 }
 
 const PianoKey = React.memo(({note, className, style, getClass, 
-  NoteEffectComponent, NoteEffectProps}) => { 
+  onPress, onRelease, NoteEffectComponent, NoteEffectProps}) => { 
   const type = Note.accidentals(Note.simplify(note)).length ? "black" : "white"
 
   return (
-    <li className={[
+    <li className={clsx(
       // generic styling
       getClass('noteItem'), 
       // className from props.classNames[note]
       className, 
       // black / white
       getClass(type), 
-      ].join(' ')}
+    )}
+    onMouseDown={onPress ? () => onPress(note) : null}
+    onMouseUp={onRelease ? () => onRelease(note) : null}
     >
       <div className={getClass('noteBody')}>
         <div className={getClass('noteRender')} style={style} />
