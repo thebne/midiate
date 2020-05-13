@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 import { Note } from '@tonaljs/tonal'
-import { useLastEvent } from '../../../api/events'
-import styles from '../style.module.css'
+import { useLastEvent } from '../../api/events'
+import styles from './style.module.css'
 
 export default () => {
   const lastEvent = useLastEvent()

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 import { makeStyles } from '@material-ui/core/styles'
+import clsx from 'clsx'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -58,7 +59,7 @@ const useStyles = makeStyles(theme => ({
       zIndex: 2,
       border: '1px solid #000',
       borderRadius: '0 0 3px 3px',
-      boxShadow: '-1px -1px 2px rgba(255,255,255,0.2) inset,0 -5px 2px 3px rgba(0,0,0,0.6) inset,0 2px 4px rgba(0,0,0,0.5)',
+      boxShadow: '-1px -1px 2px rgba(255,255,255,0.2) inset,0 -5px 2px 3px rgba(0,0,0,0.4) inset,0 2px 4px rgba(0,0,0,0.3)',
       background: 'linear-gradient(45deg,#222 0%,#555 100%)',
     },
     '$black:active &, $black.pressed &': {
@@ -132,7 +133,7 @@ export default function Piano({classNames={}, styles={}, singleOctave, startNote
               <PianoKey 
                 key={n} 
                 note={n} 
-                className={classNames[n]} 
+                className={clsx(classNames[n], classNames[Note.pitchClass(n)])} 
                 style={styles[n]}
                 getClass={getClass}
                 NoteEffectComponent={NoteEffectComponent}
