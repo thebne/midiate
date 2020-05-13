@@ -8,6 +8,7 @@
     "type": "git",
     "url": "https://github.com/thebne/midiate"
   },
+  "homepage": "https://midiate.now.sh/",
   "keywords": [
     "midi",
     "piano",
@@ -18,9 +19,6 @@
     "@material-ui/core": "^4.9.5",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.50",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
     "@tonaljs/chord-detect": "^3.5.1",
     "@tonaljs/tonal": "^3.5.1",
     "color-hash": "^1.0.3",
