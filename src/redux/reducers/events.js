@@ -13,6 +13,9 @@ const events = (state = initialState, action) => {
     case HANDLE_MIDI_BUFFER: {		
       const event = parseMessage(action.payload.msg, action.payload.deltaTime)
       event.source = action.payload.source
+      if (!event.receivedTime) {
+        event.receivedTime = new Date().getTime()
+      }
       return {
         ...state,
         lastEvent: event,

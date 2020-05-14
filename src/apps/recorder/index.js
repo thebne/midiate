@@ -14,7 +14,7 @@ const useEventHistory = () =>
 const useStartTime = () => 
   useSessionValue('startTime', null)
 const useShouldRecord = () => 
-  useSetting('shouldRecord', false)
+  useSessionValue('shouldRecord', false)
 
 function saveByteArray(reportName, byte) {
   var blob = new Blob([byte], {type: "audio/midi"});
@@ -64,10 +64,10 @@ export default function () {
                 deltaTime: e.deltaTime,
               }
             default:
-              console.warning('currently support only note-on and note-off')
+              console.warn('currently support only note-on and note-off')
               return null
           }
-        })
+        }).filter(x => x !== null)
       ]
     })
     const name = `${formatDate(startTime)}_${formatDate(new Date())}_${eventHistory.length}.mid`
@@ -90,6 +90,12 @@ export default function () {
       <Button onClick={() => setEventHistory([])}>
         Clear
       </Button>
+      <Button onClick={downloadFile} 
+        size="large" variant="contained" color="primary" 
+        disabled={eventHistory.length === 0}
+      >
+        Download MIDI
+      </Button>
       <Typography variant="h4">
         Recorded {eventHistory.length} events
       </Typography>
@@ -98,12 +104,6 @@ export default function () {
           for {parseInt((new Date().getTime() - startTime) / 1000)} seconds 
         </Typography>
       }
-      <Button onClick={downloadFile} 
-        size="large" variant="contained" color="primary" 
-        disabled={eventHistory.length === 0}
-      >
-        Download MIDI
-      </Button>
     </Container>
   )
 }
@@ -113,7 +113,7 @@ export function BackgroundTask() {
   const lastEvent = useLastEvent()
   const [shouldRecord,] = useShouldRecord()
   const [, setEventHistory] = useEventHistory()
-  const [, setStartTime] = useStartTime()
+  const [startTime, setStartTime] = useStartTime()
 
   // set start time 
   useEffect(() => {
@@ -126,14 +126,15 @@ export function BackgroundTask() {
 
   // add to history whenever a new event is sent 
   useEffect(() => {
-    if (!lastEvent || !shouldRecord)
+    if (!lastEvent || !shouldRecord || !startTime
+      || startTime >= lastEvent.receivedTime)
       return
 
     setEventHistory(eventHistory => {
       const newHistory = [...eventHistory]
       return newHistory.concat(lastEvent)
     })
-  }, [lastEvent, setEventHistory, shouldRecord])
+  }, [lastEvent, setEventHistory, shouldRecord, startTime])
 
   return null
 }
@@ -143,7 +144,7 @@ export function StatusBar() {
   const [shouldRecord,] = useShouldRecord()
   const [tick, setTick] = useState(true)
   useEffect(() => {
-    setInterval(() => setTick(t => !t), 1000)
+    setInterval(() => setTick(t => !t), 700)
   }, [setTick])
 
   if (!shouldRecord && !eventHistory.length)
