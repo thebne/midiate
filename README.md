@@ -133,7 +133,7 @@ Receive and send MIDI events.
 Events are the bare elements of MIDIate and are the base for the rest of the musical data.
 
 - `useLastEvent()->{...}`  - returns the last event received from any input (see "events" below for details).
-- `useSendEvent()` - returns a function with the signature `sendCustomEvent(deltaTime, msg, appId)` to send ("dispatch") curated MIDI messages from apps. 
+- `useSendEvent()` - returns a function with the signature `sendEvent(msg)` to send curated MIDI messages from apps. 
 #### api/notes.js
 Notes are smarter version of events. 
 
