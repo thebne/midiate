@@ -93,5 +93,4 @@ function calculateHeight(x, min, max) {
 	return `${minmax*15 + 10}vw`
 }  
   
-// midiate support
-export { default as config } from './midiate/config'
+export { default as config } from './config'

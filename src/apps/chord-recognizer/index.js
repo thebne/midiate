@@ -328,6 +328,5 @@ const ChordDetectionRangeDialog = function (
   )
 }
 
-// midiate support
-export { default as config } from './midiate/config'
-export { default as StatusBar } from './midiate/statusBar'
+export { default as config } from './config'
+export { default as StatusBar } from './statusBar'

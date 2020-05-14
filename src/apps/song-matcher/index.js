@@ -103,4 +103,4 @@ function usePrevious(value) {
 }
  
 // midiate support
-export { default as config } from './midiate/config'
+export { default as config } from './config'
