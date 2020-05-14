@@ -3,10 +3,10 @@ import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import MicIcon from '@material-ui/icons/Mic'
-import PauseIcon from '@material-ui/icons/Pause'
 import { red, grey } from '@material-ui/core/colors'
 import { useLastEvent } from '../../api/events'
-import { useSessionValue, useSetting } from '../../api/settings'
+import { useToggleStatusBarVisibility, 
+  useSessionValue } from '../../api/settings'
 const writeMidi = require('midi-file').writeMidi
 
 const useEventHistory = () => 
@@ -111,9 +111,15 @@ export default function () {
 /* collect notes even when not on main app view */
 export function BackgroundTask() {
   const lastEvent = useLastEvent()
+  const toggleStatusBarVisibility = useToggleStatusBarVisibility()
   const [shouldRecord,] = useShouldRecord()
-  const [, setEventHistory] = useEventHistory()
+  const [eventHistory, setEventHistory] = useEventHistory()
   const [startTime, setStartTime] = useStartTime()
+
+  // toggle hide/show status bar
+  useEffect(() => {
+    toggleStatusBarVisibility(shouldRecord || eventHistory.length)
+  }, [shouldRecord, eventHistory.length, toggleStatusBarVisibility])
 
   // set start time 
   useEffect(() => {
@@ -144,11 +150,12 @@ export function StatusBar() {
   const [shouldRecord,] = useShouldRecord()
   const [tick, setTick] = useState(true)
   useEffect(() => {
-    setInterval(() => setTick(t => !t), 700)
+    const interval = setInterval(() => setTick(t => !t), 700)
+    return () => clearInterval(interval)
   }, [setTick])
 
   if (!shouldRecord && !eventHistory.length)
-    return <PauseIcon style={{ color: grey[400] }} />
+    return null
 
   return <MicIcon style={{ 
           color: shouldRecord ? red[400] : grey[400], 

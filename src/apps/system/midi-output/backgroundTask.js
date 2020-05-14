@@ -1,13 +1,19 @@
 import { useEffect } from 'react'
-import { useSetting } from '../../../api/settings'
+import { useSetting, useToggleStatusBarVisibility } from '../../../api/settings'
 import { useMidiOutputs } from '../../../api/midi'
 import { useLastEvent } from '../../../api/events'
 
-export default function StatusBar () {
+export default function () {
   const lastEvent = useLastEvent()
+  const toggleStatusBarVisibility = useToggleStatusBarVisibility()
   const midiOutputs = useMidiOutputs()
   const [activeOutputs] = useSetting('activeOutputs', [])
   const [transpose] = useSetting('transpose', 0)
+
+  // toggle hide/show status bar
+  useEffect(() => {
+    toggleStatusBarVisibility(!!activeOutputs.length)
+  }, [activeOutputs, toggleStatusBarVisibility])
 
   // send output to devices
   useEffect(() => {

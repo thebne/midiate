@@ -15,7 +15,8 @@ import { PROGRAM_NAME, DEFAULT_APP_ID } from '../constants'
 import { ReactComponent as Logo } from '../logo.svg'
 import { 
   getForegroundAppId,
-  getApp
+  getApp,
+  makeGetStatusBarVisiblity
 } from '../redux/selectors'
 import { 
   switchForegroundApp, 
@@ -89,22 +90,38 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
               switchForegroundApp={switchForegroundApp}
             />
             <Box display={{xs: 'none', sm: 'initial'}}>
-              {statusBar.map(item => item != null ? 
-                <IconButton 
-                  color="inherit" 
-                  key={item.props.config.id}
-                  onClick={() => switchForegroundApp(
-                    item.props.config.statusBarAction || item.props.config.id)} 
-                  className={classes.statusBarItem}
-                >
+              {statusBar.map(item =>
+                <StatusBarIcon key={item.props.config.id}>
                   {item}
-                </IconButton> 
-                : null)}
+                </StatusBarIcon> 
+               )}
             </Box>
 					</Toolbar>
 				</AppBar>
   )
 }
+
+const StatusBarIcon = connect((state, props) => ({
+    visibility: makeGetStatusBarVisiblity(props.children.props.config.id)(state),
+}), {
+  switchForegroundApp
+})(function ({visibility, children, switchForegroundApp}) {
+  const classes = useStyles()
+
+  if (!visibility)
+    return null
+
+  return (
+    <IconButton 
+      color="inherit" 
+      onClick={() => switchForegroundApp(
+        children.props.config.statusBarAction || children.props.config.id)} 
+      className={classes.statusBarItem}
+    >
+      {children}
+    </IconButton> 
+  )
+})
 
 const AppTitle = React.memo(
   function AppTitle({foregroundAppId, foregroundAppConfig, switchForegroundApp}) {

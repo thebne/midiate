@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import Soundfont from 'soundfont-player'
 import { useLastEvent } from '../../api/events'
+import { useToggleStatusBarVisibility } from '../../api/settings'
 import { useInstrumentType, useLoading } from './settings'
 
 export default function () {
   const lastEvent = useLastEvent()
+  const toggleStatusBarVisibility = useToggleStatusBarVisibility()
   const [type] = useInstrumentType()
   const [loading, setLoading] = useLoading()
   const [instrument, setInstrument] = useState(null)
@@ -40,6 +42,11 @@ export default function () {
       return newPlaying
     })
   }, [loading, instrument, setPlaying, type])
+
+  // toggle hide/show status bar
+  useEffect(() => {
+    toggleStatusBarVisibility(!!type)
+  }, [type, toggleStatusBarVisibility])
 
   // send output to devices
   useEffect(() => {

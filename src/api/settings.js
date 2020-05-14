@@ -1,8 +1,11 @@
 import { useMemo, useRef, useCallback } from 'react'
 import { createSelector } from 'reselect'
-import { useStore, useSelector } from 'react-redux'
-import { setAppSpecificSessionValue,
-  setAppSpecificPersistentValue } from '../redux/actions'
+import { useStore, useSelector, useDispatch } from 'react-redux'
+import { 
+  setAppSpecificSessionValue,
+  setAppSpecificPersistentValue,
+  toggleStatusBarVisibility,
+} from '../redux/actions'
 import { useConfig } from './context'
 
 const getSettingsState = store => store.settings
@@ -61,3 +64,12 @@ export const useSetting = makeUseValue(
   makeGetAppSpecificPersistentValue, setAppSpecificPersistentValue)
 export const useSessionValue = makeUseValue(
   makeGetAppSpecificSessionValue, setAppSpecificSessionValue)
+
+// toggling show/hide in status bar
+export const useToggleStatusBarVisibility = () => {
+  const appId = useConfig().id
+  const dispatch = useDispatch()
+  return useCallback((v) => 
+    dispatch(toggleStatusBarVisibility(appId, v))
+  , [appId, dispatch])
+}

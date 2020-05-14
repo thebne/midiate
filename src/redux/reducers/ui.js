@@ -4,17 +4,26 @@ import {
   ADD_APP,
   SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_APP_SPECIFIC_SESSION_VALUE,
+  TOGGLE_STATUS_BAR_VISIBILITY,
 } from "../actionTypes"
 
 import { DEFAULT_APP_ID } from '../../constants'
 
 const initialState = {
+  // array of WebMIDI inputs
   midiInputs: [],
+  // array of WebMIDI outputs
   midiOutputs: [],
+  // connected to remote?
   midiServerConnectionStatus: false,
+  // current app that is presented
   foregroundApp: DEFAULT_APP_ID,
+  // config mapping
   appIdToConfig: {},
+  // per-app persistent config
   appSpecific: {},
+  // app-controlled status bar visibility
+  appStatusBarVisibility: {},
 }
 
 const ui = (state = initialState, action) => {
@@ -56,6 +65,15 @@ const ui = (state = initialState, action) => {
             ...state.appSpecific[action.payload.appId],
             [action.payload.key]: action.payload.value,
           }
+        },
+      }
+    }
+    case TOGGLE_STATUS_BAR_VISIBILITY: {
+      return {
+        ...state,
+        appStatusBarVisibility: {
+          ...state.appStatusBarVisibility,
+          [action.payload.appId]: action.payload.show,
         },
       }
     }

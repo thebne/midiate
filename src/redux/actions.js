@@ -9,6 +9,7 @@ import {
   SET_THEME_ID,
   SET_APP_SPECIFIC_PERSISTENT_VALUE,
   SET_APP_SPECIFIC_SESSION_VALUE,
+  TOGGLE_STATUS_BAR_VISIBILITY,
 } from './actionTypes'
 
 export const switchForegroundApp = appId => ({
@@ -73,4 +74,8 @@ export const setAppSpecificPersistentValue = (appId, key, value) => ({
 export const setAppSpecificSessionValue = (appId, key, value) => ({
   type: SET_APP_SPECIFIC_SESSION_VALUE, 
   payload: {appId, key, value},
+})
+export const toggleStatusBarVisibility = (appId, show) => ({
+  type: TOGGLE_STATUS_BAR_VISIBILITY, 
+  payload: {appId, show},
 })

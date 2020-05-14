@@ -56,3 +56,9 @@ export const getMidiServerConnectionStatus = createSelector(
   [getUiState],
   ui => ui.midiServerConnectionStatus
 )
+
+export const makeGetStatusBarVisiblity = appId => createSelector(
+  [getUiState],
+  ui => ui.appStatusBarVisibility[appId] === undefined 
+    ? true : ui.appStatusBarVisibility[appId]
+)
