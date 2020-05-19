@@ -14,14 +14,11 @@ const useStyles = makeStyles(theme => ({
   pianoContainer: {
     display: "flex",
     justifyContent: "center",
+    marginBottom: "4vh",
   },
   
   pianoBody: {
     display: "inline-block",
-    border: "1px solid #160801",
-    borderRadius: "1vw",
-    background: "linear-gradient(to bottom right,rgba(80,40,0,1),rgba(45,15,0,1))",
-    boxShadow: "0 0 50px rgba(0,0,0,0.5) inset,0 1px rgba(212,152,125,0.2) inset,0 5px 15px rgba(0,0,0,0.5)",
     position: "relative",
   },
   

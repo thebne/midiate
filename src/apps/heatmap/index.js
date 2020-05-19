@@ -59,16 +59,20 @@ export default function Heatmap() {
 		heights[note] = {height: calculateHeight(x,0,max)}
 	}	
     return (
-      <Container maxWidth="xl" className={styles.root}>
-        <Button onClick={() => setToggle(t => !t)}>
-          Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}
-        </Button>
-        <Button style={{float: 'right'}} onClick={() => setPressed({})}>
-          Clear
-        </Button>			
+      <React.Fragment>
+        <Container maxWidth="xl" className={styles.buttons}>
+          <Button onClick={() => setToggle(t => !t)}>
+            Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}
+          </Button>
+          <Button style={{float: 'right'}} onClick={() => setPressed({})}>
+            Clear
+          </Button>			
+        </Container>
 
-        <Piano startNote="A0" endNote="C8" styles={toggle ? colors : heights} />
-      </Container>
+        <Container maxWidth={null} className={styles.root}>
+          <Piano startNote="A0" endNote="C8" styles={toggle ? colors : heights} />
+        </Container>
+      </React.Fragment>
     )
   }
 
