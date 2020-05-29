@@ -4,5 +4,5 @@ export default [
   require('../apps/heatmap'),
   require('../apps/web-player'),
   require('../apps/recorder'),
-  // require('../apps/song-matcher'),
+  require('../apps/song-matcher'),
 ]
