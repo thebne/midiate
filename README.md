@@ -16,7 +16,9 @@ Features
 APIs
 ----------
 ### Quickstart - Simple Note Viewer
-To demonstrate just how easy and fast it is to write an app on top of MIDIate, let's build together a very basic app that visualizes notes and chords are played in realtime (either using your keyboard or a MIDI-device plugged into your computer via USB).
+To demonstrate just how easy and fast it is to write an app on top of MIDIate, let's build together a very basic app that:
+- visualizes notes and chords are played in realtime
+- adds the number of notes played on the status bar, which persists across apps (for a session)
 
 This example uses the most common API hooks. For more detailed documentation, be sure to continue reading beyond this section.
 
@@ -38,7 +40,9 @@ import { useSessionValue } from '../api/settings'
 const useNotesHistory = () => 
   useSessionValue('notesHistory', [])
 ```
-This will ensure that when our app loads notesHistory, it will load with the correct default value and will not be in conflict with other apps also loading this resource. For more explaination, see documentation on api/settings.js.
+This will ensure that when our app loads notesHistory, it will load with the correct default value and will not be in conflict with other apps that may also be loading this resource. 
+
+For more explaination, see documentation on `api/settings.js`.
 
 #### Export main view
 ```js
@@ -66,7 +70,7 @@ export default function () {
   )
 }
 ```
-Note that we use `useNotesHistory` simimilarly to how we'd use the `useState()` React hook.
+Note that we use `useNotesHistory` similarly to how we would use the `useState()` React hook.
 
 #### Export a background task to collect notes in the background
 ```js
