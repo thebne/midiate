@@ -2,22 +2,27 @@
 MIDIate
 ========
 
-MIDIate is a platform of MIDI-based apps, designed to be easily extensible (via React).
+MIDIate is a platform designed for the quick and easy development of MIDI-based React applications.
+
 ### **[Visit midiate.now.sh](https://midiate.now.sh)** to see the latest version.
 
 Features
 --------
-
-- Broad MIDI-based platform with intuitive React APIs
-- Uses WebMIDI interface to instantly allow connection
-- Several built-in apps to get started 
+- Provides a framwork with intuitive MIDI-based React APIs (e.g. getNotes())
+- Uses WebMIDI interface to instantly allow MIDI-device connections
+- Supports use of computer keyboard as a MIDI device
+- Includes several built-in apps to get started
 
 APIs
 ----------
-### Basic app example
-Here's a quick guide of how to write a simple app using the most common hooks.
+### Quickstart - Simple Note Visualizer
+To demonstrate just how easy and fast it is to write an app on top of MIDIate, let's build together a very basic app that visualizes notes and chords are played in realtime (either using your keyboard or a MIDI-device plugged into your computer via USB).
 
-In this example we assume the app is located in `/src/apps/<app-name>.js`.
+This example uses the most common API hooks. For more detailed documentation, be sure to continue reading beyond this section.
+
+#### Create a new app
+`/src/apps/<basic-note-viewer>.js`
+
 #### Import APIs and other libraries
 ```js
 import React, { useCallback, useEffect } from 'react'
@@ -33,7 +38,9 @@ import { useSessionValue } from '../api/settings'
 const useNotesHistory = () => 
   useSessionValue('notesHistory', [])
 ```
-#### Export main view (with more detailed information)
+This will ensure that when our app loads notesHistory, it will load with the correct default value and will not be in conflict with other apps also loading this resource. For more explaination, see documentation on api/settings.js.
+
+#### Export main view
 ```js
 /* show played notes and chords */
 export default function () {
@@ -59,6 +66,8 @@ export default function () {
   )
 }
 ```
+Note that we use `useNotesHistory` simimilarly to how we'd use the `useState()` React hook.
+
 #### Export a background task to collect notes in the background
 ```js
 /* collect notes even when not on main app view */
@@ -84,6 +93,9 @@ export function BackgroundTask() {
   return null
 }
 ```
+
+This will allow our app to collect note history even when not on the main app view.
+
 #### Export a status bar component with some aggregated data 
 ```js
 /* shows history count on status bar */
@@ -93,6 +105,8 @@ export function StatusBar() {
   return notesHistory.length
 }
 ```
+This allows us to add our own data in the status bar- a component which will persists across apps during the same session. 
+
 #### Lastly, export `config`
 ```js
 // make app accessible with a friendly name
@@ -102,12 +116,22 @@ export const config = {
   icon: MusicNoteIcon,
 }
 ```
-Using this as a reference, let's go through the APIs.
+Here, we define our app's configurations, including a name and icon that will be featured on the main page.
+
+#### What did we just build?
+We've just build a react app that:
+- Appears on the main page, with an icon and name, that links to its main view.
+- Displays the currently played chord or note, and a history of all notes played on it's main view.
+- Displays a count of notes played on the status bar, which persists across apps.
+
+Our note-viewer thus has it's own **app view** AND controls a piece of the **status-bar**.
+
+Try it out!
 
 ### Semantics
-There are several concepts in MIDIate:
+There are several key concepts in MIDIate:
 - The **UI** consists of two parts: the **app view** and a **status bar**.
-- **Apps** are JS libraries that export React components. 
+- **Apps** (in src/apps) are JS libraries that export React components. 
 
   Apps get control in three different ways -  as a `BackgroundTask`, in the `StatusBar` or as a full app (`default` export).
   - **System apps** are special apps that have broad effects on the system. 
@@ -123,7 +147,7 @@ Each app has to follow a specific structure:
 
 1. Provide an export to a `config` object (see "app config" below for details and options)
 2. Provide an export to `default` (main view), `StatusBar` (cross-app status bar), `BackgroundTask` (invisible background processing unit), or a combination of these. 
- The exported should be valid React elements.
+ All exported items should be valid React elements.
 
 ### App hooks
 All the hooks are under `/src/api`, separated to logical libraries. 
@@ -132,10 +156,10 @@ Receive and send MIDI events.
 
 Events are the bare elements of MIDIate and are the base for the rest of the musical data.
 
-- `useLastEvent()->{...}`  - returns the last event received from any input (see "events" below for details).
+- `useLastEvent()->{...}`  - returns the last MIDI event received from any input (see "events" below for details).
 - `useSendEvent()` - returns a function with the signature `sendEvent(msg)` to send curated MIDI messages from apps. 
 #### api/notes.js
-Notes are smarter version of events. 
+Notes are a "smarter" version of events. 
 
 They track _note_on_ and _note_off_ events to provide a coherent list of currently-played notes.
 The hooks also provide a convenient heuristic regarding the possible notes the player intended to play (mostly useful for chord-based scenarios).
@@ -145,10 +169,10 @@ The hooks also provide a convenient heuristic regarding the possible notes the p
 - `useSmartNotes(config?)->{events,id}` - returns a list of played notes with an associated "detection ID". Written with chord recognition in mind. `config` has same behavior as `useNotes()`.
 
   The return value respects some assumptions:
-  -   `events` only change when notes are added or change - not when they are removed (unless all notes are removed)
+  - `events` only change when notes are added or changed - not when they are removed (unless all notes are removed)
   - `id` only changes when all notes change
 #### api/chords.js
-Chords are detected sequences of notes.
+Chords are detections of a sequences of notes.
 
 They use `useSmartNotes()` and return information about the currently-played chords.
 
@@ -224,7 +248,7 @@ MIDI events have the following structure:
 Events are first parsed with [MIDIMessage](https://github.com/notthetup/midimessage) and then enriched with [@tonaljs](https://github.com/tonaljs/tonal) and some custom logic. 
  
 ### Apps vs. System apps
-The two are actually very similar. The main difference is the logical association (system apps provide cross-app/core functionality, while regular apps let users experience a specific narrative).
+The two are actually very similar. The main difference is logical (system apps provide cross-app/core functionality, while regular apps let users experience a specific narrative).
 
 The only technical subtlety is that system apps can provide an export to `settings` that automatically show in the settings app - while regular apps need to write their own settings layout.
 
@@ -237,7 +261,7 @@ To get started with MIDIate locally, just follow these three steps:
 2. run `yarn`
 3. run `yarn start`. 
 
-Browse `http://localhost:3000` in order to see in in development mode, or run `yarn build` in order to compile.
+Browse `http://localhost:3000` in order to see in in development mode, or run `yarn build` to compile.
 
 MIDIate is based on `create-react-app`.
 
