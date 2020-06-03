@@ -15,7 +15,7 @@ Features
 
 APIs
 ----------
-### Quickstart - Simple Note Visualizer
+### Quickstart - Simple Note Viewer
 To demonstrate just how easy and fast it is to write an app on top of MIDIate, let's build together a very basic app that visualizes notes and chords are played in realtime (either using your keyboard or a MIDI-device plugged into your computer via USB).
 
 This example uses the most common API hooks. For more detailed documentation, be sure to continue reading beyond this section.
@@ -107,7 +107,7 @@ export function StatusBar() {
 ```
 This allows us to add our own data in the status bar- a component which will persists across apps during the same session. 
 
-#### Lastly, export `config`
+#### Export `config`
 ```js
 // make app accessible with a friendly name
 export const config = {
@@ -117,6 +117,19 @@ export const config = {
 }
 ```
 Here, we define our app's configurations, including a name and icon that will be featured on the main page.
+
+#### Lastly, add the new app to the list of exported apps in `src/config/apps.js`
+
+```js
+  require('../apps/chord-recognizer'),
+  require('../apps/piano-simulator'),
+  require('../apps/heatmap'),
+  require('../apps/web-player'),
+  require('../apps/recorder'),
+  require('../apps/song-matcher'),
+  require('../apps/note-viewer') // our app
+]
+```
 
 #### What did we just build?
 We've just build a react app that:
