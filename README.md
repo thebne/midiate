@@ -156,15 +156,14 @@ Our note-viewer thus has it's own **app view** AND controls a piece of the **sta
 ### Semantics
 There are several key concepts in MIDIate:
 - The **UI** consists of two parts: the **app view** and a **status bar**.
-- The **status bar** is exactly what it sounds like - a header that is always visible and displays aggregated data. Individual apps can add components to the status bar.
+- The **status bar** is exactly what it sounds like - a header that is always visible and displays summary data. Individual apps can add components to the status bar.
 - **Apps** (in `src/apps`) are JS libraries that export React components. 
-  An app manifests itself in three different ways -  as a `BackgroundTask`, in the `StatusBar` or as a full app (`default` export). 
+  An app manifests itself in three different ways -  as a `BackgroundTask`, in the `StatusBar` or as a main view (`default` export), which takes up the full screen. 
   For example, our note-viewer app is all three- it has a `BackgroundTask` that sets `notesHistory`, renders a component on the `StatusBar` that displays a count of played notes, and has a full app view itself, which is accessible from the main MIDIate page.
   - **System apps**  (in `src/apps/system`)are special apps that provide core functionality to or have broad effects on the system (e.g. `midi-input`)
 - **Hooks** are used as the default APIs of MIDIate. They use [React Hooks](https://reactjs.org/docs/hooks-intro.html) in order to provide the relevant arguments.
-
   All hooks exist under `/src/api`.
-  -For example,  **useLastEvent**, **useNotes** and **useChords** are commonly used hooks.
+  For example,  **useLastEvent**, **useNotes** and **useChords** are commonly used hooks.
 
 ### Writing an app
 As we described, apps are the breathing core of MIDIate. They can access all the events in the system and show processed data to the user in several ways.
@@ -285,17 +284,6 @@ System apps can provide an export to `settings` that automatically show in the s
 #### Is my app a system app or regular app?
 Unless you're trying to expand the core functionality (event collection, output methods, traversal etc.) - you're probably writing a regular app. 
 
-Development
-----------
-To get started with MIDIate locally, just follow these three steps: 
-1. Clone the repository (and `cd` into the directory)
-2. Run `yarn`
-3. Run `yarn start`
-
-Browse `http://localhost:3000` for development mode or run`yarn build` to compile.
-
-MIDIate is based on `create-react-app`.
-
 Frequently Asked
 ---------
 - **Can I use MIDIate as an external package?**
@@ -308,4 +296,5 @@ Frequently Asked
   Check out [midiate-utils](https://github.com/thebne/midiate-utils) for compatible streaming servers (depending on your operating system, they may require system libraries).
 
 - **Can I use MIDIate without owning a MIDI device?**
+
   Yes! Your computer keyboard can serve as a midi-device, though the functionality is currently limited.
