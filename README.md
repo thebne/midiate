@@ -22,7 +22,7 @@ To demonstrate just how easy and fast it is to write an app on top of MIDIate, l
 
 This example uses the most common API hooks. For more detailed documentation, be sure to continue reading beyond this section.
 
-#### Development set-up
+#### Development Set-Up
 
 To get started with MIDIate locally: 
 1. clone the repository (and `cd` into the directory)
