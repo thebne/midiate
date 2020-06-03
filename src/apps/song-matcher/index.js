@@ -37,7 +37,7 @@ export default function Chordify() {
     const searchString = searchChords.join(",")
 
     // TODO: Make only first query to fetch from DB and cache it
-    fetch(`https://DbDB.azurewebsites.net/api/GetAggChords?transpose=${transpose}&chords=${searchString}`)
+    fetch(`https://DbDB.azurewebsites.net/GetAggChords?transpose=${transpose}&chords=${searchString}`)
       .then((response) => {
         return response.json();
       })
