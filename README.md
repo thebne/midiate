@@ -8,7 +8,7 @@ MIDIate is a platform designed for the quick and easy development of MIDI-based 
 
 Features
 --------
-- Provides a framwork with intuitive MIDI-based React APIs (e.g. getNotes())
+- Provides a framwork with intuitive MIDI-based React APIs (e.g. `getNotes()`)
 - Uses WebMIDI interface to instantly allow MIDI-device connections
 - Supports use of computer keyboard as a MIDI device
 - Includes several built-in apps to get started
@@ -17,17 +17,27 @@ APIs
 ----------
 ### Quickstart - Simple Note Viewer
 To demonstrate just how easy and fast it is to write an app on top of MIDIate, let's build together a very basic app that:
-- visualizes notes and chords are played in realtime
-- adds the number of notes played on the status bar, which persists across apps (for a session)
+- visualizes notes and chords played in realtime
+- adds the number of notes played on the status bar
 
 This example uses the most common API hooks. For more detailed documentation, be sure to continue reading beyond this section.
 
+#### Development set-up
+
+To get started with MIDIate locally: 
+1. clone the repository (and `cd` into the directory)
+2. run `yarn`
+3. run `yarn start`
+4. Go to `http://localhost:3000`
+
+Note - MIDIate is based on `create-react-app`
+
 #### Create a new app
-`/src/apps/<basic-note-viewer>.js`
+`/src/apps/<note-viewer>.js`
 
 #### Import APIs and other libraries
 ```js
-import React, { useCallback, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import MusicNoteIcon from '@material-ui/icons/MusicNote'
 import { useLastEvent } from '../api/events'
 import { useNotes } from '../api/notes'
@@ -40,7 +50,7 @@ import { useSessionValue } from '../api/settings'
 const useNotesHistory = () => 
   useSessionValue('notesHistory', [])
 ```
-This will ensure that when our app loads notesHistory, it will load with the correct default value and will not be in conflict with other apps that may also be loading this resource. 
+Defining this hook in one place will ensure that when our app loads `notesHistory` it will load with the correct default value and will not be in conflict other uses of `notesHistory` in our note-viewer app.
 
 For more explaination, see documentation on `api/settings.js`.
 
@@ -109,7 +119,7 @@ export function StatusBar() {
   return notesHistory.length
 }
 ```
-This allows us to add our own data in the status bar- a component which will persists across apps during the same session. 
+This allows us to add our own data in the status bar- a component which is always visible.
 
 #### Export `config`
 ```js
@@ -139,23 +149,22 @@ Here, we define our app's configurations, including a name and icon that will be
 We've just build a react app that:
 - Appears on the main page, with an icon and name, that links to its main view.
 - Displays the currently played chord or note, and a history of all notes played on it's main view.
-- Displays a count of notes played on the status bar, which persists across apps.
+- Displays a count of notes played on the status bar.
 
 Our note-viewer thus has it's own **app view** AND controls a piece of the **status-bar**.
-
-Try it out!
 
 ### Semantics
 There are several key concepts in MIDIate:
 - The **UI** consists of two parts: the **app view** and a **status bar**.
-- **Apps** (in src/apps) are JS libraries that export React components. 
-
-  Apps get control in three different ways -  as a `BackgroundTask`, in the `StatusBar` or as a full app (`default` export).
-  - **System apps** are special apps that have broad effects on the system. 
+- The **status bar** is exactly what it sounds like - a header that is always visible and displays aggregated data. Individual apps can add components to the status bar.
+- **Apps** (in `src/apps`) are JS libraries that export React components. 
+  An app manifests itself in three different ways -  as a `BackgroundTask`, in the `StatusBar` or as a full app (`default` export). 
+  For example, our note-viewer app is all three- it has a `BackgroundTask` that sets `notesHistory`, renders a component on the `StatusBar` that displays a count of played notes, and has a full app view itself, which is accessible from the main MIDIate page.
+  - **System apps**  (in `src/apps/system`)are special apps that provide core functionality to or have broad effects on the system (e.g. `midi-input`)
 - **Hooks** are used as the default APIs of MIDIate. They use [React Hooks](https://reactjs.org/docs/hooks-intro.html) in order to provide the relevant arguments.
 
   All hooks exist under `/src/api`.
-  - **useLastEvent**, **useNotes** and **useChords** are examples of (the most popular) hooks.
+  -For example,  **useLastEvent**, **useNotes** and **useChords** are commonly used hooks.
 
 ### Writing an app
 As we described, apps are the breathing core of MIDIate. They can access all the events in the system and show processed data to the user in several ways.
@@ -265,20 +274,25 @@ MIDI events have the following structure:
 Events are first parsed with [MIDIMessage](https://github.com/notthetup/midimessage) and then enriched with [@tonaljs](https://github.com/tonaljs/tonal) and some custom logic. 
  
 ### Apps vs. System apps
-The two are actually very similar. The main difference is logical (system apps provide cross-app/core functionality, while regular apps let users experience a specific narrative).
+System apps provide cross-app/core functionality, while regular apps let users experience a specific experience.
 
-The only technical subtlety is that system apps can provide an export to `settings` that automatically show in the settings app - while regular apps need to write their own settings layout.
+#### Logical Difference
+For example, the `midi-input` system app is what allows all MIDI apps to have access to midi events, either from the keyboard, a MIDI device, or the web. The regular app `chord-recognizer`, on the other hand, builds upon this core functionality by showing an nice visualization of the current chord being played.
 
-If you're about to write an app, unless you're trying to expand the core functionality (event collection, output methods, traversal etc.) - you probably want to write a regular app. 
+#### Technical Difference
+System apps can provide an export to `settings` that automatically show in the settings app, while regular apps need to write their own settings layout.
+
+#### Is my app a system app or regular app?
+Unless you're trying to expand the core functionality (event collection, output methods, traversal etc.) - you're probably writing a regular app. 
 
 Development
 ----------
 To get started with MIDIate locally, just follow these three steps: 
-1. clone the repository (and `cd` into the directory)
-2. run `yarn`
-3. run `yarn start`. 
+1. Clone the repository (and `cd` into the directory)
+2. Run `yarn`
+3. Run `yarn start`
 
-Browse `http://localhost:3000` in order to see in in development mode, or run `yarn build` to compile.
+Browse `http://localhost:3000` for development mode or run`yarn build` to compile.
 
 MIDIate is based on `create-react-app`.
 
@@ -292,3 +306,6 @@ Frequently Asked
   The package currently supports WebSockets as an external MIDI source. It means it's easy mostly within the LAN. 
  
   Check out [midiate-utils](https://github.com/thebne/midiate-utils) for compatible streaming servers (depending on your operating system, they may require system libraries).
+
+- **Can I use MIDIate without owning a MIDI device?**
+  Yes! Your computer keyboard can serve as a midi-device, though the functionality is currently limited.
