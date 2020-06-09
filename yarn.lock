@@ -7413,6 +7413,11 @@ normalize-url@^3.0.0:
   resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-3.3.0.tgz#b2e1c4dc4f7c6d57743df733a4f5978d18650559"
   integrity sha512-U+JJi7duF1o+u2pynbp2zXDW2/PADgC30f0GsHZtRh+HOcXHnw137TrNlyxxRvWW5fjKd3bcLHPxofWuCjaeZg==
 
+nosleep.js@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/nosleep.js/-/nosleep.js-0.11.0.tgz#4e03af6751d7a969ceade0c45a1b481887b2b0c2"
+  integrity sha512-Ewb7YpPJ6t1IAiMoXM5vWBMomqVFD0wUXXzUfE+kGftXxXFXqLPV3Aq6Iggxxm568tMVptrlXLw5BPMzEgOK6A==
+
 note-parser@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/note-parser/-/note-parser-1.1.0.tgz#12e9f17e51450ec994f1364a01982c22667b8e6b"

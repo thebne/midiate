@@ -26,6 +26,7 @@
     "color-hash": "^1.0.3",
     "midi-file": "^1.1.2",
     "midimessage": "^1.0.5",
+    "nosleep.js": "^0.11.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-redux": "^7.2.0",
