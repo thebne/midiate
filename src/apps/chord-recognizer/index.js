@@ -124,7 +124,8 @@ function FrontPage() {
   useEffect(() => {
     const noSleep = new NoSleep()
     noSleep.enable()
-    return noSleep.disable
+    return () => 
+      noSleep.disable()
   }, [])
 
 	return (
