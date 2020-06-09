@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
+import clsx from 'clsx'
 import Snackbar from '@material-ui/core/Snackbar'
 import Button from '@material-ui/core/Button'
 import { CssBaseline } from '@material-ui/core'
@@ -42,16 +43,6 @@ const useStyles = makeStyles(theme => ({
       padding: theme.spacing(4),
     }
   },
-
-  '@global': {
-    '.hasMidiInputs': {
-    },
-    '.noMidiInputs': {
-      '& .app-bar': {
-        background: '#666' 
-      }
-    },
-  }
 }))
 
 class Client extends React.Component {
@@ -142,37 +133,38 @@ function AppLayout(props) {
   const {isAnyMidiInputActive, foregroundAppId,
     switchForegroundApp, children} = props
 
-	return <div className={
-    [
+	return (
+    <div className={clsx(
       classes.root, 
       isAnyMidiInputActive ? "hasMidiInputs" : "noMidiInputs",
-    ].join(' ')}>
-        <StatusBar {...props} />
-				<main className={classes.content}>
-					<div className={classes.appBarSpacer} />
-					<div className={classes.container}>
-            {children}
-					</div>
-				</main>
-          <Snackbar
-            open={!isAnyMidiInputActive 
-              && foregroundAppId !== SETTINGS_APP_ID
-              && !hideWarning}
-            message="No active MIDI inputs"
-            action={
-              <React.Fragment>
-                <Button color="inherit" 
-                  onClick={() => switchForegroundApp(SETTINGS_APP_ID)}>
-                  Choose
-                </Button>
-                <Button color="inherit" 
-                  onClick={() => setHideWarning(true)}>
-                  Dismiss 
-                </Button>
-              </React.Fragment>
-          }
-        />
-			</div>
+    )}>
+      <StatusBar {...props} />
+      <main className={classes.content}>
+        <div className={classes.appBarSpacer} />
+        <div className={classes.container}>
+          {children}
+        </div>
+      </main>
+        <Snackbar
+          open={!isAnyMidiInputActive 
+            && foregroundAppId !== SETTINGS_APP_ID
+            && !hideWarning}
+          message="No active MIDI inputs"
+          action={
+            <React.Fragment>
+              <Button color="inherit" 
+                onClick={() => switchForegroundApp(SETTINGS_APP_ID)}>
+                Choose
+              </Button>
+              <Button color="inherit" 
+                onClick={() => setHideWarning(true)}>
+                Dismiss 
+              </Button>
+            </React.Fragment>
+        }
+      />
+    </div>
+  )
 }
 
 export default connect(
