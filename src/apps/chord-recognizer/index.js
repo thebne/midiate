@@ -20,9 +20,9 @@ import StarIcon from '@material-ui/icons/Star'
 import SettingsIcon from '@material-ui/icons/Settings'
 import { makeStyles } from '@material-ui/core/styles'
 import { Scale, Midi } from '@tonaljs/tonal'
-import NoSleep from 'nosleep.js'
 import { useChords, arePropsEqual } from './utils'
 import { useSetting } from '../../api/settings'
+import { useNoSleep } from '../../api/misc'
 
 const ColorHash = require('color-hash')
 const colorHash = new ColorHash({lightness: .5})
@@ -120,13 +120,7 @@ export default function App() {
 
 function FrontPage() {
   const [chords, id] = useChords()
-
-  useEffect(() => {
-    const noSleep = new NoSleep()
-    noSleep.enable()
-    return () => 
-      noSleep.disable()
-  }, [])
+  useNoSleep()
 
 	return (
     <Fragment>
