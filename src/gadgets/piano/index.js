@@ -152,7 +152,7 @@ export default function Piano({classNames={}, styles={}, singleOctave,
 const PianoKey = React.memo(({note, className, style, getClass, 
   onPress, onRelease, NoteEffectComponent, NoteEffectProps}) => { 
 
-  const [pressed, setPressed] = useState(false)
+  const [, setPressed] = useState(false)
   const onMouseDown = useCallback(e => {
     if (!onPress)
       return
