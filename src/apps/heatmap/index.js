@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useCallback } from 'react'
 import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import { Note } from "@tonaljs/tonal"
@@ -42,6 +42,9 @@ export function BackgroundTask() {
 export default function Heatmap() {
   const [pressed,setPressed] = usePressed()
   const [toggle, setToggle] = useToggle()
+  
+  const switchType = useCallback(() => setToggle(t => !t), [setToggle])
+  const clear = useCallback(() => setPressed({}), [setPressed])
 
   const heights = {}, colors = {}
   const max = Math.max(...Object.values(pressed))
@@ -58,23 +61,23 @@ export default function Heatmap() {
 		// set animation height per key
 		heights[note] = {height: calculateHeight(x,0,max)}
 	}	
-    return (
-      <React.Fragment>
-        <Container maxWidth="xl" className={styles.buttons}>
-          <Button onClick={() => setToggle(t => !t)}>
-            Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}
-          </Button>
-          <Button style={{float: 'right'}} onClick={() => setPressed({})}>
-            Clear
-          </Button>			
-        </Container>
+  return (
+    <React.Fragment>
+      <Container maxWidth="xl" className={styles.buttons}>
+        <Button onClick={switchType}>
+          Switch to: {!toggle ? 'Heat Map' : 'Piano Graph'}
+        </Button>
+        <Button style={{float: 'right'}} onClick={clear}>
+          Clear
+        </Button>			
+      </Container>
 
-        <Container maxWidth={null} className={styles.root}>
-          <Piano startNote="A0" endNote="C8" styles={toggle ? colors : heights} />
-        </Container>
-      </React.Fragment>
-    )
-  }
+      <Container maxWidth={null} className={styles.root}>
+        <Piano startNote="A0" endNote="C8" styles={toggle ? colors : heights} />
+      </Container>
+    </React.Fragment>
+  )
+}
 
 // css styling per key stroke
 function whiteShadow(x, min, max) {
