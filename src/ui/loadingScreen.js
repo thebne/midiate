@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { connect } from 'react-redux'
 import Modal from '@material-ui/core/Modal'
 import Fade from '@material-ui/core/Fade'
@@ -57,13 +57,22 @@ const useStyles = makeStyles((theme) => ({
 function LoadingScreen({isAnyMidiInputActive, switchForegroundApp}) {
   const [skip, setSkip] = useSessionStorage('skipScreen', false)
   const classes = useStyles()
+  const skipScreen = useCallback(() => setSkip(true), [setSkip])
+  const skipToSettings = useCallback(() => {
+    switchForegroundApp(SETTINGS_APP_ID)
+    skipScreen()
+  }, [switchForegroundApp, skipScreen])
+  const skipToDefault = useCallback(() => {
+    switchForegroundApp(DEFAULT_APP_ID)
+    skipScreen()
+  }, [switchForegroundApp, skipScreen])
 
   const showScreen = !isAnyMidiInputActive && !skip
   return (
       <Modal
         className={classes.modal}
         open={showScreen}
-        onClose={() => setSkip(true)}
+        onClose={skipScreen}
         closeAfterTransition
         BackdropComponent={Backdrop}
         BackdropProps={{
@@ -74,17 +83,11 @@ function LoadingScreen({isAnyMidiInputActive, switchForegroundApp}) {
 				<Fade in={showScreen}>
           <Container className={classes.container}>
           <Fab variant="extended" className={classes.ignoreFab} 
-              onClick={() => {
-                switchForegroundApp(DEFAULT_APP_ID)
-                setSkip(true)
-              }}>
+              onClick={skipToDefault}>
               Ignore
             </Fab>
             <Fab variant="extended" className={classes.advancedFab} 
-              onClick={() => {
-                switchForegroundApp(SETTINGS_APP_ID)
-                setSkip(true)
-              }}>
+              onClick={skipToSettings}>
               <SettingsIcon className={classes.extendedIcon} />
               Configure
             </Fab>

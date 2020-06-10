@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
@@ -151,6 +151,29 @@ export default function Piano({classNames={}, styles={}, singleOctave,
 
 const PianoKey = React.memo(({note, className, style, getClass, 
   onPress, onRelease, NoteEffectComponent, NoteEffectProps}) => { 
+
+  const [pressed, setPressed] = useState(false)
+  const onMouseDown = useCallback(e => {
+    if (!onPress)
+      return
+    onPress(note)
+    setPressed(true)
+  }, [note, onPress])
+  const onMouseUp = useCallback(e => {
+    if (!onRelease)
+      return
+    onRelease(note)
+    setPressed(false)
+  }, [note, onRelease])
+  const onMouseOut = useCallback(e => {
+    setPressed(pressed => {
+      if (!onRelease || !pressed)
+        return pressed
+      onRelease(note)
+      return false
+    })
+  }, [note, onRelease])
+
   const type = Note.accidentals(Note.simplify(note)).length ? "black" : "white"
 
   return (
@@ -162,8 +185,9 @@ const PianoKey = React.memo(({note, className, style, getClass,
       // black / white
       getClass(type), 
     )}
-    onMouseDown={onPress ? () => onPress(note) : null}
-    onMouseUp={onRelease ? () => onRelease(note) : null}
+    onMouseDown={onMouseDown}
+    onMouseUp={onMouseUp}
+    onMouseOut={onMouseOut}
     >
       <div className={getClass('noteBody')}>
         <div className={getClass('noteRender')} style={style} />

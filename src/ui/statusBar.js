@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { connect } from 'react-redux'
+import clsx from 'clsx'
 import AppBar from '@material-ui/core/AppBar'
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
@@ -82,7 +83,7 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
 
   return (
 				<AppBar position="absolute" 
-            className={[classes.appBar, 'app-bar'].join(' ')}>
+            className={clsx(classes.appBar, 'app-bar')}>
 					<Toolbar className={classes.toolbar}>
             <AppTitle
               foregroundAppId={foregroundAppId}
@@ -108,14 +109,18 @@ const StatusBarIcon = connect((state, props) => ({
 })(function ({visibility, children, switchForegroundApp}) {
   const classes = useStyles()
 
+  const onClick = useCallback(() => switchForegroundApp(
+    children.props.config.statusBarAction || children.props.config.id)
+  , [switchForegroundApp,
+      children.props.config.statusBarAction, children.props.config.id])
+
   if (!visibility)
     return null
 
   return (
     <IconButton 
       color="inherit" 
-      onClick={() => switchForegroundApp(
-        children.props.config.statusBarAction || children.props.config.id)} 
+      onClick={onClick} 
       className={classes.statusBarItem}
     >
       {children}
@@ -126,10 +131,14 @@ const StatusBarIcon = connect((state, props) => ({
 const AppTitle = React.memo(
   function AppTitle({foregroundAppId, foregroundAppConfig, switchForegroundApp}) {
 	const classes = useStyles()
+  const switchToDefaultApp = useCallback(() => 
+    switchForegroundApp(DEFAULT_APP_ID)
+  , [switchForegroundApp])
+
   return (
     <div className={classes.title}>
       <Button 
-        onClick={() => switchForegroundApp(DEFAULT_APP_ID)}
+        onClick={switchToDefaultApp}
         className={classes.logo}>
         <Zoom in={foregroundAppId === DEFAULT_APP_ID}>
           <Logo />
@@ -139,7 +148,7 @@ const AppTitle = React.memo(
         </Zoom>
       </Button>
       <Typography component="h1" variant="h5" color="inherit" noWrap
-        onClick={() => switchForegroundApp(DEFAULT_APP_ID)} 
+        onClick={switchToDefaultApp} 
         className={classes.titleText}>
           {foregroundAppId !== DEFAULT_APP_ID
             ? <Box display={{xs: 'none', md: 'initial'}}>{PROGRAM_NAME}</Box> 

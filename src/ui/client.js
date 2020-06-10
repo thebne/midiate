@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { connect } from 'react-redux'
 import clsx from 'clsx'
 import Snackbar from '@material-ui/core/Snackbar'
@@ -133,6 +133,13 @@ function AppLayout(props) {
   const {isAnyMidiInputActive, foregroundAppId,
     switchForegroundApp, children} = props
 
+  const switchToDefaultApp = useCallback(() =>
+    switchForegroundApp(SETTINGS_APP_ID)
+  , [switchForegroundApp])
+  const dismissWarning = useCallback(() =>
+    setHideWarning(true)
+  , [])
+
 	return (
     <div className={clsx(
       classes.root, 
@@ -153,11 +160,11 @@ function AppLayout(props) {
           action={
             <React.Fragment>
               <Button color="inherit" 
-                onClick={() => switchForegroundApp(SETTINGS_APP_ID)}>
+                onClick={switchToDefaultApp}>
                 Choose
               </Button>
               <Button color="inherit" 
-                onClick={() => setHideWarning(true)}>
+                onClick={dismissWarning}>
                 Dismiss 
               </Button>
             </React.Fragment>
