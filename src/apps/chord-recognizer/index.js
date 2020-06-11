@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
   },
   detection: {
     fontFamily: "'Baloo Tamma 2', cursive",
-    transform: "translate(50%, 60%) scale(1)",
+    transform: "translate(50%, 50%) scale(1)",
   },
   smallDetection: {
     fontFamily: "'Baloo Tamma 2', cursive",
@@ -70,18 +70,18 @@ const useStyles = makeStyles(theme => ({
   },
   "animation-enter": {
     "& > $detection": {
-      transform: "translate(50%, 60%) scale(0)",
+      transform: "translate(50%, 50%) scale(0)",
     }
   },
   "animation-enter-active": {
     "& > $detection": {
-      transform: "translate(50%, 60%) scale(1)",
+      transform: "translate(50%, 50%) scale(1)",
       transition: "transform 150ms",
     }
   },
   "animation-exit": {
     "& > $detection": {
-      transform: "translate(50%, 60%) scale(1)",
+      transform: "translate(50%, 50%) scale(1)",
     }
   },
   "animation-exit-active": {
