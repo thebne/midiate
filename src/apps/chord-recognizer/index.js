@@ -184,12 +184,9 @@ function History() {
           {chordHistory.map(({chords, id}, i) => 
             <g key={id} style={{transform: `translateX(${(i - 5) * 12}%)`}}>
               <g className={classes.smallDetection}>
-                <ellipse rx={20} ry={10}
-                  fill={colorHash.hex(chords[0].split("/")[0])}
-                />
                 <text 
-                  fill="white" 
-                  fontSize={6}
+                  fill={colorHash.hex(chords[0].split("/")[0])}
+                  fontSize={10}
                   style = {{
                     dominantBaseline: "middle",
                     textAnchor: "middle",
