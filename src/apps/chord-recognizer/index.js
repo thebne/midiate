@@ -407,7 +407,7 @@ export function BackgroundTask() {
       // add
       return newHistory.concat({chords, id})
     })
-  }, [chords, id])
+  }, [chords, id, setChordHistory])
 
   return null
 }

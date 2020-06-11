@@ -57,7 +57,7 @@ const makeUseValue = (makeSelectorFn, actionFn) =>
     }, [selector, store, appId, key, defaultRef])
 
     // return [value,setValue] like useState
-    return [value === undefined ? defaultValue : value, setValue]
+    return [value === undefined ? defaultRef.current : value, setValue]
   }
 
 export const useSetting = makeUseValue(
