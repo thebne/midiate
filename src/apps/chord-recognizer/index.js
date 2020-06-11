@@ -21,6 +21,7 @@ import SettingsIcon from '@material-ui/icons/Settings'
 import { makeStyles } from '@material-ui/core/styles'
 import { Scale, Midi } from '@tonaljs/tonal'
 import { useChords, arePropsEqual } from './utils'
+import { useChordHistory } from './settings'
 import { useSetting } from '../../api/settings'
 import { useNoSleep } from '../../api/misc'
 
@@ -39,9 +40,20 @@ const useStyles = makeStyles(theme => ({
   },
   detection: {
     fontFamily: "'Baloo Tamma 2', cursive",
-    transform: "translate(50%, 60%) scale(1)",
+    transform: "translate(50%, 50%) scale(1)",
+  },
+  smallDetection: {
+    fontFamily: "'Baloo Tamma 2', cursive",
+    transform: "translateY(10%) scale(.25)",
   },
   welcome: {
+    fontFamily: "'Baloo Tamma 2', cursive",
+    animationName: "$welcomeIn",
+    animationDuration: "150ms",
+    transform: "translate(50%, 70%) scale(1)",
+    opacity: 1,
+  },
+  history: {
     fontFamily: "'Baloo Tamma 2', cursive",
     animationName: "$welcomeIn",
     animationDuration: "150ms",
@@ -58,18 +70,18 @@ const useStyles = makeStyles(theme => ({
   },
   "animation-enter": {
     "& > $detection": {
-      transform: "translate(50%, 60%) scale(0)",
+      transform: "translate(50%, 50%) scale(0)",
     }
   },
   "animation-enter-active": {
     "& > $detection": {
-      transform: "translate(50%, 60%) scale(1)",
+      transform: "translate(50%, 50%) scale(1)",
       transition: "transform 150ms",
     }
   },
   "animation-exit": {
     "& > $detection": {
-      transform: "translate(50%, 60%) scale(1)",
+      transform: "translate(50%, 50%) scale(1)",
     }
   },
   "animation-exit-active": {
@@ -125,6 +137,7 @@ function FrontPage() {
 	return (
     <Fragment>
       <Welcome />
+      <History />
       <Animations chords={chords} id={id} />
     </Fragment>
 	)
@@ -146,6 +159,48 @@ function Welcome() {
         }}>
           Play some chords!
         </text>
+      </g>
+    </svg>
+  )
+}
+function History() {
+  const classes = useStyles()
+  const [chordHistory,] = useChordHistory()
+  return (
+    <svg 
+      viewBox="0 0 100 100" 
+      className={classes.svg}>
+      <g className={classes.history}>
+        <text 
+        fill="#bbb" 
+        fontSize={7}
+        style = {{
+          dominantBaseline: "middle",
+          textAnchor: "middle",
+        }}>
+          History:
+        </text>
+        <g>
+          {chordHistory.map(({chords, id}, i) => 
+            <g key={id} style={{transform: `translateX(${(i - 5) * 12}%)`}}>
+              <g className={classes.smallDetection}>
+                <ellipse rx={20} ry={10}
+                  fill={colorHash.hex(chords[0].split("/")[0])}
+                />
+                <text 
+                  fill="white" 
+                  fontSize={6}
+                  style = {{
+                    dominantBaseline: "middle",
+                    textAnchor: "middle",
+                  }}
+                >
+                  {chords[0]}
+                </text>
+              </g>
+            </g>
+          )}
+        </g>
       </g>
     </svg>
   )
@@ -329,6 +384,32 @@ const ChordDetectionRangeDialog = function (
         </DialogActions>
       </Dialog>
   )
+}
+
+export function BackgroundTask() {
+  const [chords, id] = useChords()
+  const [, setChordHistory] = useChordHistory()
+
+  useEffect(() => {
+    if (!chords.length)
+      return
+    setChordHistory(chordHistory => {
+      let newHistory = [...chordHistory]
+      // update
+      if (newHistory[newHistory.length - 1] 
+        && newHistory[newHistory.length - 1].id === id) {
+        newHistory[newHistory.length - 1].chords = chords
+        return newHistory
+      }
+      // shrink
+      if (newHistory.length > 10)
+        newHistory = newHistory.slice(newHistory.length - 10)
+      // add
+      return newHistory.concat({chords, id})
+    })
+  }, [chords, id, setChordHistory])
+
+  return null
 }
 
 export { default as config } from './config'

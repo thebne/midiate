@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useLastEvent } from './events'
 
 export const useNotes = (config={}) => {
@@ -24,21 +24,22 @@ export const useNotes = (config={}) => {
     })
   }, [lastEvent])
 
-  switch (data) {
-    case 'simple':
-      return notes.map(n => n.note)
-    case 'extended':
-      return notes
-    default:
-      throw new Error(`unknown data mode ${data}`)
-  }
+  return useMemo(() => {
+    switch (data) {
+      case 'simple':
+        return notes.map(n => n.note)
+      case 'extended':
+        return notes
+      default:
+        throw new Error(`unknown data mode ${data}`)
+    }
+  }, [data, notes])
 }
 
 export const useSmartNotes = (config={}) => {
   const {data='simple'} = config
   const lastEvent = useLastEvent()
   const notes = useNotes({data: 'extended'})
-  const prevNotes = usePrevious(notes)
   const [smartNotes, setSmartNotes] = useState({id: 0, events: []})
 
   useEffect(() => {
@@ -50,7 +51,7 @@ export const useSmartNotes = (config={}) => {
         case 'noteon': 
         case 'noteoff': 
           const prevId = smartNotes.id
-          const prevKeys = (prevNotes || []).map(e => e.key)
+          const prevKeys = smartNotes.events.map(e => e.key)
           const nextKeys = notes.map(e => e.key)
 
           // handle alteration of current notes
@@ -81,25 +82,20 @@ export const useSmartNotes = (config={}) => {
           return smartNotes
       }
     })
-  }, [notes, prevNotes, lastEvent])
+  }, [notes, lastEvent])
 
-  switch (data) {
-    case 'simple':
-      return smartNotes.map(n => n.note)
-    case 'extended':
-      return smartNotes
-    default:
-      throw new Error(`unknown data mode ${data}`)
-  }
+  return useMemo(() => {
+    switch (data) {
+      case 'simple':
+        return smartNotes.map(n => n.note)
+      case 'extended':
+        return smartNotes
+      default:
+        throw new Error(`unknown data mode ${data}`)
+    }
+  }, [data, smartNotes])
 }
 
 // is a subset of b
 const isSubset = (a, b) => a.every(val => b.includes(val))
 
-function usePrevious(value) {
-  const ref = useRef()
-  useEffect(() => {
-    ref.current = value
-  })
-  return ref.current
-}
