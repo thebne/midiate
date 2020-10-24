@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import React, { useLayoutEffect, useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
@@ -6,8 +6,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete'
 import clsx from 'clsx'
 import { Note, Scale, Midi } from '@tonaljs/tonal'
 import Piano from '../../gadgets/piano'
-import { useNotes } from '../../api/notes'
-import { useSendEvent, useLastEvent } from '../../api/events'
+import { useNotes, useLastNote } from '../../api/notes'
+import { useSendEvent } from '../../api/events'
 import { useScale } from './settings'
 
 const ANIMATION_DURATION_S = 15
@@ -107,9 +107,9 @@ const useStyles = makeStyles(theme => ({
 
   timer: {
     position: 'fixed',
-    top: '40%',
+    top: '20%',
     left: '40%',
-    fontSize: 30,
+    fontSize: 15,
   },
   
   highlight: {
@@ -133,11 +133,14 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function PianoSimulator () {
+export default function ScaleSprint () {
   const classes = useStyles()
   const sendEvent = useSendEvent()
   const notes = useNotes()
   const [scale,] = useScale()
+  const [noteIndex, setNoteIndex] = useState(0)
+  const lastNote = useLastNote()
+  const lastScale = usePrevious(scale)
 
   // mark highlighted notes if scale is selected
   const highlightClasses = useMemo(() => {
@@ -177,12 +180,41 @@ export default function PianoSimulator () {
     sendEvent(new Uint8Array([144, Midi.toMidi(n), 0]))
     , [sendEvent])
 
-  const allowedNotes = Scale.get(`${scale.pitchClass}1 ${scale.name}`).notes.map(n => Note.pitchClass(Midi.midiToNoteName(Midi.toMidi(n))))
+  const noteQueue = useMemo(() => {
+    const allowedNotes = Scale.get(`${scale.pitchClass}1 ${scale.name}`).notes.map(n => Note.pitchClass(Midi.midiToNoteName(Midi.toMidi(n))))
+
+    const queue = []
+    for (var i = 2; i < 6; i++) {
+      allowedNotes.forEach(note => queue.push(note + i.toString()))
+    }
+    return queue
+    }
+  , [scale])
+
+  // progress the queue with correct/incorrect presses
+  useEffect(() => {
+    if (lastNote === null)
+      return
+
+    setNoteIndex(i => {
+      if (lastNote === noteQueue[i]) {
+        return i + 1
+      }
+      
+      return 0
+    })
+  }, [lastNote, noteQueue])
+
 
   return (
     <React.Fragment> 
       <ScaleSelect />
-      <ScaleCounter allowedNotes={allowedNotes}/>
+      <ScaleCounter 
+        current={noteQueue[noteIndex]} 
+        started={scale != null && noteIndex !== 0} 
+        finished={noteQueue.length > 0 && noteIndex === noteQueue.length}
+        failed={scale != null && noteIndex === 0 && lastScale === scale} 
+      />
       <Piano 
         NoteEffectProps={pressedProps}
         classNames={{...pressedClasses, ...highlightClasses}} 
@@ -261,78 +293,65 @@ const ScaleSelect = React.memo(function () {
   )
 })
 
-function ScaleCounter({allowedNotes}) {    
-  const lastEvent = useLastEvent()
+function ScaleCounter({started, current, finished, failed}) {    
   const classes = useStyles()
-  const noteQueue = []
 
-  for (var i = 2; i < 6; i++) {
-    allowedNotes.forEach(note => noteQueue.push(note + i.toString()))
-  }
-
-  if (!lastEvent) {
-    return <h1 className={classes.timer}>Hit first note to start</h1>
-  }
-
-  if (lastEvent.messageType === 'noteon') 
-  var firstInQueue = noteQueue.shift()  
-  console.log(firstInQueue)    
-    if (lastEvent.note === firstInQueue) {      
-      console.log("GREAT", lastEvent.note, noteQueue)
-      }
-    else {
-      console.log("LOOSE", lastEvent.note, noteQueue)
-    }	 
-
-  return <Counter noteQueue={noteQueue} lastEvent={lastEvent} className={classes.timer}/>
+  return (
+    <div className={classes.timer}>
+      <h1>{current != null ? current : "Select scale"}</h1>
+      <Stopwatch started={started} ended={finished || failed} />
+      {finished && <div style={{color: 'green'}}>aye rufus!</div>}
+      {failed && <div style={{color: 'red'}}>booz leha!</div>}
+    </div>
+  )
 }
 
-class Counter extends React.Component {  
-  state = {
-      lastEvent: this.props.lastEvent,
-      noteQueue: this.props.noteQueue,
-      seconds: 0,
-      miliseconds: 0,
-  }  
+function Stopwatch({started, ended}) {
+  const [startTime, setStartTime] = useState(new Date().getTime())
+  const endTime = useMemo(() => new Date().getTime(), [ended])
+  
+  useEffect(() => {
+    setStartTime(startTime => 
+      !started ? startTime : new Date().getTime()
+    )
+  }, [started])
 
-  componentDidMount() {      
-      this.myInterval = setInterval(() => {
-          const { miliseconds, seconds } = this.state          
+  // force re-rendering of component
+  const [_, refresh] = useState({})
+  useEffect(() => {
+    const interval = setInterval(() => refresh({}), 35)
+    return () => clearInterval(interval)
+  }, [])
 
-          if (miliseconds < 100) {
-              this.setState(({ miliseconds }) => ({
-                  miliseconds: miliseconds + 1
-              }))
-          }
-          if (miliseconds === 100) {
-              if (seconds === 60) {
-                  clearInterval(this.myInterval)
-              } else {
-                  this.setState(({ seconds }) => ({
-                      seconds: seconds + 1,
-                      miliseconds: 0
-                  }))
-              }
-          } 
-      }, 10)
-      return () => clearInterval(this.myInterval)
-  }
+  let timeDiff
+  if (started && !ended)
+    timeDiff = new Date().getTime() - startTime
+  else 
+    timeDiff = endTime - startTime
 
-  componentDidUpdate() {
-  }
+  const ms = timeDiff % 1000
+  let s = parseInt(timeDiff / 1000)
 
-  componentWillUnmount() {
-      clearInterval(this.myInterval)
-  }
+  return (
+    <React.Fragment>
+      {(started || ended) && <h1>Time: {s}:{pad(ms, 3)}</h1>}
+      {(!started || ended) && <h1>Hit to start</h1>}
+    </React.Fragment>
+  )
+}
 
-  render() {
-      const { seconds, miliseconds } = this.state
-      return (
-          <div className={this.props.className}>
-            <h1>Time: {seconds}:{miliseconds < 10 ? `0${miliseconds}` : miliseconds}</h1>
-          </div>
-      )
-  }
+function pad(num, size) {
+  num = num.toString();
+  while (num.length < size) num = "0" + num;
+  return num;
+}
+
+function usePrevious(value) {
+  const ref = useRef()
+  useEffect(() => {
+    ref.current = value
+  })
+  return ref.current
 }
 
 export { default as config } from './config'

@@ -1,6 +1,28 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useLastEvent } from './events'
 
+export const useLastNote = () => {
+  const lastEvent = useLastEvent()
+  const [note, setNote] = useState(null)
+
+  useEffect(() => {
+    if (!lastEvent) {
+      return 
+    }
+    setNote(note => {
+      switch (lastEvent.messageType) {
+        case 'noteon': 
+          return lastEvent.note
+        case 'noteoff': 
+            return null
+        default:
+          return note
+      }
+    })
+  }, [lastEvent])
+  return note
+}
+
 export const useNotes = (config={}) => {
   const {data='simple'} = config
   const lastEvent = useLastEvent()
