@@ -6,17 +6,32 @@ const VELOCITY_MAX = 127
 const VELOCITY_MID = 64
 
 // initalize keyboard mapping to notes - validKeys order will be by octave order
-const validKeys = Array.from('q2w3er5t6y7uzsxdcvgbhnjm')
-const midiBindingsPerKey = validKeys.map((x, index) => new Uint8Array([144, 60+index, 0]))
+let midiBindingsPerKey = {}
+let octaveOffset = 0
+const validKeys = Array.from('q2w3er5t6y7ui')
 const keyboardTriggers = {}
-validKeys.forEach((x,i) => keyboardTriggers[x] = midiBindingsPerKey[i])
 const currentMap = {}
 let prevEventTime = null
+SetOcatve(octaveOffset)
+
+function SetOcatve(offset) {
+  midiBindingsPerKey = validKeys.map((x, index) => new Uint8Array([144, 60 + (offset * 12) + index, 0]))
+  validKeys.forEach((x,i) => keyboardTriggers[x] = midiBindingsPerKey[i])
+}
 
 function KeyboardHandler({sendKeyboardEvent}) { 
   const handleKeyStroke = useCallback(
     ({key, type, shiftKey, timeStamp}) => {
       const lowerKey = key.toLowerCase()
+      
+      if (type === 'keydown' && lowerKey === 'arrowright') {
+        SetOcatve(++octaveOffset)
+      }
+
+      if (type === 'keydown' && lowerKey === 'arrowleft') {
+        SetOcatve(--octaveOffset)
+      }
+
       if (!keyboardTriggers[lowerKey]) { 
         return true
       }

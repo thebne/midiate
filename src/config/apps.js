@@ -5,4 +5,5 @@ export default [
   require('../apps/web-player'),
   require('../apps/recorder'),
   require('../apps/song-matcher'),
+  require('../apps/scale-sprint')
 ]
