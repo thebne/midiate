@@ -7,5 +7,5 @@ export const config = {
   icon: SettingsInputSvideoIcon,
 }
 
-export { default as default } from './settings'
+export { default } from './settings'
 export { default as BackgroundTask } from './backgroundTask'

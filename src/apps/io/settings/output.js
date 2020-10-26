@@ -66,13 +66,16 @@ const TransposeControl = React.memo(function () {
     <React.Fragment>
       <ListSubheader>Transpose MIDI Outputs</ListSubheader>
       <ListItem>
+        Slide to transpose the output (in tones):
+      </ListItem>
+      <ListItem>
         <Slider
           value={transpose}
           step={0.5}
           marks
-          min={-3}
-          max={3}
-          valueLabelDisplay="auto"
+          min={-4}
+          max={4}
+          valueLabelDisplay="on"
           onChange={onTransposeChange}
         />
       </ListItem>

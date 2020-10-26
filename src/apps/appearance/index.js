@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Container from '@material-ui/core/Container'
 import Radio from '@material-ui/core/Radio'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
@@ -8,7 +7,6 @@ import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListSubheader from '@material-ui/core/ListSubheader'
 import BrushIcon from '@material-ui/icons/Brush'
-import { APPEARANCE_APP_ID } from '../../constants'
 import themes from '../../ui/themes'
 import { 
   setThemeId, 
