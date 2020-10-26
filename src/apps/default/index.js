@@ -6,13 +6,13 @@ import Paper from '@material-ui/core/Paper'
 import AppDefaultIcon from '@material-ui/icons/MusicVideo'
 import { makeStyles } from '@material-ui/core/styles'
 
-import { DEFAULT_APP_ID } from '../../../constants'
+import { DEFAULT_APP_ID } from '../../constants'
 import { 
   switchForegroundApp,
-} from '../../../redux/actions'
+} from '../../redux/actions'
 import { 
   getApps,
-} from '../../../redux/selectors'
+} from '../../redux/selectors'
 
 const useStyles = makeStyles((theme) => ({
   container: {

@@ -14,7 +14,7 @@ import {
 import { switchForegroundApp } from '../redux/actions'
 import { ReactComponent as Logo } from '../logo.svg'
 import { useSessionStorage } from '../utils/react'
-import { SETTINGS_APP_ID, DEFAULT_APP_ID } from '../constants'
+import { IO_APP_ID, DEFAULT_APP_ID } from '../constants'
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -59,7 +59,7 @@ function LoadingScreen({isAnyMidiInputActive, switchForegroundApp}) {
   const classes = useStyles()
   const skipScreen = useCallback(() => setSkip(true), [setSkip])
   const skipToSettings = useCallback(() => {
-    switchForegroundApp(SETTINGS_APP_ID)
+    switchForegroundApp(IO_APP_ID)
     skipScreen()
   }, [switchForegroundApp, skipScreen])
   const skipToDefault = useCallback(() => {

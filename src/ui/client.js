@@ -19,7 +19,7 @@ import { wrapContext } from '../api/context'
 import StatusBar from './statusBar'
 import LoadingScreen from './loadingScreen'
 import themes from './themes'
-import { SETTINGS_APP_ID } from '../constants'
+import { IO_APP_ID } from '../constants'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -60,10 +60,8 @@ class Client extends React.Component {
 
     // load apps from config file 
     const appsFromConfig = require('../config/apps').default
-    // load system apps from config file 
-    const systemAppsFromConfig = require('../apps/system').default
 
-    for (const app of appsFromConfig.concat(systemAppsFromConfig)) {
+    for (const app of appsFromConfig) {
       const appConfig = app.config
       if (!appConfig) {
         throw new Error('all apps must provide config')
@@ -134,7 +132,7 @@ function AppLayout(props) {
     switchForegroundApp, children} = props
 
   const switchToDefaultApp = useCallback(() =>
-    switchForegroundApp(SETTINGS_APP_ID)
+    switchForegroundApp(IO_APP_ID)
   , [switchForegroundApp])
   const dismissWarning = useCallback(() =>
     setHideWarning(true)
@@ -154,7 +152,7 @@ function AppLayout(props) {
       </main>
         <Snackbar
           open={!isAnyMidiInputActive 
-            && foregroundAppId !== SETTINGS_APP_ID
+            && foregroundAppId !== IO_APP_ID
             && !hideWarning}
           message="No active MIDI inputs"
           action={
