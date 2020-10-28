@@ -1,38 +1,42 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Midi } from "@tonaljs/tonal"
 import Soundfont from 'soundfont-player'
 import { useLastEvent } from '../../api/events'
 import { useToggleStatusBarVisibility } from '../../api/settings'
-import { useInstrumentType, useLoading } from './settings'
+import { useInstrumentType, useLoading, useTranspose } from './settings'
 
 export default function () {
-  const lastEvent = useLastEvent('output')
+  const lastEvent = useLastEvent()
   const toggleStatusBarVisibility = useToggleStatusBarVisibility()
   const [type] = useInstrumentType()
   const [loading, setLoading] = useLoading()
+  const [transpose] = useTranspose()
   const [instrument, setInstrument] = useState(null)
   const [, setPlaying] = useState({})
-
-  console.log(lastEvent)
 
   const playSound = useCallback(lastEvent => {
     if (loading || !instrument || !type)
       return
 
+    const note = Midi.midiToNoteName(lastEvent.key + transpose * 2)
+
     setPlaying(playing => ({
       ...playing,
-      [lastEvent.note]: instrument.start(lastEvent.note, null, {
+      [note]: instrument.start(note, null, {
         loop: true,
         gain: lastEvent.velocity / 127
       }),
     }))
-  }, [loading, instrument, setPlaying, type])
+  }, [loading, instrument, setPlaying, type, transpose])
 
   const stopSound = useCallback(lastEvent => {
     if (loading || !instrument || !type)
       return
 
+    const note = Midi.midiToNoteName(lastEvent.key + transpose * 2)
+
     setPlaying(playing => {
-      let node = playing[lastEvent.note]
+      let node = playing[note]
       if (!node) {
         // can't find any specific note, stop everything
         instrument.stop()
@@ -40,10 +44,10 @@ export default function () {
       }
       node.stop()
       const newPlaying = {...playing}
-      delete newPlaying[lastEvent.note]
+      delete newPlaying[note]
       return newPlaying
     })
-  }, [loading, instrument, setPlaying, type])
+  }, [loading, instrument, setPlaying, type, transpose])
 
   // toggle hide/show status bar
   useEffect(() => {

@@ -42,6 +42,7 @@ export default connect(
 export const config = {
   id: 'APPEARANCE',
   name: 'Appearance',
+  description: "Color themes and animations",
   icon: BrushIcon,
   openInDrawer: true,
 }

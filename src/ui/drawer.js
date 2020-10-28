@@ -25,6 +25,7 @@ import {
 } from '../redux/selectors'
 import { 
   switchDrawerApp, 
+  switchForegroundApp,
   toggleDrawer, 
 } from '../redux/actions'
 
@@ -40,7 +41,6 @@ const useStyles = makeStyles({
     top: 0,
     right: 0,
     zIndex: 100,
-    margin: '.5em',
   },
 })
 
@@ -92,7 +92,12 @@ function SideDrawer({ apps, items }) {
             </div>
           )}
           {drawerAppId != null 
-            ? React.createElement(apps[drawerAppId], {config: drawerAppConfig})
+            ? (
+              <React.Fragment>
+                <AppItem {...drawerAppConfig} />
+                {React.createElement(apps[drawerAppId], {config: drawerAppConfig})}
+              </React.Fragment>
+            )
             : (
               <React.Fragment>
                 <List>
@@ -101,7 +106,14 @@ function SideDrawer({ apps, items }) {
                 </List>
                 <Divider />
                 <List>
-                  {items}
+                  {items.map(item => 
+                    <ListItem key={item.props.config.id} button onClick={() => {
+                      dispatch(switchForegroundApp(item.props.config.id))
+                      dispatch(toggleDrawer(false))
+                    }}>
+                      {item}
+                    </ListItem>
+                  )}
                 </List>
               </React.Fragment>
           )}
@@ -112,14 +124,14 @@ function SideDrawer({ apps, items }) {
 }
 
 
-function AppItem({ id, icon, name }) {
+function AppItem({ id, icon, name, description }) {
   const dispatch = useDispatch()
   return (
     <ListItem button onClick={() => dispatch(switchDrawerApp(id))}>
       <ListItemIcon>
         {icon ? React.createElement(icon) : <AppDefaultIcon />}
       </ListItemIcon>
-      <ListItemText primary={name} />
+      <ListItemText primary={name} secondary={description} />
     </ListItem>
   )
 }

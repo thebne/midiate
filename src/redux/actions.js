@@ -6,7 +6,6 @@ import {
   HANDLE_MIDI_BUFFER, 
   TOGGLE_MIDI_INPUT,
   SET_MIDI_DEVICES,
-  TOGGLE_SEND_OUTPUT_EVENT,
   SET_THEME_ID,
   SET_APP_SPECIFIC_PERSISTENT_VALUE,
   SET_APP_SPECIFIC_SESSION_VALUE,
@@ -43,9 +42,9 @@ export const sendKeyboardEvent  = (deltaTime, msg) => ({
   payload: {deltaTime, msg, source: {type: 'keyboard'}},
 })
 
-export const sendCustomEvent = (deltaTime, msg, id, direction = 'input') => ({
+export const sendCustomEvent = (deltaTime, msg, id) => ({
   type: HANDLE_MIDI_BUFFER, 
-  payload: {deltaTime, msg, source: {type: 'app', id}, direction},
+  payload: {deltaTime, msg, source: {type: 'app', id}},
 })
 
 export const toggleMidiInput = (input, isActive) => ({
@@ -56,11 +55,6 @@ export const toggleMidiInput = (input, isActive) => ({
 export const setMidiDevices = (inputs, outputs) => ({
   type: SET_MIDI_DEVICES, 
   payload: {inputs, outputs},
-})
-
-export const toggleSendOutputEvent = send => ({
-  type: TOGGLE_SEND_OUTPUT_EVENT, 
-  payload: send,
 })
 
 export const setThemeId = id => ({
