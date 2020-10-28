@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useSetting, useToggleStatusBarVisibility } from '../../../api/settings'
 import { useMidiOutputs } from '../../../api/midi'
-import { useLastEvent } from '../../../api/events'
+import { useLastEvent, useSendEvent, useShouldSendOutputEvent } from '../../../api/events'
 
 export default function () {
   const lastEvent = useLastEvent()
@@ -9,6 +9,8 @@ export default function () {
   const midiOutputs = useMidiOutputs()
   const [activeOutputs] = useSetting('activeOutputs', [])
   const [transpose] = useSetting('transpose', 0)
+  const shouldSendOutputEvent = useShouldSendOutputEvent()
+  const sendEvent = useSendEvent()
 
   // toggle hide/show status bar
   useEffect(() => {
@@ -19,6 +21,11 @@ export default function () {
   useEffect(() => {
     if (!lastEvent || !activeOutputs) {
       return
+    }
+
+    if (shouldSendOutputEvent) {
+      lastEvent.direction = 'output'
+      sendEvent(lastEvent._data, 'output')
     }
 
     const data = [...lastEvent._data]

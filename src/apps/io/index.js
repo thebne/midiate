@@ -5,6 +5,7 @@ export const config = {
   id: IO_APP_ID,
   name: "Devices",
   icon: SettingsInputSvideoIcon,
+  openInDrawer: true,
 }
 
 export { default } from './settings'

@@ -43,5 +43,6 @@ export const config = {
   id: 'APPEARANCE',
   name: 'Appearance',
   icon: BrushIcon,
+  openInDrawer: true,
 }
 

@@ -1,8 +1,9 @@
 import { 
   SET_MIDI_DEVICES, 
   SWITCH_APP, 
+  SWITCH_DRAWER_APP, 
+  TOGGLE_DRAWER,
   ADD_APP,
-  SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_APP_SPECIFIC_SESSION_VALUE,
   TOGGLE_STATUS_BAR_VISIBILITY,
 } from "../actionTypes"
@@ -14,10 +15,12 @@ const initialState = {
   midiInputs: [],
   // array of WebMIDI outputs
   midiOutputs: [],
-  // connected to remote?
-  midiServerConnectionStatus: false,
   // current app that is presented
   foregroundApp: DEFAULT_APP_ID,
+  // current app that is presented
+  drawerApp: null,
+  // is drawer open?
+  drawerOpen: false,
   // config mapping
   appIdToConfig: {},
   // per-app persistent config
@@ -34,6 +37,20 @@ const ui = (state = initialState, action) => {
         foregroundApp: action.payload,
       }
     }
+    case SWITCH_DRAWER_APP: {
+      return {
+        ...state,
+        drawerOpen: action.payload != null ? true : state.drawerApp,
+        drawerApp: action.payload,
+      }
+    }
+    case TOGGLE_DRAWER: {
+      return {
+        ...state,
+        drawerOpen: action.payload,
+        drawerApp: action.payload ? state.drawerApp : null,
+      }
+    }
     case ADD_APP: {
       return {
         ...state,
@@ -48,12 +65,6 @@ const ui = (state = initialState, action) => {
         ...state,
         midiInputs: action.payload.inputs,
         midiOutputs: action.payload.outputs,
-      }
-    }
-    case SET_MIDI_SERVER_CONNECTION_STATUS: {
-      return {
-        ...state,
-        midiServerConnectionStatus: action.payload,
       }
     }
     case SET_APP_SPECIFIC_SESSION_VALUE: {

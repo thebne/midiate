@@ -5,12 +5,14 @@ import { useToggleStatusBarVisibility } from '../../api/settings'
 import { useInstrumentType, useLoading } from './settings'
 
 export default function () {
-  const lastEvent = useLastEvent()
+  const lastEvent = useLastEvent('output')
   const toggleStatusBarVisibility = useToggleStatusBarVisibility()
   const [type] = useInstrumentType()
   const [loading, setLoading] = useLoading()
   const [instrument, setInstrument] = useState(null)
   const [, setPlaying] = useState({})
+
+  console.log(lastEvent)
 
   const playSound = useCallback(lastEvent => {
     if (loading || !instrument || !type)

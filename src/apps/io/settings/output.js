@@ -8,12 +8,19 @@ import ListItemText from '@material-ui/core/ListItemText'
 import ListSubheader from '@material-ui/core/ListSubheader'
 import Switch from '@material-ui/core/Switch'
 import UsbIcon from '@material-ui/icons/Usb'
+import RestorePageIcon from '@material-ui/icons/RestorePage'
 import { useSetting } from '../../../api/settings'
 import { useMidiOutputs } from '../../../api/midi'
+import { 
+  useShouldSendOutputEvent,
+  useToggleSendOutputEvent 
+} from '../../../api/events'
 
 export default React.memo(function MidiOutput() {
   const midiOutputs = useMidiOutputs()
   const [activeOutputs, setActiveOutputs] = useActiveOutputs()
+  const shouldSendOutputEvent = useShouldSendOutputEvent()
+  const toggleSendOutputEvent = useToggleSendOutputEvent()
 
   const toggleMidiOutput = useCallback((output) => {
     setActiveOutputs(activeOutputs => {
@@ -30,9 +37,22 @@ export default React.memo(function MidiOutput() {
 	return (
     <React.Fragment>
       <List>
-        <ListSubheader>MIDI Outputs</ListSubheader>
-        {midiOutputs.length === 0 
-          && <ListItem><i>no output devices found</i></ListItem>}
+        <ListSubheader>MIDI Output</ListSubheader>
+        <ListItem button
+            onClick={() => toggleSendOutputEvent(!shouldSendOutputEvent)}
+          >
+          <ListItemIcon>
+            <RestorePageIcon />
+          </ListItemIcon>
+          <ListItemText primary={'Play generated output in browser'} />
+          <ListItemSecondaryAction>
+            <Switch
+              edge="end"
+              onChange={() => toggleSendOutputEvent(!shouldSendOutputEvent)}
+              checked={shouldSendOutputEvent}
+            />
+          </ListItemSecondaryAction>
+        </ListItem>
         {midiOutputs.map(output => (
           <ListItem key={output.id} button
               onClick={() => toggleMidiOutput(output)}
@@ -72,11 +92,11 @@ const TransposeControl = React.memo(function () {
         <Slider
           value={transpose}
           step={0.5}
-          marks
+          marks={[{value: 0, label: '0'}]}
           min={-4}
           max={4}
-          valueLabelDisplay="on"
           onChange={onTransposeChange}
+          valueLabelDisplay="auto"
         />
       </ListItem>
     </React.Fragment>

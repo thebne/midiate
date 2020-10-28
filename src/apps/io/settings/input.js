@@ -16,7 +16,7 @@ import { useMidiInputs } from '../../../api/midi'
 const MidiInputs = (({toggleMidiInput}) => {
   const midiInputs = useMidiInputs()
   return (
-    <List subheader={<ListSubheader>MIDI Inputs</ListSubheader>}>
+    <List subheader={<ListSubheader>MIDI Input</ListSubheader>}>
       {midiInputs.length === 0 
         && <ListItem><i>no input devices found</i></ListItem>}
       {midiInputs.map(input => (

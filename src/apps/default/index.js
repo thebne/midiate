@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
 function AppButton({switchForegroundApp, config}) {
   const classes = useStyles()
 
-  if (config.showInMenu === false)
+  if (config.showInMenu === false || config.openInDrawer === true)
     return null
 
   return (
