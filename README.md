@@ -8,7 +8,7 @@ MIDIate is a platform designed for the quick and easy development of MIDI-based 
 
 Features
 --------
-- Provides a framwork with intuitive MIDI-based React APIs (e.g. `getNotes()`)
+- Provides a framwork with intuitive MIDI-based React hooks (e.g. `useNotes()`)
 - Uses WebMIDI interface to instantly allow MIDI-device connections
 - Supports use of computer keyboard as a MIDI device
 - Includes several built-in apps to get started
