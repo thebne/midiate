@@ -7,7 +7,6 @@ import ListItemText from '@material-ui/core/ListItemText'
 import ListSubheader from '@material-ui/core/ListSubheader'
 import Switch from '@material-ui/core/Switch'
 import UsbIcon from '@material-ui/icons/Usb'
-import RestorePageIcon from '@material-ui/icons/RestorePage'
 import { useSetting } from '../../../api/settings'
 import { useMidiOutputs } from '../../../api/midi'
 

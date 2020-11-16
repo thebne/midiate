@@ -59,7 +59,7 @@ class Client extends React.Component {
 
   componentDidMount() {
     let apps = {}, statusBar = {}, drawer = {}, backgroundTasks = {}
-, drawerAppId
+
     // load apps from config file 
     const appsFromConfig = require('../config/apps').default
 
@@ -145,7 +145,7 @@ function AppLayout(props) {
 
   const switchToDefaultApp = useCallback(() =>
     switchDrawerApp(IO_APP_ID)
-  , [])
+  , [switchDrawerApp])
   const dismissWarning = useCallback(() =>
     setHideWarning(true)
   , [])

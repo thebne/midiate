@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { useSetting, useToggleStatusBarVisibility } from '../../../api/settings'
+import { useToggleStatusBarVisibility } from '../../../api/settings'
 import { useMidiOutputs } from '../../../api/midi'
-import { useLastEvent, useSendEvent } from '../../../api/events'
+import { useLastEvent } from '../../../api/events'
 import { useActiveOutputs } from '../settings/output'
 
 export default function () {
@@ -9,7 +9,6 @@ export default function () {
   const toggleStatusBarVisibility = useToggleStatusBarVisibility()
   const midiOutputs = useMidiOutputs()
   const [activeOutputs] = useActiveOutputs()
-  const sendEvent = useSendEvent()
 
   // toggle hide/show status bar
   useEffect(() => {
