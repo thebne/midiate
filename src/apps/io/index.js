@@ -9,5 +9,6 @@ export const config = {
   openInDrawer: true,
 }
 
+// eslint-disable-next-line
 export { default } from './settings'
 export { default as BackgroundTask } from './backgroundTask'
