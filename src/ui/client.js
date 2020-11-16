@@ -7,9 +7,10 @@ import { CssBaseline } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles'
 
-import { addApp, switchForegroundApp } from '../redux/actions'
+import { addApp, switchDrawerApp } from '../redux/actions'
 import { 
   getForegroundAppId, 
+  getDrawerAppId, 
   getIsAnyMidiInputActive,
   getApp,
   getThemeId,
@@ -19,7 +20,7 @@ import { wrapContext } from '../api/context'
 import StatusBar from './statusBar'
 import LoadingScreen from './loadingScreen'
 import themes from './themes'
-import { SETTINGS_APP_ID } from '../constants'
+import { IO_APP_ID } from '../constants'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -49,21 +50,20 @@ class Client extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      statusBar: {}, 
       apps: {},
+      statusBar: {}, 
+      drawer: {}, 
       backgroundTasks: {},
     }
   }
 
   componentDidMount() {
-    let statusBar = {}, apps = {}, backgroundTasks = {}
+    let apps = {}, statusBar = {}, drawer = {}, backgroundTasks = {}
 
     // load apps from config file 
     const appsFromConfig = require('../config/apps').default
-    // load system apps from config file 
-    const systemAppsFromConfig = require('../apps/system').default
 
-    for (const app of appsFromConfig.concat(systemAppsFromConfig)) {
+    for (const app of appsFromConfig) {
       const appConfig = app.config
       if (!appConfig) {
         throw new Error('all apps must provide config')
@@ -77,26 +77,31 @@ class Client extends React.Component {
 
       this.props.addApp(appId, appConfig)
       // save apps on state
-      if (app.default)
+      if (app.default) 
         apps[appId] = wrapContext(app.default, appConfig)
       if (app.StatusBar)
         statusBar[appId] = wrapContext(app.StatusBar, appConfig)
       if (app.BackgroundTask)
         backgroundTasks[appId] = wrapContext(app.BackgroundTask, appConfig)
+      if (app.Drawer) 
+        drawer[appId] = wrapContext(app.Drawer, appConfig)
     }
 
-    this.setState({apps, statusBar, backgroundTasks})
+    this.setState({apps, statusBar, drawer, backgroundTasks})
   }
 
   render() {
-    const {apps, statusBar, backgroundTasks} = this.state
+    const {apps, statusBar, drawer, backgroundTasks} = this.state
     const {foregroundAppId, getApp} = this.props
 
     let app
     if (apps[foregroundAppId]) {
       app = React.createElement(apps[foregroundAppId], {config: getApp(foregroundAppId)})
     }
-    const bars = Object.entries(statusBar).map(([id, s]) => 
+    const statusBarItems = Object.entries(statusBar).map(([id, s]) => 
+      React.createElement(s, {config: getApp(id)}))
+
+    const drawerItems = Object.entries(drawer).map(([id, s]) => 
       React.createElement(s, {config: getApp(id)}))
 
     const tasks = Object.entries(backgroundTasks).map(([id, s]) => 
@@ -104,7 +109,12 @@ class Client extends React.Component {
 
     // render with all the other UI elements
 		return (
-      <Content {...this.props} statusBar={bars}>
+      <Content 
+        {...this.props} 
+        statusBarItems={statusBarItems} 
+        drawerItems={drawerItems} 
+        apps={apps}
+      >
         {tasks}
         {app}
       </Content>
@@ -130,12 +140,12 @@ function Content(props) {
 function AppLayout(props) {
 	const classes = useStyles()
   const [hideWarning, setHideWarning] = useState(false)
-  const {isAnyMidiInputActive, foregroundAppId,
-    switchForegroundApp, children} = props
+  const {isAnyMidiInputActive, drawerAppId,
+    switchDrawerApp, children} = props
 
   const switchToDefaultApp = useCallback(() =>
-    switchForegroundApp(SETTINGS_APP_ID)
-  , [switchForegroundApp])
+    switchDrawerApp(IO_APP_ID)
+  , [switchDrawerApp])
   const dismissWarning = useCallback(() =>
     setHideWarning(true)
   , [])
@@ -154,7 +164,7 @@ function AppLayout(props) {
       </main>
         <Snackbar
           open={!isAnyMidiInputActive 
-            && foregroundAppId !== SETTINGS_APP_ID
+            && drawerAppId !== IO_APP_ID
             && !hideWarning}
           message="No active MIDI inputs"
           action={
@@ -177,12 +187,13 @@ function AppLayout(props) {
 export default connect(
   (state, ownProps) => ({
     foregroundAppId: getForegroundAppId(state),
+    drawerAppId: getDrawerAppId(state),
     getApp: id => getApp(state, id),
     isAnyMidiInputActive: getIsAnyMidiInputActive(state),
     theme: themes[getThemeId(state)].theme,
   }),
   { 
     addApp, 
-    switchForegroundApp,
+    switchDrawerApp,
   }
 )(Client)

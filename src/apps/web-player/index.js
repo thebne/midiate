@@ -7,5 +7,5 @@ export const config = {
 }
 
 export { default } from './default'
-export { default as StatusBar } from './statusBar'
+export { default as Drawer } from './drawer'
 export { default as BackgroundTask } from './backgroundTask'

@@ -4,15 +4,16 @@ import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import Paper from '@material-ui/core/Paper'
 import AppDefaultIcon from '@material-ui/icons/MusicVideo'
+import GitHubIcon from '@material-ui/icons/GitHub'
 import { makeStyles } from '@material-ui/core/styles'
 
-import { DEFAULT_APP_ID } from '../../../constants'
+import { DEFAULT_APP_ID } from '../../constants'
 import { 
   switchForegroundApp,
-} from '../../../redux/actions'
+} from '../../redux/actions'
 import { 
   getApps,
-} from '../../../redux/selectors'
+} from '../../redux/selectors'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -45,12 +46,15 @@ const useStyles = makeStyles((theme) => ({
       }
     },
   },
+  link: {
+    textDecoration: "none",
+  },
 }))
 
 function AppButton({switchForegroundApp, config}) {
   const classes = useStyles()
 
-  if (config.showInMenu === false)
+  if (config.showInMenu === false || config.openInDrawer === true)
     return null
 
   return (
@@ -72,6 +76,12 @@ function DefaultApp({apps, switchForegroundApp}) {
         <AppButton config={app} key={app.id}
           switchForegroundApp={switchForegroundApp} />
       ))}
+      <a className={classes.link} href='https://github.com/thebne/midiate'>
+        <Paper className={classes.paper}>
+          <GitHubIcon />
+          <Typography variant="button">Fork on GitHub</Typography>
+        </Paper>
+      </a>
     </Container>
   )
 }

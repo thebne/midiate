@@ -11,11 +11,13 @@ const initialState = {
 const events = (state = initialState, action) => {  
   switch (action.type) {	    
     case HANDLE_MIDI_BUFFER: {		
-      const event = parseMessage(action.payload.msg, action.payload.deltaTime)
-      event.source = action.payload.source
+      const { msg, source, deltaTime } = action.payload
+      const event = parseMessage(msg, deltaTime)
+      event.source = source
       if (!event.receivedTime) {
         event.receivedTime = new Date().getTime()
       }
+
       return {
         ...state,
         lastEvent: event,

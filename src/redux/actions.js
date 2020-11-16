@@ -1,11 +1,11 @@
 import { 
   SWITCH_APP, 
+  SWITCH_DRAWER_APP, 
+  TOGGLE_DRAWER,
   ADD_APP, 
   HANDLE_MIDI_BUFFER, 
   TOGGLE_MIDI_INPUT,
   SET_MIDI_DEVICES,
-  SET_MIDI_SERVER_HOST,
-  SET_MIDI_SERVER_CONNECTION_STATUS,
   SET_THEME_ID,
   SET_APP_SPECIFIC_PERSISTENT_VALUE,
   SET_APP_SPECIFIC_SESSION_VALUE,
@@ -15,6 +15,16 @@ import {
 export const switchForegroundApp = appId => ({
   type: SWITCH_APP,
   payload: appId,
+})
+
+export const switchDrawerApp = appId => ({
+  type: SWITCH_DRAWER_APP,
+  payload: appId,
+})
+
+export const toggleDrawer = open => ({
+  type: TOGGLE_DRAWER,
+  payload: open,
 })
 
 export const addApp = (appId, config) => ({
@@ -32,11 +42,6 @@ export const sendKeyboardEvent  = (deltaTime, msg) => ({
   payload: {deltaTime, msg, source: {type: 'keyboard'}},
 })
 
-export const sendServerEvent = (deltaTime, msg, host) => ({
-  type: HANDLE_MIDI_BUFFER, 
-  payload: {deltaTime, msg, source: {type: 'server', host}},
-})
-
 export const sendCustomEvent = (deltaTime, msg, id) => ({
   type: HANDLE_MIDI_BUFFER, 
   payload: {deltaTime, msg, source: {type: 'app', id}},
@@ -50,16 +55,6 @@ export const toggleMidiInput = (input, isActive) => ({
 export const setMidiDevices = (inputs, outputs) => ({
   type: SET_MIDI_DEVICES, 
   payload: {inputs, outputs},
-})
-
-export const setMidiServerHost = host => ({
-  type: SET_MIDI_SERVER_HOST, 
-  payload: host,
-})
-
-export const setMidiServerConnectionStatus = status => ({
-  type: SET_MIDI_SERVER_CONNECTION_STATUS, 
-  payload: status,
 })
 
 export const setThemeId = id => ({

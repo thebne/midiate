@@ -14,6 +14,16 @@ export const getForegroundAppId = createSelector(
   ui => ui.foregroundApp
 )
 
+export const getDrawerAppId = createSelector(
+  [getUiState],
+  ui => ui.drawerApp
+)
+
+export const getDrawerOpen = createSelector(
+  [getUiState],
+  ui => ui.drawerOpen
+)
+
 export const getApp = (store, appId) => 
   getApps(store)[appId] || {}
 

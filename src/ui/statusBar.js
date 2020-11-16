@@ -22,6 +22,7 @@ import {
 import { 
   switchForegroundApp, 
 } from '../redux/actions'
+import Drawer from './drawer'
 
 
 const useStyles = makeStyles(theme => ({
@@ -78,7 +79,7 @@ const useStyles = makeStyles(theme => ({
 
 
 function StatusBar({foregroundAppConfig, foregroundAppId, 
-  statusBar, switchForegroundApp}) {
+  statusBarItems, drawerItems, apps, switchForegroundApp}) {
 	const classes = useStyles()
 
   return (
@@ -91,12 +92,13 @@ function StatusBar({foregroundAppConfig, foregroundAppId,
               switchForegroundApp={switchForegroundApp}
             />
             <Box display={{xs: 'none', sm: 'initial'}}>
-              {statusBar.map(item =>
+              {statusBarItems.map(item =>
                 <StatusBarIcon key={item.props.config.id}>
                   {item}
                 </StatusBarIcon> 
                )}
             </Box>
+            <Drawer apps={apps} items={drawerItems} /> 
 					</Toolbar>
 				</AppBar>
   )

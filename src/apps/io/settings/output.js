@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react'
-import Slider from '@material-ui/core/Slider'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
@@ -30,7 +29,7 @@ export default React.memo(function MidiOutput() {
 	return (
     <React.Fragment>
       <List>
-        <ListSubheader>MIDI Outputs</ListSubheader>
+        <ListSubheader>MIDI Output</ListSubheader>
         {midiOutputs.length === 0 
           && <ListItem><i>no output devices found</i></ListItem>}
         {midiOutputs.map(output => (
@@ -50,37 +49,10 @@ export default React.memo(function MidiOutput() {
             </ListItemSecondaryAction>
           </ListItem>
         ))}
-      <TransposeControl />
       </List>
     </React.Fragment>
 	)
 })
 
-const TransposeControl = React.memo(function () {
-  const [transpose, setTranspose] = useTranspose()
-  const onTransposeChange = useCallback(
-    (e, v) => setTranspose(v),
-    [setTranspose])
-
-  return (
-    <React.Fragment>
-      <ListSubheader>Transpose MIDI Outputs</ListSubheader>
-      <ListItem>
-        <Slider
-          value={transpose}
-          step={0.5}
-          marks
-          min={-3}
-          max={3}
-          valueLabelDisplay="auto"
-          onChange={onTransposeChange}
-        />
-      </ListItem>
-    </React.Fragment>
-  )
-})
-
-export const useTranspose = () => 
-  useSetting('transpose', 0)
 export const useActiveOutputs = () => 
   useSetting('activeOutputs', [])
