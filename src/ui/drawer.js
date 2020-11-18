@@ -26,7 +26,8 @@ import {
 
 const useStyles = makeStyles({
   drawer: {
-    width: '20vw',
+    width: '25em',
+    maxWidth: '90vw',
   },
   btnContainer: {
     position: 'relative',
@@ -36,6 +37,7 @@ const useStyles = makeStyles({
     top: 0,
     right: 0,
     zIndex: 100,
+    pointerEvents: 'none',
   },
 })
 
@@ -78,10 +80,7 @@ function SideDrawer({ apps, items }) {
           {drawerAppId != null 
           && (
             <div className={classes.btnContainer}>
-              <IconButton 
-                onClick={() => dispatch(switchDrawerApp(null))}
-                className={classes.backButton}
-              >
+              <IconButton className={classes.backButton}>
                 <ChevronLeftIcon />
               </IconButton>
             </div>
@@ -89,7 +88,7 @@ function SideDrawer({ apps, items }) {
           {drawerAppId != null 
             ? (
               <React.Fragment>
-                <AppItem {...drawerAppConfig} />
+                <AppItem action={() => dispatch(switchDrawerApp(null))} {...drawerAppConfig} />
                 {React.createElement(apps[drawerAppId], {config: drawerAppConfig})}
               </React.Fragment>
             )
@@ -97,7 +96,7 @@ function SideDrawer({ apps, items }) {
               <React.Fragment>
                 <List>
                   {appConfigs.filter(app => app.openInDrawer === true).map(app => 
-                    <AppItem key={app.id} {...app} />)}
+                    <AppItem key={app.id} action={() => dispatch(switchDrawerApp(app.id))} {...app} />)}
                 </List>
                 <Divider />
                 <List>
@@ -119,10 +118,9 @@ function SideDrawer({ apps, items }) {
 }
 
 
-function AppItem({ id, icon, name, description }) {
-  const dispatch = useDispatch()
+function AppItem({ id, icon, name, description, action }) {
   return (
-    <ListItem button onClick={() => dispatch(switchDrawerApp(id))}>
+    <ListItem button onClick={action}>
       <ListItemIcon>
         {icon ? React.createElement(icon) : <AppDefaultIcon />}
       </ListItemIcon>
