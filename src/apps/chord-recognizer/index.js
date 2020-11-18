@@ -166,6 +166,8 @@ function Welcome() {
 function History() {
   const classes = useStyles()
   const [chordHistory,] = useChordHistory()
+  if (!chordHistory.length)
+    return null
   return (
     <svg 
       viewBox="0 0 100 100" 
