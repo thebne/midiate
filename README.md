@@ -140,7 +140,6 @@ Here, we define our app's configurations, including a name and icon that will be
   require('../apps/heatmap'),
   require('../apps/web-player'),
   require('../apps/recorder'),
-  require('../apps/song-matcher'),
   require('../apps/note-viewer') // our app
 ]
 ```
@@ -271,30 +270,13 @@ MIDI events have the following structure:
 }
 ```
 Events are first parsed with [MIDIMessage](https://github.com/notthetup/midimessage) and then enriched with [@tonaljs](https://github.com/tonaljs/tonal) and some custom logic. 
- 
-### Apps vs. System apps
-System apps provide cross-app/core functionality, while regular apps let users experience a specific experience.
-
-#### Logical Difference
-For example, the `midi-input` system app is what allows all MIDI apps to have access to midi events, either from the keyboard, a MIDI device, or the web. The regular app `chord-recognizer`, on the other hand, builds upon this core functionality by showing an nice visualization of the current chord being played.
-
-#### Technical Difference
-System apps can provide an export to `settings` that automatically show in the settings app, while regular apps need to write their own settings layout.
-
-#### Is my app a system app or regular app?
-Unless you're trying to expand the core functionality (event collection, output methods, traversal etc.) - you're probably writing a regular app. 
 
 Frequently Asked
 ---------
-- **Can I use MIDIate as an external package?**
-
-  It's currently not possible to easily use MIDIate APIs as a library/npm package, but future versions may support a `@midiate/api` import that makes it easier.
-- **Is it possible to connect to MIDIate remotely?**
-
-  The package currently supports WebSockets as an external MIDI source. It means it's easy mostly within the LAN. 
- 
-  Check out [midiate-utils](https://github.com/thebne/midiate-utils) for compatible streaming servers (depending on your operating system, they may require system libraries).
-
 - **Can I use MIDIate without owning a MIDI device?**
 
   Yes! Your computer keyboard can serve as a midi-device, though the functionality is currently limited.
+
+- **Can I use MIDIate as an external package?**
+
+  It's currently not possible to easily use MIDIate APIs as a library/npm package, but future versions may support a `@midiate/api` import that makes it easier.
