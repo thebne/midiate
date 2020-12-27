@@ -67,7 +67,11 @@ export default function () {
               console.warn('currently support only note-on and note-off')
               return null
           }
-        }).filter(x => x !== null)
+        }).filter(x => x !== null).concat({
+          deltaTime: 0,
+          meta: true,
+          type: 'endOfTrack',
+        })
       ]
     })
     const name = `${formatDate(startTime)}_${formatDate(new Date())}_${eventHistory.length}.mid`
