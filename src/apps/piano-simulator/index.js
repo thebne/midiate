@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useMemo, useCallback } from 'react'
+import React, { useEffect, useLayoutEffect, useState, useMemo, useCallback } from 'react'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
@@ -8,12 +8,22 @@ import clsx from 'clsx'
 import { Note, Scale, Midi } from '@tonaljs/tonal'
 import Piano from '../../gadgets/piano'
 import { useNotes } from '../../api/notes'
-import { useSendEvent } from '../../api/events'
+import { useLastEvent, useSendEvent } from '../../api/events'
 import { useScale } from './settings'
+import detections from '../../detections.json'
 
 const ANIMATION_DURATION_S = 15
 
 const useStyles = makeStyles(theme => ({
+  fp: {
+      backgroundColor: 'red',
+  },
+  tp: {
+      backgroundColor: 'green',
+  },
+  fn: {
+      backgroundColor: 'yellow',
+  },
 
   transform: {
     position: "absolute",
@@ -40,7 +50,6 @@ const useStyles = makeStyles(theme => ({
     height: '100em',
     minHeight: '.6em',
     maxHeight: '100em',
-    backgroundColor: "#d10",
     border: '1px solid #222',
     borderRadius: '.2vw',
     willChange: "height, background-color",
@@ -49,7 +58,6 @@ const useStyles = makeStyles(theme => ({
   "animation-enter": {
     "& $body": {
       height: 0,
-      backgroundColor: '#392',
     },
     "& $flex": {
       transform: 'translateY(0)',
@@ -58,14 +66,12 @@ const useStyles = makeStyles(theme => ({
   "animation-enter-active": {
     "& $body": {
       transition: `height ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
-      backgroundColor: '#3f2',
       height: '100em',
     },
   },
   "animation-exit":{
     "& $body": {
       height: '100em',
-      backgroundColor: '#3f2',
       transition: `height ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
     },
     "& $flex": {
@@ -77,7 +83,6 @@ const useStyles = makeStyles(theme => ({
   "animation-exit-active": {
     "& $body": {
       height: '100em',
-      backgroundColor: '#d10',
       transition: `height ${ANIMATION_DURATION_S}s linear, background-color ${ANIMATION_DURATION_S / 2}s linear`,
     },
     "& $flex": {
@@ -127,11 +132,35 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
+export function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default function PianoSimulator () {
   const classes = useStyles()
   const sendEvent = useSendEvent()
-  const notes = useNotes()
+  const exNotes = useNotes({data: 'extended'})
+  const notes = exNotes.map(n => n.note)
   const [scale,] = useScale()
+
+  // read custom json and send events
+  useEffect(() => {
+    (async () => {
+      let i = 0
+      for (const bin of detections) {
+        for (const note of Object.keys(bin)) {
+          sendEvent(new Uint8Array([144, note, 64]), i)
+        }
+        i++
+        await sleep(200)
+        // send all off
+        //sendEvent(new Uint8Array([123, 0, 0]))
+        for (const note of Object.keys(bin)) {
+          sendEvent(new Uint8Array([144, note, 0]))
+        }
+      }
+    })()
+  }, [])
 
   // mark highlighted notes if scale is selected
   const highlightClasses = useMemo(() => {
@@ -149,19 +178,22 @@ export default function PianoSimulator () {
   const pressedClasses = useMemo(() => {
     const clss = {}
     const hasHighlight = !!Object.keys(highlightClasses).length
-    notes.forEach(n =>
-      clss[n] = clsx('pressed', hasHighlight
-        && {[classes.wrong]: !(Note.pitchClass(n) in highlightClasses)})
+    exNotes.forEach(n =>
+      clss[n.note] = clsx('pressed', hasHighlight
+        && {[classes.wrong]: !(Note.pitchClass(n.note) in highlightClasses)},
+        classes[detections[n.source.id]?.[n.key]])
     )
     return clss
-  }, [notes, highlightClasses, classes.wrong])
+  }, [exNotes, highlightClasses, classes.wrong])
 
   // create an Object of {note: {pressed: true}, note: {pressed: true}, ...} for each pressed note
   const pressedProps = useMemo(() => {
     const clss = {}
-    notes.forEach(n => clss[n] = {pressed: true})
+    exNotes.forEach(n => clss[n.note] = {pressed: true,
+      className: classes[detections[n.source.id]?.[n.key]],
+    })
     return clss
-  }, [notes])
+  }, [exNotes])
 
   // send events when piano is pressed
   const onPress = useCallback((n) => 
@@ -186,7 +218,7 @@ export default function PianoSimulator () {
   )
 }
 
-const NoteAnimation = React.memo(({pressed}) => {
+const NoteAnimation = React.memo(({pressed, className}) => {
   const classes = useStyles()
   
   const applyFixedTransform = useCallback(node => {
@@ -212,7 +244,7 @@ const NoteAnimation = React.memo(({pressed}) => {
         >
           <div className={classes.transform}> 
             <div className={classes.flex}>
-              <div className={classes.body} />
+              <div className={clsx(classes.body, className)} />
             </div>
           </div>
         </CSSTransition>

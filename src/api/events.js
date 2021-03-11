@@ -16,9 +16,9 @@ export const useSendEvent = () => {
   const dispatch = useDispatch()
   return useMemo(() => {
     let lastTime = new Date().getTime()
-    return (msg) => {
+    return (msg, customId) => {
       const now = new Date().getTime()
-      dispatch(sendCustomEvent(now - lastTime, msg, appId))
+      dispatch(sendCustomEvent(now - lastTime, msg, customId !== undefined ? customId : appId))
       lastTime = now
     }
   }, [dispatch, appId])
