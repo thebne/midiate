@@ -4,6 +4,8 @@ MIDIate
 
 MIDIate is a platform designed for the quick and easy development of MIDI-based React applications.
 
+![image](https://user-images.githubusercontent.com/5146877/111039057-b97bdb80-8434-11eb-957d-f8bd4460be28.png)
+
 ### **[Visit midiate.now.sh](https://midiate.now.sh)** to see the latest version.
 
 Features
