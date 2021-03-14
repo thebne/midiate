@@ -282,6 +282,3 @@ Frequently Asked
 - **Can I use MIDIate as an external package?**
 
   It's currently not possible to easily use MIDIate APIs as a library/npm package, but future versions may support a `@midiate/api` import that makes it easier.
-
-
-![image](https://user-images.githubusercontent.com/5146877/111039057-b97bdb80-8434-11eb-957d-f8bd4460be28.png)
