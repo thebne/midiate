@@ -13,7 +13,7 @@ import AppDefaultIcon from '@material-ui/icons/MusicVideo'
 import { makeStyles } from '@material-ui/core/styles'
 
 import { PROGRAM_NAME, DEFAULT_APP_ID } from '../constants'
-import { ReactComponent as Logo } from '../logo.svg'
+import Logo from '../logo.svg?react'
 import { 
   getForegroundAppId,
   getApp,

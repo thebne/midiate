@@ -138,9 +138,8 @@ export default function Piano({classNames={}, styles={}, singleOctave,
                 NoteEffectProps={NoteEffectProps[n]}
                 onPress={onPress}
                 onRelease={onRelease}
-              >
-                }
-              </PianoKey>
+              />
+
             )}
           </ul>
         </div>

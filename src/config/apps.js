@@ -1,17 +1,26 @@
+import * as defaultApp from '../apps/default'
+import * as chordRecognizer from '../apps/chord-recognizer'
+import * as pianoSimulator from '../apps/piano-simulator'
+import * as heatmap from '../apps/heatmap'
+import * as webPlayer from '../apps/web-player'
+import * as recorder from '../apps/recorder'
+import * as appearance from '../apps/appearance'
+import * as io from '../apps/io'
+
 export default [
   // default app - shows menu of all apps
-  require('../apps/default'),
+  defaultApp,
 
   // functional apps
-  require('../apps/chord-recognizer'),
-  require('../apps/piano-simulator'),
-  require('../apps/heatmap'),
-  require('../apps/web-player'),
-  require('../apps/recorder'),
-  //require('../apps/song-matcher'),
+  chordRecognizer,
+  pianoSimulator,
+  heatmap,
+  webPlayer,
+  recorder,
+  //songMatcher,
 
   // appearance (theme selection, etc.)
-  require('../apps/appearance'),
+  appearance,
   // IO app - receives and sends MIDI events
-  require('../apps/io'),
+  io,
 ]

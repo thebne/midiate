@@ -21,6 +21,7 @@ import StatusBar from './statusBar'
 import LoadingScreen from './loadingScreen'
 import themes from './themes'
 import { IO_APP_ID } from '../constants'
+import appsFromConfig from '../config/apps'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -59,9 +60,6 @@ class Client extends React.Component {
 
   componentDidMount() {
     let apps = {}, statusBar = {}, drawer = {}, backgroundTasks = {}
-
-    // load apps from config file 
-    const appsFromConfig = require('../config/apps').default
 
     for (const app of appsFromConfig) {
       const appConfig = app.config

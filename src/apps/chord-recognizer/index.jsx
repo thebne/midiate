@@ -24,8 +24,8 @@ import { useChords, arePropsEqual } from './utils'
 import { useChordHistory } from './settings'
 import { useSetting } from '../../api/settings'
 import { useNoSleep } from '../../api/misc'
+import ColorHash from 'color-hash'
 
-const ColorHash = require('color-hash')
 const colorHash = new ColorHash({lightness: .5})
 
 const useStyles = makeStyles(theme => ({

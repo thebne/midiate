@@ -10,10 +10,92 @@
 }
 
 .root :global(.piano-gadget-root) {
-  justify-content: center;
+  justify-content: flex-end;
 }
 
-.root :global(.piano-gadget-noteRender) {  
-  transition: .5s ease-out;
+.root :global(.piano-gadget-pianoContainer) {
+  position: relative;
+}
+
+.root :global(.piano-gadget-pianoBody)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -40vw;
+  height: 40vw;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(180, 180, 180, 0.2) 0,
+    rgba(180, 180, 180, 0.2) 1px,
+    transparent 1px,
+    transparent 2vw
+  );
+}
+
+.root :global(.piano-gadget-noteRender) {
+  z-index: 1;
+  will-change: height;
+  transition: height .3s ease-out;
+}
+
+.root :global(.piano-gadget-pianoBody) {
+  overflow: visible;
+}
+
+.root :global(.piano-gadget-notesList) {
+  overflow: visible;
+  height: auto;
+  align-items: flex-end;
+}
+
+.root :global(.piano-gadget-noteItem) {
+  float: none;
+  display: inline-block;
+  vertical-align: bottom;
+  height: 10vw;
+  position: relative;
+}
+
+.root :global(.piano-gadget-white) {
+  width: 1.5vw;
+}
+
+.root :global(.piano-gadget-black) {
+  width: 0;
+}
+
+.root :global(.piano-gadget-white) :global(.piano-gadget-noteBody) {
+  position: absolute;
+  bottom: 0;
+  height: 10vw;
+  width: 1.5vw;
+  overflow: visible;
+}
+
+.root :global(.piano-gadget-white) :global(.piano-gadget-noteRender) {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Black keys: keep at top of piano, bars grow upward */
+.root :global(.piano-gadget-black) :global(.piano-gadget-noteBody) {
+  position: absolute;
+  top: 0;
+  left: -.4vw;
+  height: 6vw;
+  width: .8vw;
+  overflow: visible;
+}
+
+.root :global(.piano-gadget-black) :global(.piano-gadget-noteRender) {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
