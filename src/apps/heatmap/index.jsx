@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useMemo, useRef } from 'react'
 import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import { Note } from "@tonaljs/tonal"
@@ -7,60 +7,87 @@ import { useSetting, useSessionValue } from '../../api/settings'
 import Piano from '../../gadgets/piano'
 import styles from './style.module.css'
 
-export const usePressed = () => 
+export const usePressed = () =>
   useSessionValue('pressed', {})
-export const useToggle = () => 
+export const useToggle = () =>
   useSetting('toggle', false)
 
 export function BackgroundTask() {
   const lastEvent = useLastEvent()
   const [,setPressed] = usePressed()
+  const pendingUpdates = useRef({})
+  const rafId = useRef(null)
 
-  useEffect(() => {	 
-	 // show animation only for note press
-	 if (!lastEvent || lastEvent.messageType !== 'noteon') {
-		return 
-	 }
+  useEffect(() => {
+    // show animation only for note press
+    if (!lastEvent || lastEvent.messageType !== 'noteon') {
+      return
+    }
 
-   setPressed(pressed => {
-     let newPressed = {...pressed}
-     // update note frequency dict
-     let n = lastEvent.note	
-     if (newPressed[n]) {
-       newPressed[n] += 15	
-     }
-     else {
-       newPressed[n] = 1
-     }
-     return newPressed
-   })
+    // Accumulate updates
+    const n = lastEvent.note
+    pendingUpdates.current[n] = (pendingUpdates.current[n] || 0) + 15
+
+    // Batch updates using requestAnimationFrame
+    if (!rafId.current) {
+      rafId.current = requestAnimationFrame(() => {
+        const updates = pendingUpdates.current
+        pendingUpdates.current = {}
+        rafId.current = null
+
+        setPressed(pressed => {
+          const newPressed = {...pressed}
+          for (const [note, increment] of Object.entries(updates)) {
+            newPressed[note] = (newPressed[note] || 0) + increment
+          }
+          return newPressed
+        })
+      })
+    }
   }, [lastEvent, setPressed])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current)
+      }
+    }
+  }, [])
 
   return null
 }
 
 export default function Heatmap() {
-  const [pressed,setPressed] = usePressed()
+  const [pressed, setPressed] = usePressed()
   const [toggle, setToggle] = useToggle()
-  
+
   const switchType = useCallback(() => setToggle(t => !t), [setToggle])
   const clear = useCallback(() => setPressed({}), [setPressed])
 
-  const heights = {}, colors = {}
-  const max = Math.max(...Object.values(pressed))
+  // Memoize style calculations to avoid recalculating on every render
+  const { heights, colors } = useMemo(() => {
+    const heights = {}
+    const colors = {}
+    const values = Object.values(pressed)
+    const max = values.length > 0 ? Math.max(...values) : 0
 
-	for (const [note, x] of Object.entries(pressed)) {			
-		// set color styling per key type (black/white)
-		if (Note.accidentals(Note.simplify(note)).length) {
-			colors[note] = {background: colorBlackKeys(x,0,max),  border: colorBlackKeys(x,0,max)}
-		}
-		else {
-			colors[note] = {background: colorWhiteKeys(x,0,max), boxShadow: whiteShadow(x,0,max), border: 'none'}
-		}
-		
-		// set animation height per key
-		heights[note] = {height: calculateHeight(x,0,max)}
-	}	
+    for (const [note, x] of Object.entries(pressed)) {
+      // set color styling per key type (black/white)
+      if (Note.accidentals(Note.simplify(note)).length) {
+        colors[note] = {background: colorBlackKeys(x, 0, max), border: colorBlackKeys(x, 0, max)}
+      } else {
+        colors[note] = {background: colorWhiteKeys(x, 0, max), boxShadow: whiteShadow(x, 0, max), border: 'none'}
+      }
+
+      // set animation height per key
+      heights[note] = {height: calculateHeight(x, 0, max)}
+    }
+    return { heights, colors }
+  }, [pressed])
+
+  const pianoStyles = toggle ? colors : heights
+
   return (
     <React.Fragment>
       <Container maxWidth="xl" className={styles.buttons}>
@@ -69,11 +96,11 @@ export default function Heatmap() {
         </Button>
         <Button style={{float: 'right'}} onClick={clear}>
           Clear
-        </Button>			
+        </Button>
       </Container>
 
       <Container maxWidth={null} className={styles.root}>
-        <Piano startNote="A0" endNote="C8" styles={toggle ? colors : heights} />
+        <Piano startNote="A0" endNote="C8" styles={pianoStyles} />
       </Container>
     </React.Fragment>
   )

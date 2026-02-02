@@ -37,6 +37,8 @@
 
 .root :global(.piano-gadget-noteRender) {
   z-index: 1;
+  will-change: height;
+  transition: height .3s ease-out;
 }
 
 .root :global(.piano-gadget-pianoBody) {
@@ -78,7 +80,6 @@
   bottom: 0;
   left: 0;
   right: 0;
-  transition: height .5s ease-out;
 }
 
 /* Black keys: keep at top of piano, bars grow upward */
@@ -96,6 +97,5 @@
   bottom: 0;
   left: 0;
   right: 0;
-  transition: height .5s ease-out;
 }
 
