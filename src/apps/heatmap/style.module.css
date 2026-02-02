@@ -13,6 +13,32 @@
   justify-content: flex-end;
 }
 
+.root :global(.piano-gadget-pianoContainer) {
+  position: relative;
+}
+
+.root :global(.piano-gadget-pianoBody)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -40vw;
+  height: 40vw;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(180, 180, 180, 0.2) 0,
+    rgba(180, 180, 180, 0.2) 1px,
+    transparent 1px,
+    transparent 2vw
+  );
+}
+
+.root :global(.piano-gadget-noteRender) {
+  z-index: 1;
+}
+
 .root :global(.piano-gadget-pianoBody) {
   overflow: visible;
 }
