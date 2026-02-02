@@ -4,6 +4,7 @@ import * as pianoSimulator from '../apps/piano-simulator'
 import * as heatmap from '../apps/heatmap'
 import * as webPlayer from '../apps/web-player'
 import * as recorder from '../apps/recorder'
+import * as chickenInvaders from '../apps/chicken-invaders'
 import * as appearance from '../apps/appearance'
 import * as io from '../apps/io'
 
@@ -17,6 +18,7 @@ export default [
   heatmap,
   webPlayer,
   recorder,
+  chickenInvaders,
   //songMatcher,
 
   // appearance (theme selection, etc.)
