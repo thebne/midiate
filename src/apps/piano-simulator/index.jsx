@@ -1,5 +1,4 @@
-import React, { useLayoutEffect, useState, useMemo, useCallback } from 'react'
-import { TransitionGroup, CSSTransition } from 'react-transition-group'
+import React, { useLayoutEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
@@ -22,6 +21,7 @@ const useStyles = makeStyles(theme => ({
     top: '-.5vh',
     zIndex: 100,
     contain: 'layout',
+    pointerEvents: 'none',
   },
 
   flex: {
@@ -37,54 +37,41 @@ const useStyles = makeStyles(theme => ({
 
   body: {
     width: '100%',
-    height: '100em',
     minHeight: '.6em',
-    maxHeight: '100em',
-    backgroundColor: "#d10",
+    backgroundColor: "#3f2",
     border: '1px solid #222',
     borderRadius: '.2vw',
-    willChange: "height, background-color",
   },
 
-  "animation-enter": {
+  growing: {
     "& $body": {
-      height: 0,
-      backgroundColor: '#392',
-    },
-    "& $flex": {
-      transform: 'translateY(0)',
-    },
-  },
-  "animation-enter-active": {
-    "& $body": {
-      transition: `height ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
+      animation: `$growHeight ${ANIMATION_DURATION_S}s linear forwards`,
       backgroundColor: '#3f2',
-      height: '100em',
     },
   },
-  "animation-exit":{
-    "& $body": {
-      height: '100em',
-      backgroundColor: '#3f2',
-      transition: `height ${ANIMATION_DURATION_S}s linear, background-color 200ms linear`,
-    },
+
+  releasing: {
     "& $flex": {
-      transform: 'translateY(-100em)',
-      transition: `transform ${ANIMATION_DURATION_S}s linear`,
-      willChange: 'transform',
+      animation: `$slideUp ${ANIMATION_DURATION_S}s linear forwards`,
+    },
+    "& $body": {
+      animation: `$fadeColor ${ANIMATION_DURATION_S}s linear forwards`,
     },
   },
-  "animation-exit-active": {
-    "& $body": {
-      height: '100em',
-      backgroundColor: '#d10',
-      transition: `height ${ANIMATION_DURATION_S}s linear, background-color ${ANIMATION_DURATION_S / 2}s linear`,
-    },
-    "& $flex": {
-      transform: 'translateY(-100em)',
-      transition: `transform ${ANIMATION_DURATION_S}s linear`,
-      willChange: 'transform',
-    },
+
+  "@keyframes slideUp": {
+    "0%": { transform: 'translateY(0)' },
+    "100%": { transform: 'translateY(-100em)' },
+  },
+
+  "@keyframes growHeight": {
+    "0%": { height: 0 },
+    "100%": { height: '100em' },
+  },
+
+  "@keyframes fadeColor": {
+    "0%": { backgroundColor: '#3f2' },
+    "100%": { backgroundColor: '#d10' },
   },
 
   scaleSelect: {
@@ -156,12 +143,19 @@ export default function PianoSimulator () {
     return clss
   }, [notes, highlightClasses, classes.wrong])
 
-  // create an Object of {note: {pressed: true}, note: {pressed: true}, ...} for each pressed note
+  // create an Object of {note: {pressed: true}, ...} for each pressed note
   const pressedProps = useMemo(() => {
-    const clss = {}
-    notes.forEach(n => clss[n] = {pressed: true})
-    return clss
+    const props = {}
+    notes.forEach(n => props[n] = {pressed: true})
+    return props
   }, [notes])
+
+  // Memoize the NoteAnimation component with classes baked in
+  const NoteAnimationWithClasses = useMemo(() => {
+    return React.memo(function NoteAnimationWrapper(props) {
+      return <NoteAnimation {...props} classes={classes} />
+    })
+  }, [classes])
 
   // send events when piano is pressed
   const onPress = useCallback((n) => 
@@ -171,13 +165,18 @@ export default function PianoSimulator () {
     sendEvent(new Uint8Array([144, Midi.toMidi(n), 0]))
     , [sendEvent])
 
+  // Memoize merged classNames to avoid creating new object on every render
+  const mergedClassNames = useMemo(() =>
+    ({...pressedClasses, ...highlightClasses})
+  , [pressedClasses, highlightClasses])
+
   return (
-    <React.Fragment> 
+    <React.Fragment>
       <ScaleSelect />
-      <Piano 
-        NoteEffectComponent={NoteAnimation} 
+      <Piano
+        NoteEffectComponent={NoteAnimationWithClasses}
         NoteEffectProps={pressedProps}
-        classNames={{...pressedClasses, ...highlightClasses}} 
+        classNames={mergedClassNames}
         startNote="A0" endNote="C8"
         onPress={onPress}
         onRelease={onRelease}
@@ -186,40 +185,64 @@ export default function PianoSimulator () {
   )
 }
 
-const NoteAnimation = React.memo(({pressed}) => {
-  const classes = useStyles()
-  
-  const applyFixedTransform = useCallback(node => {
-    const body = node.getElementsByClassName(classes.body)[0]
-    const {height} = window.getComputedStyle(body)
-    body.style.maxHeight = `${height}`
-  }, [classes])
+const NoteAnimation = React.memo(({pressed, classes}) => {
+  const [trails, setTrails] = useState([])
+  const nextId = useRef(0)
+  const activeTrailId = useRef(null)
+
+  // Add new trail when pressed, mark as released when unpressed
+  React.useEffect(() => {
+    if (pressed) {
+      const id = nextId.current++
+      activeTrailId.current = id
+      setTrails(t => [...t, { id, startTime: Date.now(), released: false }])
+    } else if (activeTrailId.current !== null) {
+      const releasedId = activeTrailId.current
+      activeTrailId.current = null
+      setTrails(t => t.map(trail =>
+        trail.id === releasedId
+          ? { ...trail, released: true, releaseTime: Date.now() }
+          : trail
+      ))
+    }
+  }, [pressed])
+
+  // Clean up old trails after they finish animating
+  React.useEffect(() => {
+    const releasedTrails = trails.filter(t => t.released)
+    if (releasedTrails.length === 0) return
+    const timeout = setTimeout(() => {
+      const now = Date.now()
+      setTrails(t => t.filter(trail =>
+        !trail.released || now - trail.releaseTime < ANIMATION_DURATION_S * 1000
+      ))
+    }, ANIMATION_DURATION_S * 1000)
+    return () => clearTimeout(timeout)
+  }, [trails])
 
   return (
-    <TransitionGroup component={null}>
-      {pressed &&
-        <CSSTransition
-          key={new Date().getTime()}
-          timeout={ANIMATION_DURATION_S * 1000 / 2}
-          classNames={{
-            enter: classes['animation-enter'],
-            enterActive: classes['animation-enter-active'],
-            enterDone: classes['animation-enter-active'],
-            exit: classes['animation-exit'],
-            exitActive: classes['animation-exit-active'],
-          }}
-          onExit={applyFixedTransform}
+    <>
+      {trails.map(trail => (
+        <div
+          key={trail.id}
+          className={clsx(
+            classes.transform,
+            trail.released ? classes.releasing : classes.growing
+          )}
         >
-          <div className={classes.transform}> 
-            <div className={classes.flex}>
-              <div className={classes.body} />
-            </div>
+          <div className={classes.flex}>
+            <div
+              className={classes.body}
+              style={trail.released ? {
+                height: `${Math.min((trail.releaseTime - trail.startTime) / 1000 / ANIMATION_DURATION_S * 100, 100)}em`
+              } : undefined}
+            />
           </div>
-        </CSSTransition>
-      }
-  </TransitionGroup>
+        </div>
+      ))}
+    </>
   )
-})
+}, (prev, next) => prev.pressed === next.pressed && prev.classes === next.classes)
 
 // all scales are simply way too much...
 //const allScales = Scale.names().sort((a, b) => a.localeCompare(b))
