@@ -1,5 +1,5 @@
 import { Midi } from "@tonaljs/tonal"
-const MIDIMessage = require('midimessage')
+import MIDIMessage from 'midimessage'
 
 export function parseMessage(rawMsg, deltaTime) {
   let msg = MIDIMessage({data: new Uint8Array(rawMsg)})

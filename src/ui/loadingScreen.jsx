@@ -12,7 +12,7 @@ import {
   getIsAnyMidiInputActive,
 } from '../redux/selectors'
 import { switchForegroundApp } from '../redux/actions'
-import { ReactComponent as Logo } from '../logo.svg'
+import Logo from '../logo.svg?react'
 import { useSessionStorage } from '../utils/react'
 import { IO_APP_ID, DEFAULT_APP_ID } from '../constants'
 

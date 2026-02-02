@@ -5,9 +5,9 @@ import Typography from '@material-ui/core/Typography'
 import MicIcon from '@material-ui/icons/Mic'
 import { red, grey } from '@material-ui/core/colors'
 import { useLastEvent } from '../../api/events'
-import { useToggleStatusBarVisibility, 
+import { useToggleStatusBarVisibility,
   useSessionValue } from '../../api/settings'
-const writeMidi = require('midi-file').writeMidi
+import { writeMidi } from 'midi-file'
 
 const useEventHistory = () => 
   useSessionValue('eventHistory', [])
