@@ -7,10 +7,18 @@ const store = createStore(rootReducer,
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
 
+// Debounce localStorage writes to prevent UI jank during rapid MIDI input
+let saveTimeout = null
 store.subscribe(() => {
-  saveState({
-    settings: store.getState().settings
-  });
-});
+  if (saveTimeout) {
+    clearTimeout(saveTimeout)
+  }
+  saveTimeout = setTimeout(() => {
+    saveState({
+      settings: store.getState().settings
+    })
+    saveTimeout = null
+  }, 1000)
+})
 
 export default store

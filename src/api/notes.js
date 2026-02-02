@@ -1,27 +1,37 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { useLastEvent } from './events'
 
 export const useNotes = (config={}) => {
   const {data='simple'} = config
   const lastEvent = useLastEvent()
   const [notes, setNotes] = useState([])
+  // Use a Set for O(1) key lookups
+  const activeKeysRef = useRef(new Set())
 
   useEffect(() => {
     if (!lastEvent) {
-      return 
+      return
     }
-    setNotes(notes => {
-      const newNotes = [...notes]
-      switch (lastEvent.messageType) {
-        case 'noteon': 
-          return newNotes.concat({...lastEvent})
-        
-        case 'noteoff': 
-          return newNotes.filter(n => n.key !== lastEvent.key)
-        default:
-          return notes
-      }
-    })
+    const activeKeys = activeKeysRef.current
+
+    switch (lastEvent.messageType) {
+      case 'noteon':
+        if (!activeKeys.has(lastEvent.key)) {
+          activeKeys.add(lastEvent.key)
+          setNotes(notes => [...notes, {...lastEvent}])
+        }
+        break
+
+      case 'noteoff':
+        if (activeKeys.has(lastEvent.key)) {
+          activeKeys.delete(lastEvent.key)
+          setNotes(notes => notes.filter(n => n.key !== lastEvent.key))
+        }
+        break
+
+      default:
+        break
+    }
   }, [lastEvent])
 
   return useMemo(() => {
@@ -96,6 +106,9 @@ export const useSmartNotes = (config={}) => {
   }, [data, smartNotes])
 }
 
-// is a subset of b
-const isSubset = (a, b) => a.every(val => b.includes(val))
+// is a subset of b - O(n) using Set instead of O(n²)
+const isSubset = (a, b) => {
+  const setB = new Set(b)
+  return a.every(val => setB.has(val))
+}
 
