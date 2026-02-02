@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { Note, Scale, Midi } from "@tonaljs/tonal"
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
@@ -94,33 +94,40 @@ const MIDI_START_NOTE = 0
 const MIDI_END_NOTE = 127
 
 // if singleOctave is a note name, create only a single octave starting from this name
-export default function Piano({classNames={}, styles={}, singleOctave, 
+export default function Piano({classNames={}, styles={}, singleOctave,
   startNote, endNote, onPress=null, onRelease=null,
   NoteEffectComponent, NoteEffectProps={}}) {
   const classes = useStyles()
-  const getClass = name => `${classes[name] || ''} piano-gadget-${name}`
-  let notes
 
-  if (singleOctave) {
-    // aggregate notes, ignore different octaves (use 1 as the octave)
-    for (const [note, cls] in Object.entries(classNames)) {
-      classNames[`${Note.pitchClass(note)}1`] = cls
+  // Memoize getClass to prevent recreation on every render
+  const getClass = useCallback(
+    name => `${classes[name] || ''} piano-gadget-${name}`,
+    [classes]
+  )
+
+  // Memoize notes array - only recalculate when range changes
+  const notes = useMemo(() => {
+    if (singleOctave) {
+      // aggregate notes, ignore different octaves (use 1 as the octave)
+      for (const [note, cls] in Object.entries(classNames)) {
+        classNames[`${Note.pitchClass(note)}1`] = cls
+      }
+      // create a chromatic scale (including blacks and whites) from root
+      return Scale.get(`${singleOctave}1 chromatic`).notes
+    } else {
+      // convert textual note (e.g. Ab4) to midi numbers, check range and return to text
+      const startMidi = Midi.toMidi(startNote) || MIDI_START_NOTE
+      const endMidi = Midi.toMidi(endNote) || MIDI_END_NOTE
+      if (startMidi > endMidi)
+        throw new Error(`start > end: ${startNote} > ${endNote}`)
+      if (endMidi > MIDI_END_NOTE || startMidi < MIDI_START_NOTE)
+        throw new Error(`start or end out of bounds: `
+          `${startNote} < ${MIDI_START_NOTE} ||  ${endNote} > ${MIDI_END_NOTE}`)
+
+      // translate range back from midi numbers to textual notes
+      return [...Array(endMidi - startMidi + 1).keys()].map(m => Note.fromMidi(startMidi + m))
     }
-    // create a chromatic scale (including blacks and whites) from root
-    notes = Scale.get(`${singleOctave}1 chromatic`).notes
-  } else {
-    // convert textual note (e.g. Ab4) to midi numbers, check range and return to text
-    const startMidi = Midi.toMidi(startNote) || MIDI_START_NOTE
-    const endMidi = Midi.toMidi(endNote) || MIDI_END_NOTE
-    if (startMidi > endMidi)
-      throw new Error(`start > end: ${startNote} > ${endNote}`)
-    if (endMidi > MIDI_END_NOTE || startMidi < MIDI_START_NOTE)
-      throw new Error(`start or end out of bounds: `
-        `${startNote} < ${MIDI_START_NOTE} ||  ${endNote} > ${MIDI_END_NOTE}`)
-
-    // translate range back from midi numbers to textual notes
-    notes = [...Array(endMidi - startMidi + 1).keys()].map(m => Note.fromMidi(startMidi + m))
-  }
+  }, [singleOctave, startNote, endNote, classNames])
 	
 	return (
     <div className={getClass('root')}>
@@ -200,8 +207,17 @@ const PianoKey = React.memo(({note, className, style, getClass,
     </li>
   )
 }, (prevProps, nextProps) => {
-  // only compare visuals that might change
+  // Shallow equality check - much faster than JSON.stringify
+  const shallowEqual = (a, b) => {
+    if (a === b) return true
+    if (!a || !b) return a === b
+    const keysA = Object.keys(a)
+    const keysB = Object.keys(b)
+    if (keysA.length !== keysB.length) return false
+    return keysA.every(key => a[key] === b[key])
+  }
+
   return prevProps.className === nextProps.className
-    && JSON.stringify(prevProps.style) === JSON.stringify(nextProps.style)
-    && JSON.stringify(prevProps.NoteEffectProps) === JSON.stringify(nextProps.NoteEffectProps)
+    && shallowEqual(prevProps.style, nextProps.style)
+    && shallowEqual(prevProps.NoteEffectProps, nextProps.NoteEffectProps)
 })

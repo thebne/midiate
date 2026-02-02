@@ -37,20 +37,22 @@ export const getMidiServerHost = createSelector(
   settings => settings.midiServerHost || ""
 )
 
-export const isMidiInputActive = createSelector(
+// Get the active state map directly for efficient lookups
+export const getMidiInputsActiveMap = createSelector(
   [getSettingsState],
-  settings => {
-    return input => settings.midiInputsActive[input] !== undefined 
-      ? settings.midiInputsActive[input] : true
-  }
+  settings => settings.midiInputsActive || {}
 )
 
+// Helper function (not a selector) to check if input is active
+export const isInputActive = (activeMap, inputId) =>
+  activeMap[inputId] !== undefined ? activeMap[inputId] : true
+
 export const getMidiInputs = createSelector(
-  [getUiState, isMidiInputActive],
-  (ui, isActive) => (ui.midiInputs || []).map(i => {
-    i.active = isActive(i.id)
-    return i
-  })
+  [getUiState, getMidiInputsActiveMap],
+  (ui, activeMap) => (ui.midiInputs || []).map(i => ({
+    ...i,
+    active: isInputActive(activeMap, i.id)
+  }))
 )
 export const getMidiOutputs = createSelector(
   [getUiState],

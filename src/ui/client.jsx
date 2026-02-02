@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react'
-import { connect } from 'react-redux'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import clsx from 'clsx'
 import Snackbar from '@material-ui/core/Snackbar'
 import Button from '@material-ui/core/Button'
@@ -8,9 +8,9 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles'
 
 import { addApp, switchDrawerApp } from '../redux/actions'
-import { 
-  getForegroundAppId, 
-  getDrawerAppId, 
+import {
+  getForegroundAppId,
+  getDrawerAppId,
   getIsAnyMidiInputActive,
   getApp,
   getThemeId,
@@ -47,19 +47,32 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-class Client extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      apps: {},
-      statusBar: {}, 
-      drawer: {}, 
-      backgroundTasks: {},
-    }
-  }
+function Client() {
+  const dispatch = useDispatch()
+  const foregroundAppId = useSelector(getForegroundAppId)
+  const drawerAppId = useSelector(getDrawerAppId)
+  const isAnyMidiInputActive = useSelector(getIsAnyMidiInputActive)
+  const themeId = useSelector(getThemeId)
+  const theme = themes[themeId].theme
 
-  componentDidMount() {
-    let apps = {}, statusBar = {}, drawer = {}, backgroundTasks = {}
+  // Get app config helper
+  const getAppConfig = useCallback((state, id) => getApp(state, id), [])
+  const appConfigs = useSelector(state => {
+    const configs = {}
+    appsFromConfig.forEach(app => {
+      if (app.config?.id) {
+        configs[app.config.id] = getApp(state, app.config.id)
+      }
+    })
+    return configs
+  })
+
+  // Initialize apps once on mount - memoized to prevent recreation
+  const { apps, statusBar, drawer, backgroundTasks } = useMemo(() => {
+    const apps = {}
+    const statusBar = {}
+    const drawer = {}
+    const backgroundTasks = {}
 
     for (const app of appsFromConfig) {
       const appConfig = app.config
@@ -73,51 +86,68 @@ class Client extends React.Component {
         throw new Error('all apps must define ID')
       }
 
-      this.props.addApp(appId, appConfig)
-      // save apps on state
-      if (app.default) 
+      if (app.default)
         apps[appId] = wrapContext(app.default, appConfig)
       if (app.StatusBar)
         statusBar[appId] = wrapContext(app.StatusBar, appConfig)
       if (app.BackgroundTask)
         backgroundTasks[appId] = wrapContext(app.BackgroundTask, appConfig)
-      if (app.Drawer) 
+      if (app.Drawer)
         drawer[appId] = wrapContext(app.Drawer, appConfig)
     }
 
-    this.setState({apps, statusBar, drawer, backgroundTasks})
-  }
+    return { apps, statusBar, drawer, backgroundTasks }
+  }, [])
 
-  render() {
-    const {apps, statusBar, drawer, backgroundTasks} = this.state
-    const {foregroundAppId, getApp} = this.props
-
-    let app
-    if (apps[foregroundAppId]) {
-      app = React.createElement(apps[foregroundAppId], {config: getApp(foregroundAppId)})
+  // Register apps in Redux on mount
+  useEffect(() => {
+    for (const app of appsFromConfig) {
+      if (app.config?.id) {
+        dispatch(addApp(app.config.id, app.config))
+      }
     }
-    const statusBarItems = Object.entries(statusBar).map(([id, s]) => 
-      React.createElement(s, {config: getApp(id)}))
+  }, [dispatch])
 
-    const drawerItems = Object.entries(drawer).map(([id, s]) => 
-      React.createElement(s, {config: getApp(id)}))
+  // Memoize rendered elements
+  const app = useMemo(() => {
+    if (apps[foregroundAppId]) {
+      return React.createElement(apps[foregroundAppId], {
+        config: appConfigs[foregroundAppId]
+      })
+    }
+    return null
+  }, [apps, foregroundAppId, appConfigs])
 
-    const tasks = Object.entries(backgroundTasks).map(([id, s]) => 
-      React.createElement(s, {config: getApp(id), key: id}))
+  const statusBarItems = useMemo(() =>
+    Object.entries(statusBar).map(([id, s]) =>
+      React.createElement(s, { config: appConfigs[id], key: id }))
+  , [statusBar, appConfigs])
 
-    // render with all the other UI elements
-		return (
-      <Content 
-        {...this.props} 
-        statusBarItems={statusBarItems} 
-        drawerItems={drawerItems} 
-        apps={apps}
-      >
-        {tasks}
-        {app}
-      </Content>
-    )
-  }
+  const drawerItems = useMemo(() =>
+    Object.entries(drawer).map(([id, s]) =>
+      React.createElement(s, { config: appConfigs[id], key: id }))
+  , [drawer, appConfigs])
+
+  const tasks = useMemo(() =>
+    Object.entries(backgroundTasks).map(([id, s]) =>
+      React.createElement(s, { config: appConfigs[id], key: id }))
+  , [backgroundTasks, appConfigs])
+
+  return (
+    <Content
+      theme={theme}
+      foregroundAppId={foregroundAppId}
+      drawerAppId={drawerAppId}
+      isAnyMidiInputActive={isAnyMidiInputActive}
+      switchDrawerApp={(id) => dispatch(switchDrawerApp(id))}
+      statusBarItems={statusBarItems}
+      drawerItems={drawerItems}
+      apps={apps}
+    >
+      {tasks}
+      {app}
+    </Content>
+  )
 }
 
 // separate to functional component to easily include themes
@@ -182,16 +212,4 @@ function AppLayout(props) {
   )
 }
 
-export default connect(
-  (state, ownProps) => ({
-    foregroundAppId: getForegroundAppId(state),
-    drawerAppId: getDrawerAppId(state),
-    getApp: id => getApp(state, id),
-    isAnyMidiInputActive: getIsAnyMidiInputActive(state),
-    theme: themes[getThemeId(state)].theme,
-  }),
-  { 
-    addApp, 
-    switchDrawerApp,
-  }
-)(Client)
+export default Client
