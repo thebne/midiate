@@ -1,14 +1,38 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
-import { Note } from '@tonaljs/tonal'
+import ButtonGroup from '@material-ui/core/ButtonGroup'
+import { Note, Chord } from '@tonaljs/tonal'
 import { useNotes } from '../../api/notes'
+import { detect } from '../../api/chords'
 
 const ENEMY_SPEED = 0.6
-const SPAWN_INTERVAL = 2200
 const LASER_DURATION = 200
 const PARTICLE_COUNT = 12
 const COMBO_TIMEOUT = 1500
+
+// Game modes
+const MODES = {
+  notes: {
+    name: 'Notes',
+    description: 'Single notes',
+    spawnInterval: 2200,
+  },
+  triads: {
+    name: 'Triads',
+    description: '3-note chords',
+    spawnInterval: 3500,
+  },
+  complex: {
+    name: 'Complex',
+    description: '7th chords & more',
+    spawnInterval: 4500,
+  },
+}
+
+// Chord definitions for each mode
+const TRIAD_CHORDS = ['C', 'Cm', 'D', 'Dm', 'E', 'Em', 'F', 'Fm', 'G', 'Gm', 'A', 'Am', 'B', 'Bm']
+const COMPLEX_CHORDS = ['Cmaj7', 'Cm7', 'C7', 'Dm7', 'D7', 'Em7', 'E7', 'Fmaj7', 'Fm7', 'G7', 'Am7', 'A7', 'Bm7b5']
 
 const useStyles = makeStyles(theme => ({
   '@global': {
@@ -547,6 +571,69 @@ const useStyles = makeStyles(theme => ({
     pointerEvents: 'none',
     letterSpacing: 1,
   },
+
+  // Mode selector
+  modeSelector: {
+    marginBottom: 40,
+  },
+  modeButton: {
+    padding: '12px 30px',
+    fontSize: '1rem',
+    fontWeight: 600,
+    color: 'rgba(255, 255, 255, 0.7)',
+    background: 'rgba(30, 41, 59, 0.8)',
+    border: '1px solid rgba(148, 163, 184, 0.3)',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      background: 'rgba(59, 130, 246, 0.3)',
+      borderColor: 'rgba(59, 130, 246, 0.5)',
+    },
+  },
+  modeButtonActive: {
+    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+    color: '#fff',
+    borderColor: '#3b82f6',
+    boxShadow: '0 0 20px rgba(59, 130, 246, 0.4)',
+    '&:hover': {
+      background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+      borderColor: '#60a5fa',
+    },
+  },
+  modeDescription: {
+    color: 'rgba(148, 163, 184, 0.8)',
+    fontSize: 14,
+    marginTop: 10,
+    letterSpacing: 1,
+  },
+
+  // Current mode indicator in HUD
+  modeIndicator: {
+    background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%)',
+    padding: '8px 20px',
+    borderRadius: 8,
+    border: '1px solid rgba(148, 163, 184, 0.2)',
+  },
+  modeIndicatorText: {
+    color: 'rgba(148, 163, 184, 0.9)',
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+
+  // Chord label (wider than note label)
+  chordLabel: {
+    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+    color: '#fff',
+    padding: '6px 14px',
+    borderRadius: 25,
+    fontWeight: 800,
+    fontSize: 16,
+    marginTop: 5,
+    boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
+    border: '2px solid rgba(255,255,255,0.2)',
+    letterSpacing: 0,
+    whiteSpace: 'nowrap',
+  },
 }))
 
 // Available notes (C3 to C5)
@@ -556,6 +643,8 @@ for (let midi = 48; midi <= 72; midi++) {
 }
 
 const getRandomNote = () => AVAILABLE_NOTES[Math.floor(Math.random() * AVAILABLE_NOTES.length)]
+const getRandomTriad = () => TRIAD_CHORDS[Math.floor(Math.random() * TRIAD_CHORDS.length)]
+const getRandomComplexChord = () => COMPLEX_CHORDS[Math.floor(Math.random() * COMPLEX_CHORDS.length)]
 
 // Format note: uppercase letter, lowercase flat (e.g., "Bb" not "BB")
 const formatNote = (note) => {
@@ -564,12 +653,68 @@ const formatNote = (note) => {
   return pitch[0].toUpperCase() + pitch.slice(1).toLowerCase()
 }
 
+// Format chord name for display
+const formatChord = (chord) => {
+  // Replace 'M' with 'maj' for clarity, handle flats
+  return chord
+    .replace(/^([A-G])b/, (_, letter) => letter + 'b')
+    .replace(/^([A-G])#/, (_, letter) => letter + '#')
+}
+
+// Normalize chord name for comparison
+const normalizeChord = (chord) => {
+  return chord
+    .replace('maj7', 'M7')
+    .replace('Maj7', 'M7')
+    .replace('major', '')
+    .replace('Major', '')
+    .replace('minor', 'm')
+    .replace('min', 'm')
+    .replace('M', '') // Remove M for major (Chord.detect returns CM for C major)
+    .trim()
+}
+
+// Check if two chords match (handles inversions and enharmonic equivalents)
+const chordsMatch = (detected, target) => {
+  const normDetected = normalizeChord(detected).toLowerCase()
+  const normTarget = normalizeChord(target).toLowerCase()
+
+  // Direct match
+  if (normDetected === normTarget) return true
+
+  // Check without bass note (for inversions like C/E)
+  const detectedRoot = normDetected.split('/')[0]
+  const targetRoot = normTarget.split('/')[0]
+  if (detectedRoot === targetRoot) return true
+
+  // Handle enharmonic equivalents (Db = C#, etc.)
+  const enharmonics = {
+    'db': 'c#', 'c#': 'db',
+    'eb': 'd#', 'd#': 'eb',
+    'gb': 'f#', 'f#': 'gb',
+    'ab': 'g#', 'g#': 'ab',
+    'bb': 'a#', 'a#': 'bb',
+  }
+
+  // Try enharmonic match
+  for (const [from, to] of Object.entries(enharmonics)) {
+    if (detectedRoot.startsWith(from) && targetRoot.startsWith(to)) {
+      const detectedSuffix = detectedRoot.slice(from.length)
+      const targetSuffix = targetRoot.slice(to.length)
+      if (detectedSuffix === targetSuffix) return true
+    }
+  }
+
+  return false
+}
+
 const getParticleColors = () => ['#fbbf24', '#f59e0b', '#ef4444', '#ffffff', '#fb923c']
 
 export default function ChickenInvaders() {
   const classes = useStyles()
   const notes = useNotes()
   const [gameState, setGameState] = useState('start')
+  const [gameMode, setGameMode] = useState('notes')
   const [score, setScore] = useState(0)
   const [combo, setCombo] = useState(0)
   const [maxCombo, setMaxCombo] = useState(0)
@@ -583,7 +728,14 @@ export default function ChickenInvaders() {
   const spawnIntervalRef = useRef(null)
   const comboTimeoutRef = useRef(null)
   const lastNotesRef = useRef([])
+  const lastChordsRef = useRef([])
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
+
+  // Detect chords from currently pressed notes
+  const detectedChords = useMemo(() => {
+    if (gameMode === 'notes' || notes.length === 0) return []
+    return detect(notes)
+  }, [notes, gameMode])
 
   // Track container dimensions
   useEffect(() => {
@@ -649,7 +801,8 @@ export default function ChickenInvaders() {
     }, 800)
   }, [])
 
-  const startGame = useCallback(() => {
+  const startGame = useCallback((mode = gameMode) => {
+    setGameMode(mode)
     setGameState('playing')
     setScore(0)
     setCombo(0)
@@ -659,7 +812,8 @@ export default function ChickenInvaders() {
     setParticles([])
     setScorePopups([])
     lastNotesRef.current = []
-  }, [])
+    lastChordsRef.current = []
+  }, [gameMode])
 
   const endGame = useCallback(() => {
     setGameState('gameover')
@@ -668,29 +822,43 @@ export default function ChickenInvaders() {
     if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
   }, [])
 
-  // Spawn enemies
+  // Spawn enemies based on game mode
   useEffect(() => {
     if (gameState !== 'playing') return
 
     const spawnEnemy = () => {
-      const note = getRandomNote()
       const margin = 80
+      let target, type
+
+      if (gameMode === 'notes') {
+        target = getRandomNote()
+        type = 'note'
+      } else if (gameMode === 'triads') {
+        target = getRandomTriad()
+        type = 'chord'
+      } else {
+        target = getRandomComplexChord()
+        type = 'chord'
+      }
+
       setEnemies(prev => [...prev, {
         id: Date.now() + Math.random(),
-        note,
+        target,
+        type,
         x: Math.random() * (dimensions.width - margin * 2) + margin,
         y: -80,
       }])
     }
 
+    const spawnInterval = MODES[gameMode].spawnInterval
     const initialTimeout = setTimeout(spawnEnemy, 300)
-    spawnIntervalRef.current = setInterval(spawnEnemy, SPAWN_INTERVAL)
+    spawnIntervalRef.current = setInterval(spawnEnemy, spawnInterval)
 
     return () => {
       clearTimeout(initialTimeout)
       if (spawnIntervalRef.current) clearInterval(spawnIntervalRef.current)
     }
-  }, [gameState, dimensions.width])
+  }, [gameState, gameMode, dimensions.width])
 
   // Game loop
   useEffect(() => {
@@ -714,9 +882,48 @@ export default function ChickenInvaders() {
     }
   }, [gameState, endGame, dimensions.height])
 
-  // Handle note input
+  // Helper to hit an enemy
+  const hitEnemy = useCallback((targetEnemy, bonusMultiplier = 1) => {
+    // Fire laser
+    const laserId = Date.now() + Math.random()
+    setLasers(prev => [...prev, {
+      id: laserId,
+      startX: playerX,
+      startY: playerY,
+      endX: targetEnemy.x,
+      endY: targetEnemy.y + 40,
+    }])
+
+    setTimeout(() => {
+      setLasers(prev => prev.filter(l => l.id !== laserId))
+    }, LASER_DURATION)
+
+    // Particles and effects
+    spawnParticles(targetEnemy.x, targetEnemy.y + 20)
+    triggerShake()
+
+    // Update combo
+    if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
+    setCombo(prev => {
+      const newCombo = prev + 1
+      setMaxCombo(max => Math.max(max, newCombo))
+      return newCombo
+    })
+    comboTimeoutRef.current = setTimeout(() => setCombo(0), COMBO_TIMEOUT)
+
+    // Calculate points (chords worth more)
+    const basePoints = targetEnemy.type === 'chord' ? 200 : 100
+    const points = (basePoints + (combo * 50)) * bonusMultiplier
+    spawnScorePopup(targetEnemy.x, targetEnemy.y, Math.round(points))
+    setScore(prev => prev + Math.round(points))
+
+    // Remove enemy
+    setEnemies(prev => prev.filter(e => e.id !== targetEnemy.id))
+  }, [playerX, playerY, combo, spawnParticles, triggerShake, spawnScorePopup])
+
+  // Handle note input (notes mode)
   useEffect(() => {
-    if (gameState !== 'playing') return
+    if (gameState !== 'playing' || gameMode !== 'notes') return
     if (notes.length === 0) return
 
     const newNotes = notes.filter(n => !lastNotesRef.current.includes(n))
@@ -727,53 +934,70 @@ export default function ChickenInvaders() {
     newNotes.forEach(playedNote => {
       const playedPitch = Note.pitchClass(playedNote)
 
-      // Find all matching enemies
-      const matchingEnemies = enemies.filter(e => Note.pitchClass(e.note) === playedPitch)
+      // Find all matching enemies (note type only)
+      const matchingEnemies = enemies.filter(e =>
+        e.type === 'note' && Note.pitchClass(e.target) === playedPitch
+      )
 
       if (matchingEnemies.length > 0) {
         // Pick a random one from matching enemies
         const targetEnemy = matchingEnemies[Math.floor(Math.random() * matchingEnemies.length)]
-
-        // Fire laser
-        const laserId = Date.now() + Math.random()
-        setLasers(prev => [...prev, {
-          id: laserId,
-          startX: playerX,
-          startY: playerY,
-          endX: targetEnemy.x,
-          endY: targetEnemy.y + 40,
-        }])
-
-        setTimeout(() => {
-          setLasers(prev => prev.filter(l => l.id !== laserId))
-        }, LASER_DURATION)
-
-        // Particles and effects
-        spawnParticles(targetEnemy.x, targetEnemy.y + 20)
-        triggerShake()
-
-        // Update combo
-        if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
-        setCombo(prev => {
-          const newCombo = prev + 1
-          setMaxCombo(max => Math.max(max, newCombo))
-          return newCombo
-        })
-        comboTimeoutRef.current = setTimeout(() => setCombo(0), COMBO_TIMEOUT)
-
-        // Calculate points
-        const points = 100 + (combo * 50)
-        spawnScorePopup(targetEnemy.x, targetEnemy.y, points)
-        setScore(prev => prev + points)
-
-        // Remove enemy
-        setEnemies(prev => prev.filter(e => e.id !== targetEnemy.id))
+        hitEnemy(targetEnemy)
       } else {
         // Wrong note
         endGame()
       }
     })
-  }, [notes, enemies, gameState, endGame, playerX, playerY, combo, spawnParticles, triggerShake, spawnScorePopup])
+  }, [notes, enemies, gameState, gameMode, endGame, hitEnemy])
+
+  // Handle chord input (triads and complex modes)
+  useEffect(() => {
+    if (gameState !== 'playing' || gameMode === 'notes') return
+    if (detectedChords.length === 0) {
+      lastChordsRef.current = []
+      return
+    }
+
+    // Only process if we have enough notes for the mode
+    const minNotes = gameMode === 'triads' ? 3 : 3
+    if (notes.length < minNotes) {
+      lastChordsRef.current = [...detectedChords]
+      return
+    }
+
+    // Check if this is a new chord (different from last detected)
+    const isNewChord = detectedChords.length > 0 &&
+      (lastChordsRef.current.length === 0 ||
+       detectedChords[0] !== lastChordsRef.current[0])
+
+    if (!isNewChord) {
+      return
+    }
+
+    // Find matching enemy for any detected chord
+    let foundMatch = false
+    for (const detectedChord of detectedChords) {
+      const matchingEnemies = enemies.filter(e => {
+        if (e.type !== 'chord') return false
+        return chordsMatch(detectedChord, e.target)
+      })
+
+      if (matchingEnemies.length > 0) {
+        const targetEnemy = matchingEnemies[Math.floor(Math.random() * matchingEnemies.length)]
+        hitEnemy(targetEnemy, gameMode === 'complex' ? 1.5 : 1)
+        foundMatch = true
+        lastChordsRef.current = [...detectedChords]
+        return
+      }
+    }
+
+    // Wrong chord - only end game if there are enemies on screen
+    if (!foundMatch && enemies.some(e => e.type === 'chord')) {
+      endGame()
+    }
+
+    lastChordsRef.current = [...detectedChords]
+  }, [detectedChords, enemies, gameState, gameMode, notes.length, endGame, hitEnemy])
 
   // Laser geometry
   const getLaserStyle = (laser) => {
@@ -822,6 +1046,9 @@ export default function ChickenInvaders() {
             <div className={classes.scoreLabel}>Score</div>
             <div className={classes.scoreValue}>{String(score).padStart(6, '0')}</div>
           </div>
+          <div className={classes.modeIndicator}>
+            <div className={classes.modeIndicatorText}>{MODES[gameMode].name} Mode</div>
+          </div>
           {combo > 1 && (
             <div className={classes.comboPanel}>
               <div className={classes.comboText}>{combo}x COMBO!</div>
@@ -839,7 +1066,9 @@ export default function ChickenInvaders() {
         >
           <div className={classes.enemyGlow} />
           <span className={classes.chicken}>🐔</span>
-          <span className={classes.noteLabel}>{formatNote(enemy.note)}</span>
+          <span className={enemy.type === 'chord' ? classes.chordLabel : classes.noteLabel}>
+            {enemy.type === 'chord' ? formatChord(enemy.target) : formatNote(enemy.target)}
+          </span>
         </div>
       ))}
 
@@ -896,7 +1125,10 @@ export default function ChickenInvaders() {
       {/* Note hint */}
       {gameState === 'playing' && (
         <div className={classes.noteHint}>
-          Play the note shown on each chicken to destroy it
+          {gameMode === 'notes'
+            ? 'Play the note shown on each chicken to destroy it'
+            : `Play the ${gameMode === 'triads' ? 'triad chord' : 'chord'} shown to destroy chickens`
+          }
         </div>
       )}
 
@@ -911,12 +1143,39 @@ export default function ChickenInvaders() {
             </div>
             <div className={classes.titleSub}>A Musical Space Battle</div>
           </div>
+
+          <div className={classes.modeSelector}>
+            <ButtonGroup>
+              {Object.entries(MODES).map(([key, mode]) => (
+                <Button
+                  key={key}
+                  className={`${classes.modeButton} ${gameMode === key ? classes.modeButtonActive : ''}`}
+                  onClick={() => setGameMode(key)}
+                >
+                  {mode.name}
+                </Button>
+              ))}
+            </ButtonGroup>
+            <div className={classes.modeDescription}>
+              {MODES[gameMode].description}
+            </div>
+          </div>
+
           <div className={classes.instructions}>
-            <span className={classes.instructionIcon}>🎹</span>
-            <strong>Play the correct note</strong> to shoot chickens
+            {gameMode === 'notes' ? (
+              <>
+                <span className={classes.instructionIcon}>🎹</span>
+                <strong>Play the correct note</strong> to shoot chickens
+              </>
+            ) : (
+              <>
+                <span className={classes.instructionIcon}>🎹</span>
+                <strong>Play the correct {gameMode === 'triads' ? 'chord' : 'chord'}</strong> to shoot chickens
+              </>
+            )}
             <br />
             <span className={classes.instructionIcon}>❌</span>
-            Wrong note = <strong>Game Over</strong>
+            Wrong {gameMode === 'notes' ? 'note' : 'chord'} = <strong>Game Over</strong>
             <br />
             <span className={classes.instructionIcon}>⚡</span>
             Chain hits for <strong>combo multipliers</strong>
@@ -924,7 +1183,7 @@ export default function ChickenInvaders() {
             <span className={classes.instructionIcon}>🛡️</span>
             Don't let them reach the bottom!
           </div>
-          <Button className={classes.startButton} onClick={startGame}>
+          <Button className={classes.startButton} onClick={() => startGame(gameMode)}>
             Start Mission
           </Button>
         </div>
@@ -934,6 +1193,9 @@ export default function ChickenInvaders() {
       {gameState === 'gameover' && (
         <div className={classes.overlay}>
           <div className={classes.gameOverTitle}>MISSION FAILED</div>
+          <div className={classes.modeIndicator} style={{ marginBottom: 20 }}>
+            <div className={classes.modeIndicatorText}>{MODES[gameMode].name} Mode</div>
+          </div>
           <div className={classes.statsContainer}>
             <div className={classes.statBox}>
               <div className={classes.statLabel}>Final Score</div>
@@ -944,9 +1206,18 @@ export default function ChickenInvaders() {
               <div className={`${classes.statValue} ${classes.statValueCombo}`}>{maxCombo}x</div>
             </div>
           </div>
-          <Button className={classes.playAgainButton} onClick={startGame}>
-            Try Again
-          </Button>
+          <div style={{ display: 'flex', gap: 20 }}>
+            <Button className={classes.playAgainButton} onClick={() => startGame(gameMode)}>
+              Try Again
+            </Button>
+            <Button
+              className={classes.playAgainButton}
+              style={{ background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)' }}
+              onClick={() => setGameState('start')}
+            >
+              Change Mode
+            </Button>
+          </div>
         </div>
       )}
     </div>
